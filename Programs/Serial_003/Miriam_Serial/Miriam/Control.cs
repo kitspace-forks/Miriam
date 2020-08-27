@@ -96,11 +96,17 @@ namespace Miriam
             //Plate.RowCount = 8;
 
             String alphabets = "ABCDEFGH";
+            String cur_letter;
             for (int i = 0; i<8; i++)
-            {
+            {                                
                 Plate.Rows.Add("", "", "", "", "", "", "", "", "", "", "", "");
-                Plate.Rows[i].HeaderCell.Value = alphabets[i].ToString();
-                Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;
+                cur_letter = alphabets[i].ToString(); //[AT] fill cells automatically 
+                Plate.Rows[i].HeaderCell.Value = cur_letter;
+                Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;                
+                for (int col = 0; col < Plate.ColumnCount; col++)
+                {
+                    Plate.Rows[i].Cells[col].Value = cur_letter + Plate.Columns[col].Name;
+                }
             }
 
             //Results.Visible = true;
@@ -458,15 +464,17 @@ namespace Miriam
             do
             {
                 DateTime current = DateTime.Now;
-                int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
+				// AT: time when the current measurement started
+				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second; 
 
-                if (duration < endCycle)
+				// AT:stop if the specified duration passed (from the textbox)
+				if (duration < endCycle) 
                 {
                     cont = false;
                     
                 }
                 
-
+                // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
                 SerialPort serialPort = null;
 
                 // Create a new SerialPort object with default settings.
@@ -492,12 +500,12 @@ namespace Miriam
                     String ReceivedData;
                     //RecievedData = serialPort.ReadLine();
                     //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                    serialPort.Write("R" + "\r\n");
+                    serialPort.Write("R" + "\r\n"); // [AT] SW 'R' (read assay) - FW 'A1,A2,A3...E12' 
 
                     Boolean conti = true;
                     do
                     {
-                        ReceivedData = serialPort.ReadLine();
+                        ReceivedData = serialPort.ReadLine(); // [AT] can be more than 1 line coming from the serial port, and we are interested in one containing $ 
                         if (ReceivedData.Contains('$'))
                         {
                             conti = false;
@@ -508,6 +516,7 @@ namespace Miriam
                     conti = true;
 
                     serialPort.Write("i" + "\r\n");
+                    // [AT] SW 'i' (info) - FW '[0] outputMiddle, [1] outputUpper, [2] temperatureMiddle, [3] temperatureUpper, [4] temperatureMiddleC, [5] temperatureUpperC'
                     String ReceivedData1;
                     do
                     {
@@ -522,15 +531,15 @@ namespace Miriam
                     conti = true;
 
 
-                    Thread.Sleep(2000);
-
+                    Thread.Sleep(2000); // [AT] sleep 2s
+                   
                     ReceivedData = ReceivedData.Replace("$", "");
                     ReceivedData1 = ReceivedData1.Replace("$", "");
                     ReceivedData = ReceivedData.Replace("\r", "");
                     ReceivedData1 = ReceivedData1.Replace("\r", "");
                     ReceivedData = ReceivedData.Replace("\n", "");
                     ReceivedData1 = ReceivedData1.Replace("\n", "");
-
+                    // [AT] 4: temperatureMiddleC, 5: temperatureUpperC. Check what is C and what is correct? (in this string it is the other way around
                     AppendHeatLabel("Temperature U:" + ReceivedData1.Split(',')[4] + "," + "Temperature M:" + ReceivedData1.Split(',')[5]);
 
 
@@ -558,11 +567,11 @@ namespace Miriam
                 Boolean timeRunning = true;
 
 
-
+                // wait until getting the next measurement
                 do
                 {
                     DateTime wait = DateTime.Now;
-                    if (endCycle + 120 < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                    if (endCycle + 2 < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
                     {
                         timeRunning = false;
                     }
