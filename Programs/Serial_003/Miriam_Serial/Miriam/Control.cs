@@ -144,6 +144,7 @@ namespace Miriam
 
                 //RecievedData = serialPort.ReadLine();
                 //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
+                // [AT] SW 'M param' (middle wanted temperature, i.e. M 63) - FW 'temperatureMiddleSet'
                 serialPort.Write("M " + CboxTempM.Text + "\r\n");
 
                 Boolean conti = true;
@@ -539,7 +540,7 @@ namespace Miriam
                     ReceivedData1 = ReceivedData1.Replace("\r", "");
                     ReceivedData = ReceivedData.Replace("\n", "");
                     ReceivedData1 = ReceivedData1.Replace("\n", "");
-                    // [AT] 4: temperatureMiddleC, 5: temperatureUpperC. Check what is C and what is correct? (in this string it is the other way around
+                    // [AT] 4: temperatureMiddleC, 5: temperatureUpperC. Check what is C and what is correct? (in this string it is the other way around). Upd: works correct, so probably there is a typo in the documentation.
                     AppendHeatLabel("Temperature U:" + ReceivedData1.Split(',')[4] + "," + "Temperature M:" + ReceivedData1.Split(',')[5]);
 
 
