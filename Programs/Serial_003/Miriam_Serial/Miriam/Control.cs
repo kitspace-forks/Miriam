@@ -35,7 +35,6 @@ using System.Windows.Forms.DataVisualization.Charting;
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 namespace Miriam
 {
     public partial class Control : Form
@@ -45,6 +44,9 @@ namespace Miriam
         private int maximumValue = 0;
         private string port = "";
         private Boolean started = false;
+        private int nGridRows = 8;
+        private int nGridCols = 12;
+
 
         public Control()
         {
@@ -80,8 +82,8 @@ namespace Miriam
             CboxTempM.Text = "65";
             CboxDuration.Text = "120";
 
-            Plate.ColumnCount = 12;
-            for (int i = 0; i < 12; i++)
+            Plate.ColumnCount = nGridCols;
+            for (int i = 0; i < nGridCols; i++)
             {
                 DataGridViewColumn column = Plate.Columns[i];
 
@@ -97,9 +99,9 @@ namespace Miriam
 
             String alphabets = "ABCDEFGH";
             String cur_letter;
-            for (int i = 0; i<8; i++)
+            for (int i = 0; i<nGridRows; i++)
             {                                
-                Plate.Rows.Add("", "", "", "", "", "", "", "", "", "", "", "");
+                Plate.Rows.Add("", "", "", "", "", "", "", "", "", "", "", ""); // [AT] todo: use nGridCols as a number of elements
                 cur_letter = alphabets[i].ToString(); //[AT] fill cells automatically 
                 Plate.Rows[i].HeaderCell.Value = cur_letter;
                 Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;                
@@ -455,6 +457,20 @@ namespace Miriam
             
 
         }
+        public string ReverseColumnOrder(String received_vals)
+        {
+            string[] values = received_vals.Split(',');
+            string ans = "";
+    
+            for (int irow = 0; irow < nGridRows; irow++)
+            {
+                for (int jcol = nGridCols - 1; jcol >= 0; jcol--)
+                { 
+                    ans += values[irow * nGridCols + jcol] + ",";
+                }
+            }
+            return ans;
+        }
 
         private void doAssay()
         {
@@ -543,7 +559,8 @@ namespace Miriam
                     // [AT] 4: temperatureMiddleC, 5: temperatureUpperC. Check what is C and what is correct? (in this string it is the other way around). Upd: works correct, so probably there is a typo in the documentation.
                     AppendHeatLabel("Temperature U:" + ReceivedData1.Split(',')[4] + "," + "Temperature M:" + ReceivedData1.Split(',')[5]);
 
-
+                    // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
+                    ReceivedData = ReverseColumnOrder(ReceivedData);
 
                     AppendData(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
                     ReceivedData1.Split(',')[5] + "," + ReceivedData);
