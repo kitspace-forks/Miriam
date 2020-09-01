@@ -472,6 +472,31 @@ namespace Miriam
             return ans;
         }
 
+        public string RearrangeColumnOrder(String received_vals) // not tested yet: 1,2,3,4,5,6 -> 5,6,3,4,1,2
+        {
+            string[] values = received_vals.Split(',');
+            string ans = "";
+            string[] vals_reversed = new string[nGridCols * nGridRows];
+
+            for (int irow = 0; irow < nGridRows; irow++)
+            {
+                for (int jcol = nGridCols - 1, jrev=0; jcol >= 0; jcol--, jrev++)
+                {
+                    //ans += values[irow * nGridCols + jcol] + ",";
+                    vals_reversed[irow * nGridCols + jrev] = values[irow * nGridCols + jcol];
+                }
+            }
+
+            for (int irow = 0; irow < nGridRows; irow++)
+            {
+                for (int jrev=0; jrev+1 < nGridCols; jrev+=2)
+                { 
+                    ans += vals_reversed[irow * nGridCols + jrev + 1] + "," + vals_reversed[irow * nGridCols + jrev] + ",";                    
+                }
+            }
+            return ans;
+        }
+
         private void doAssay()
         {
             Boolean cont = true;
@@ -560,7 +585,9 @@ namespace Miriam
                     AppendHeatLabel("Temperature U:" + ReceivedData1.Split(',')[4] + "," + "Temperature M:" + ReceivedData1.Split(',')[5]);
 
                     // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
-                    ReceivedData = ReverseColumnOrder(ReceivedData);
+                    // ReceivedData = ReverseColumnOrder(ReceivedData);
+                    // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
+                    ReceivedData = RearrangeColumnOrder(ReceivedData);
 
                     AppendData(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
                     ReceivedData1.Split(',')[5] + "," + ReceivedData);

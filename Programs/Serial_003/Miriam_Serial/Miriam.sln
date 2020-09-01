@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miriam", "Miriam\Miriam.csproj", "{DC108458-49E8-49E0-9272-517FE4C7FA6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiriamTests", "MiriamTests\MiriamTests.csproj", "{54963713-25C5-4011-99F2-2A8B0E2D263F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{DC108458-49E8-49E0-9272-517FE4C7FA6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC108458-49E8-49E0-9272-517FE4C7FA6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC108458-49E8-49E0-9272-517FE4C7FA6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54963713-25C5-4011-99F2-2A8B0E2D263F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54963713-25C5-4011-99F2-2A8B0E2D263F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54963713-25C5-4011-99F2-2A8B0E2D263F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54963713-25C5-4011-99F2-2A8B0E2D263F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2CF026B4-7EAB-40D3-AA4D-D9CCDBBADD95}
 	EndGlobalSection
 EndGlobal
