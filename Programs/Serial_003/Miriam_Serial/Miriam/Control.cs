@@ -79,7 +79,7 @@ namespace Miriam
             {
                 CboxDuration.Items.Add(i);                
             }
-            for (int i = 2; i < 600; i++)
+            for (int i = 10; i < 600; i++)
             {
                 CboxInterval.Items.Add(i);
             }
@@ -99,7 +99,6 @@ namespace Miriam
             }
 
             Plate.AllowUserToAddRows = false;
-
 
 
             //Plate.RowCount = 8;
@@ -367,9 +366,9 @@ namespace Miriam
                     Plate.Rows[0].Cells[0].Value = "TimeTrack";
                 }
 
-                List<int> list = new List<int>();
+                List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
                 int counter = 3;
-                string msg = "Time,U,M,";
+                string msg = "Time,U,M,"; // [AT] csv file header. 
 
                 for (int i = 0; i < Plate.RowCount; i++)
                 {
@@ -385,8 +384,8 @@ namespace Miriam
                     }
                 }
 
-                Data.Items.Add(msg);
-                arrayNames = msg;
+                Data.Items.Add(msg); //[AT] Data -- invisible ListBox
+                arrayNames = msg; //[AT] header
 
                 Color[] clr;
 
@@ -405,7 +404,7 @@ namespace Miriam
                 int clrsUsed = 0;
 
                 
-
+                //[AT] add series for all named wells 
                 for (int i = 0; i < list.Count; i++)
                 {
                     Results.Series.Add(msg.Split(',')[list[i]]);
@@ -434,7 +433,7 @@ namespace Miriam
 
         }
 
-
+        // [AT] appends result to the plot
         private void AppendResult(string value)
         {
             if (InvokeRequired)
@@ -516,7 +515,8 @@ namespace Miriam
             {
                 DateTime current = DateTime.Now;
 				// AT: time when the current measurement started
-				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second; 
+				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
+                string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
 
 				// AT:stop if the specified duration passed (from the textbox)
 				if (duration < endCycle) 
@@ -561,10 +561,13 @@ namespace Miriam
                         {
                             conti = false;
                         }
-                    } while (conti);
-
+                    } while (conti);                    
 
                     conti = true;
+
+                    // [AT] ReceivedData -- string of values for each well
+                    // [AT] ReceivedData1 -- info string (temperatures etc)
+
 
                     serialPort.Write("i" + "\r\n");
                     // [AT] SW 'i' (info) - FW '[0] outputMiddle, [1] outputUpper, [2] temperatureMiddle, [3] temperatureUpper, [4] temperatureMiddleC, [5] temperatureUpperC'
@@ -598,15 +601,16 @@ namespace Miriam
                     // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
                     ReceivedData = RearrangeColumnOrder(ReceivedData);
 
-                    AppendData(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
-                    ReceivedData1.Split(',')[5] + "," + ReceivedData);
+                    //AppendData(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
+                    //ReceivedData1.Split(',')[5] + "," + ReceivedData);
+                    AppendData(timestr + "," + ReceivedData1.Split(',')[4] + "," + ReceivedData1.Split(',')[5] + "," + ReceivedData);
 
-                    string resToAppend = loop.ToString() + ",U,M,";
+                    //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
                 
                     AppendResult(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
                         ReceivedData1.Split(',')[5] + "," + ReceivedData);
 
-                    Thread.Sleep(2000);
+                    Thread.Sleep(2000); // 2s
 
                     serialPort.Close();
 
