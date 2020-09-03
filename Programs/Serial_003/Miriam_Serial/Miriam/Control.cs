@@ -46,6 +46,7 @@ namespace Miriam
         private Boolean started = false;
         private int nGridRows = 8;
         private int nGridCols = 12;
+        private int betweenMesSec;
 
 
         public Control()
@@ -76,13 +77,19 @@ namespace Miriam
             }
             for (int i = 0; i < 150; i++)
             {
-                CboxDuration.Items.Add(i);
+                CboxDuration.Items.Add(i);                
+            }
+            for (int i = 2; i < 600; i++)
+            {
+                CboxInterval.Items.Add(i);
             }
             CboxTempU.Text = "90";
             CboxTempM.Text = "65";
             CboxDuration.Text = "120";
+            CboxInterval.Text = "10";
 
             Plate.ColumnCount = nGridCols;
+
             for (int i = 0; i < nGridCols; i++)
             {
                 DataGridViewColumn column = Plate.Columns[i];
@@ -322,6 +329,8 @@ namespace Miriam
 
                 duration = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
                     Convert.ToInt32(CboxDuration.Text) * 60;
+
+                betweenMesSec = Convert.ToInt32(CboxInterval.Text);
 
                 Boolean noneFound = true;
                 List<String> dupl = new List<String>();
@@ -616,7 +625,7 @@ namespace Miriam
                 do
                 {
                     DateTime wait = DateTime.Now;
-                    if (endCycle + 2 < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
                     {
                         timeRunning = false;
                     }
@@ -685,19 +694,17 @@ namespace Miriam
         {
             try
             {
-
                 //before your loop
                 var csv = new StringBuilder();
 
                 for(int i = 0; i<Data.Items.Count;i++)
-                {
-                
+                {                
                     var newLine = string.Format(Data.Items[i].ToString() + Environment.NewLine);
                     csv.Append(newLine);
                 }
 
-
                 //after your loop
+                //[AT] todo: change path option
                 File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Miriam_serial_data.csv", csv.ToString());
             }
             catch (IOException)

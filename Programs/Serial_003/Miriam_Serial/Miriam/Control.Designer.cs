@@ -51,15 +51,18 @@ namespace Miriam
             this.ButtonWrite = new System.Windows.Forms.Button();
             this.COM_label = new System.Windows.Forms.Label();
             this.COM = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.CboxInterval = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).BeginInit();
             this.SuspendLayout();
             // 
             // ButtonStart
             // 
-            this.ButtonStart.Location = new System.Drawing.Point(512, 9);
+            this.ButtonStart.Location = new System.Drawing.Point(437, 6);
+            this.ButtonStart.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.ButtonStart.Name = "ButtonStart";
-            this.ButtonStart.Size = new System.Drawing.Size(113, 98);
+            this.ButtonStart.Size = new System.Drawing.Size(75, 64);
             this.ButtonStart.TabIndex = 12;
             this.ButtonStart.Text = "Start";
             this.ButtonStart.UseVisualStyleBackColor = true;
@@ -68,87 +71,97 @@ namespace Miriam
             // LabelTempU
             // 
             this.LabelTempU.AutoSize = true;
-            this.LabelTempU.Location = new System.Drawing.Point(135, 56);
+            this.LabelTempU.Location = new System.Drawing.Point(90, 36);
+            this.LabelTempU.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabelTempU.Name = "LabelTempU";
-            this.LabelTempU.Size = new System.Drawing.Size(93, 20);
+            this.LabelTempU.Size = new System.Drawing.Size(62, 13);
             this.LabelTempU.TabIndex = 18;
             this.LabelTempU.Text = "Upper temp";
             // 
             // LabelTempM
             // 
             this.LabelTempM.AutoSize = true;
-            this.LabelTempM.Location = new System.Drawing.Point(8, 56);
+            this.LabelTempM.Location = new System.Drawing.Point(5, 36);
+            this.LabelTempM.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabelTempM.Name = "LabelTempM";
-            this.LabelTempM.Size = new System.Drawing.Size(95, 20);
+            this.LabelTempM.Size = new System.Drawing.Size(64, 13);
             this.LabelTempM.TabIndex = 17;
             this.LabelTempM.Text = "Middle temp";
             // 
             // LabelDuration
             // 
             this.LabelDuration.AutoSize = true;
-            this.LabelDuration.Location = new System.Drawing.Point(266, 56);
+            this.LabelDuration.Location = new System.Drawing.Point(177, 36);
+            this.LabelDuration.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabelDuration.Name = "LabelDuration";
-            this.LabelDuration.Size = new System.Drawing.Size(70, 20);
+            this.LabelDuration.Size = new System.Drawing.Size(69, 13);
             this.LabelDuration.TabIndex = 16;
-            this.LabelDuration.Text = "Duration";
+            this.LabelDuration.Text = "Duration[min]";
             // 
             // CboxTempU
             // 
             this.CboxTempU.FormattingEnabled = true;
-            this.CboxTempU.Location = new System.Drawing.Point(139, 79);
+            this.CboxTempU.Location = new System.Drawing.Point(93, 51);
+            this.CboxTempU.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.CboxTempU.Name = "CboxTempU";
-            this.CboxTempU.Size = new System.Drawing.Size(121, 28);
+            this.CboxTempU.Size = new System.Drawing.Size(82, 21);
             this.CboxTempU.TabIndex = 15;
             // 
             // CboxTempM
             // 
             this.CboxTempM.FormattingEnabled = true;
-            this.CboxTempM.Location = new System.Drawing.Point(12, 79);
+            this.CboxTempM.Location = new System.Drawing.Point(8, 51);
+            this.CboxTempM.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.CboxTempM.Name = "CboxTempM";
-            this.CboxTempM.Size = new System.Drawing.Size(121, 28);
+            this.CboxTempM.Size = new System.Drawing.Size(82, 21);
             this.CboxTempM.TabIndex = 14;
             // 
             // CboxDuration
             // 
             this.CboxDuration.FormattingEnabled = true;
-            this.CboxDuration.Location = new System.Drawing.Point(266, 79);
+            this.CboxDuration.Location = new System.Drawing.Point(177, 51);
+            this.CboxDuration.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.CboxDuration.Name = "CboxDuration";
-            this.CboxDuration.Size = new System.Drawing.Size(121, 28);
+            this.CboxDuration.Size = new System.Drawing.Size(82, 21);
             this.CboxDuration.TabIndex = 13;
             // 
             // Plate
             // 
             this.Plate.AllowDrop = true;
             this.Plate.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.Plate.Location = new System.Drawing.Point(12, 113);
+            this.Plate.Location = new System.Drawing.Point(8, 73);
+            this.Plate.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Plate.Name = "Plate";
             this.Plate.RowTemplate.Height = 28;
-            this.Plate.Size = new System.Drawing.Size(805, 392);
+            this.Plate.Size = new System.Drawing.Size(537, 255);
             this.Plate.TabIndex = 19;
             // 
             // LabelTempUC
             // 
             this.LabelTempUC.AutoSize = true;
-            this.LabelTempUC.Location = new System.Drawing.Point(8, 9);
+            this.LabelTempUC.Location = new System.Drawing.Point(5, 6);
+            this.LabelTempUC.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabelTempUC.Name = "LabelTempUC";
-            this.LabelTempUC.Size = new System.Drawing.Size(120, 20);
+            this.LabelTempUC.Size = new System.Drawing.Size(81, 13);
             this.LabelTempUC.TabIndex = 20;
             this.LabelTempUC.Text = "Temperature U:";
             // 
             // LabelTempMC
             // 
             this.LabelTempMC.AutoSize = true;
-            this.LabelTempMC.Location = new System.Drawing.Point(176, 9);
+            this.LabelTempMC.Location = new System.Drawing.Point(117, 6);
+            this.LabelTempMC.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LabelTempMC.Name = "LabelTempMC";
-            this.LabelTempMC.Size = new System.Drawing.Size(121, 20);
+            this.LabelTempMC.Size = new System.Drawing.Size(82, 13);
             this.LabelTempMC.TabIndex = 21;
             this.LabelTempMC.Text = "Temperature M:";
             // 
             // ButtonHeat
             // 
-            this.ButtonHeat.Location = new System.Drawing.Point(393, 9);
+            this.ButtonHeat.Location = new System.Drawing.Point(358, 6);
+            this.ButtonHeat.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.ButtonHeat.Name = "ButtonHeat";
-            this.ButtonHeat.Size = new System.Drawing.Size(113, 46);
+            this.ButtonHeat.Size = new System.Drawing.Size(75, 30);
             this.ButtonHeat.TabIndex = 22;
             this.ButtonHeat.Text = "Heat";
             this.ButtonHeat.UseVisualStyleBackColor = true;
@@ -156,9 +169,10 @@ namespace Miriam
             // 
             // AskHeat
             // 
-            this.AskHeat.Location = new System.Drawing.Point(393, 61);
+            this.AskHeat.Location = new System.Drawing.Point(358, 40);
+            this.AskHeat.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.AskHeat.Name = "AskHeat";
-            this.AskHeat.Size = new System.Drawing.Size(113, 46);
+            this.AskHeat.Size = new System.Drawing.Size(75, 30);
             this.AskHeat.TabIndex = 23;
             this.AskHeat.Text = "Ask heat";
             this.AskHeat.UseVisualStyleBackColor = true;
@@ -167,10 +181,10 @@ namespace Miriam
             // Data
             // 
             this.Data.FormattingEnabled = true;
-            this.Data.ItemHeight = 20;
-            this.Data.Location = new System.Drawing.Point(393, 225);
+            this.Data.Location = new System.Drawing.Point(262, 146);
+            this.Data.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Data.Name = "Data";
-            this.Data.Size = new System.Drawing.Size(61, 84);
+            this.Data.Size = new System.Drawing.Size(42, 56);
             this.Data.TabIndex = 24;
             this.Data.Visible = false;
             // 
@@ -180,18 +194,20 @@ namespace Miriam
             this.Results.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.Results.Legends.Add(legend1);
-            this.Results.Location = new System.Drawing.Point(12, 511);
+            this.Results.Location = new System.Drawing.Point(8, 332);
+            this.Results.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Results.Name = "Results";
-            this.Results.Size = new System.Drawing.Size(805, 484);
+            this.Results.Size = new System.Drawing.Size(537, 315);
             this.Results.TabIndex = 25;
             this.Results.Text = "chart1";
             this.Results.Visible = false;
             // 
             // ButtonWrite
             // 
-            this.ButtonWrite.Location = new System.Drawing.Point(631, 9);
+            this.ButtonWrite.Location = new System.Drawing.Point(517, 6);
+            this.ButtonWrite.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.ButtonWrite.Name = "ButtonWrite";
-            this.ButtonWrite.Size = new System.Drawing.Size(113, 46);
+            this.ButtonWrite.Size = new System.Drawing.Size(75, 30);
             this.ButtonWrite.TabIndex = 26;
             this.ButtonWrite.Text = "Write CSV";
             this.ButtonWrite.UseVisualStyleBackColor = true;
@@ -200,26 +216,49 @@ namespace Miriam
             // COM_label
             // 
             this.COM_label.AutoSize = true;
-            this.COM_label.Location = new System.Drawing.Point(627, 56);
+            this.COM_label.Location = new System.Drawing.Point(514, 36);
+            this.COM_label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.COM_label.Name = "COM_label";
-            this.COM_label.Size = new System.Drawing.Size(77, 20);
+            this.COM_label.Size = new System.Drawing.Size(52, 13);
             this.COM_label.TabIndex = 28;
             this.COM_label.Text = "COM port";
             // 
             // COM
             // 
             this.COM.FormattingEnabled = true;
-            this.COM.Location = new System.Drawing.Point(631, 79);
+            this.COM.Location = new System.Drawing.Point(517, 51);
+            this.COM.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.COM.Name = "COM";
-            this.COM.Size = new System.Drawing.Size(121, 28);
+            this.COM.Size = new System.Drawing.Size(82, 21);
             this.COM.TabIndex = 29;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(259, 36);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(99, 13);
+            this.label1.TabIndex = 31;
+            this.label1.Text = "Measure interval [s]";
+            // 
+            // CboxInterval
+            // 
+            this.CboxInterval.FormattingEnabled = true;
+            this.CboxInterval.Location = new System.Drawing.Point(259, 51);
+            this.CboxInterval.Margin = new System.Windows.Forms.Padding(2);
+            this.CboxInterval.Name = "CboxInterval";
+            this.CboxInterval.Size = new System.Drawing.Size(85, 21);
+            this.CboxInterval.TabIndex = 30;
             // 
             // Control
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(840, 519);
+            this.ClientSize = new System.Drawing.Size(602, 341);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.CboxInterval);
             this.Controls.Add(this.COM);
             this.Controls.Add(this.COM_label);
             this.Controls.Add(this.ButtonWrite);
@@ -238,6 +277,7 @@ namespace Miriam
             this.Controls.Add(this.CboxDuration);
             this.Controls.Add(this.ButtonStart);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "Control";
             this.Text = "Control_Serial";
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).EndInit();
@@ -266,6 +306,8 @@ namespace Miriam
         private Button ButtonWrite;
         private Label COM_label;
         private ComboBox COM;
+        private Label label1;
+        private ComboBox CboxInterval;
     }
 }
 
