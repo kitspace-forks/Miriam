@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using Microsoft.VisualBasic.FileIO;
 
 /*
  * Miriam control
@@ -44,9 +45,11 @@ namespace Miriam
         private int maximumValue = 0;
         private string port = "";
         private Boolean started = false;
-        private int nGridRows = 8;
-        private int nGridCols = 12;
+        private readonly int nGridRows = 8;
+        private readonly int nGridCols = 12;
         private int betweenMesSec;
+
+        private Dictionary<string, string> wellNames;
 
 
         public Control()
@@ -81,47 +84,103 @@ namespace Miriam
             }
             for (int i = 10; i < 600; i++)
             {
-                CboxInterval.Items.Add(i);
+                CboxInterval.Items.Add(i); // AT: minimum time a measurement takes is 11 seconds
             }
             CboxTempU.Text = "90";
             CboxTempM.Text = "65";
             CboxDuration.Text = "120";
             CboxInterval.Text = "10";
 
+            //CreatePlate();
+            CreateEmptyPlate();
+            //todo: on exit save to tsv. 
+            // todo: Default name .wellnames.tsv; 
+            // todo: load from file button
+            // todo: auto_fill all cells button
+            FillPlate(@"1some_names.tsv");
+            //Results.Visible = true;
+
+        }
+
+        private void CreateEmptyPlate()
+        {
+            Plate.ColumnCount = nGridCols;
+            //Plate.RowCount = 8;
+            for (int i = 0; i < nGridCols; i++)
+            {
+                DataGridViewColumn column = Plate.Columns[i];
+                column.Name = (i + 1).ToString();
+                column.Width = 40;
+            }
+            Plate.AllowUserToAddRows = false;
+            
+            String alphabets = "ABCDEFGH";
+            String cur_letter;
+            for (int i = 0; i < nGridRows; i++)
+            {
+                Plate.Rows.Add("", "", "", "", "", "", "", "", "", "", "", ""); // [AT] todo: use nGridCols as a number of elements
+                cur_letter = alphabets[i].ToString(); //[AT] fill cells automatically 
+                Plate.Rows[i].HeaderCell.Value = cur_letter;
+                Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;
+            }
+        }
+
+        private void FillPlate(string filename)
+        {
+            if (!File.Exists(filename))
+                { return; }
+            using (TextFieldParser parser = new TextFieldParser(filename))
+            {
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters("\t");
+                int istring = 0;
+                string[] fields = parser.ReadFields(); // skip header
+                while (!parser.EndOfData)
+                {
+                    //Process row
+                    fields = parser.ReadFields();
+                    int jcol = -1;
+                    foreach (string field in fields)
+                    {
+                        if (jcol >= 0) Plate.Rows[istring].Cells[jcol].Value = field;
+                        jcol++;
+                    }
+                    istring++;
+                }
+            }
+        }
+
+
+        private void CreatePlate()
+        {
             Plate.ColumnCount = nGridCols;
 
             for (int i = 0; i < nGridCols; i++)
             {
                 DataGridViewColumn column = Plate.Columns[i];
 
-                column.Name = (i+1).ToString();
+                column.Name = (i + 1).ToString();
                 column.Width = 40;
             }
 
             Plate.AllowUserToAddRows = false;
 
-
             //Plate.RowCount = 8;
 
             String alphabets = "ABCDEFGH";
             String cur_letter;
-            for (int i = 0; i<nGridRows; i++)
-            {                                
+            for (int i = 0; i < nGridRows; i++)
+            {
                 Plate.Rows.Add("", "", "", "", "", "", "", "", "", "", "", ""); // [AT] todo: use nGridCols as a number of elements
                 cur_letter = alphabets[i].ToString(); //[AT] fill cells automatically 
                 Plate.Rows[i].HeaderCell.Value = cur_letter;
-                Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;                
+                Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;
                 for (int col = 0; col < Plate.ColumnCount; col++)
                 {
                     Plate.Rows[i].Cells[col].Value = cur_letter + Plate.Columns[col].Name;
                 }
             }
-
-            //Results.Visible = true;
-
-
         }
-        
         private void ButtonHeat_Click(object sender, EventArgs e)
         {
             // Set upper temperature
