@@ -53,6 +53,8 @@ namespace Miriam
             this.COM = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.CboxInterval = new System.Windows.Forms.ComboBox();
+            this.buttonFillAll = new System.Windows.Forms.Button();
+            this.buttonClearAll = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).BeginInit();
             this.SuspendLayout();
@@ -60,7 +62,7 @@ namespace Miriam
             // ButtonStart
             // 
             this.ButtonStart.Location = new System.Drawing.Point(437, 6);
-            this.ButtonStart.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ButtonStart.Margin = new System.Windows.Forms.Padding(2);
             this.ButtonStart.Name = "ButtonStart";
             this.ButtonStart.Size = new System.Drawing.Size(75, 64);
             this.ButtonStart.TabIndex = 12;
@@ -102,7 +104,7 @@ namespace Miriam
             // 
             this.CboxTempU.FormattingEnabled = true;
             this.CboxTempU.Location = new System.Drawing.Point(93, 51);
-            this.CboxTempU.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.CboxTempU.Margin = new System.Windows.Forms.Padding(2);
             this.CboxTempU.Name = "CboxTempU";
             this.CboxTempU.Size = new System.Drawing.Size(82, 21);
             this.CboxTempU.TabIndex = 15;
@@ -111,7 +113,7 @@ namespace Miriam
             // 
             this.CboxTempM.FormattingEnabled = true;
             this.CboxTempM.Location = new System.Drawing.Point(8, 51);
-            this.CboxTempM.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.CboxTempM.Margin = new System.Windows.Forms.Padding(2);
             this.CboxTempM.Name = "CboxTempM";
             this.CboxTempM.Size = new System.Drawing.Size(82, 21);
             this.CboxTempM.TabIndex = 14;
@@ -120,7 +122,7 @@ namespace Miriam
             // 
             this.CboxDuration.FormattingEnabled = true;
             this.CboxDuration.Location = new System.Drawing.Point(177, 51);
-            this.CboxDuration.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.CboxDuration.Margin = new System.Windows.Forms.Padding(2);
             this.CboxDuration.Name = "CboxDuration";
             this.CboxDuration.Size = new System.Drawing.Size(82, 21);
             this.CboxDuration.TabIndex = 13;
@@ -130,7 +132,7 @@ namespace Miriam
             this.Plate.AllowDrop = true;
             this.Plate.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.Plate.Location = new System.Drawing.Point(8, 73);
-            this.Plate.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Plate.Margin = new System.Windows.Forms.Padding(2);
             this.Plate.Name = "Plate";
             this.Plate.RowTemplate.Height = 28;
             this.Plate.Size = new System.Drawing.Size(537, 255);
@@ -159,7 +161,7 @@ namespace Miriam
             // ButtonHeat
             // 
             this.ButtonHeat.Location = new System.Drawing.Point(358, 6);
-            this.ButtonHeat.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ButtonHeat.Margin = new System.Windows.Forms.Padding(2);
             this.ButtonHeat.Name = "ButtonHeat";
             this.ButtonHeat.Size = new System.Drawing.Size(75, 30);
             this.ButtonHeat.TabIndex = 22;
@@ -170,7 +172,7 @@ namespace Miriam
             // AskHeat
             // 
             this.AskHeat.Location = new System.Drawing.Point(358, 40);
-            this.AskHeat.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.AskHeat.Margin = new System.Windows.Forms.Padding(2);
             this.AskHeat.Name = "AskHeat";
             this.AskHeat.Size = new System.Drawing.Size(75, 30);
             this.AskHeat.TabIndex = 23;
@@ -182,7 +184,7 @@ namespace Miriam
             // 
             this.Data.FormattingEnabled = true;
             this.Data.Location = new System.Drawing.Point(262, 146);
-            this.Data.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Data.Margin = new System.Windows.Forms.Padding(2);
             this.Data.Name = "Data";
             this.Data.Size = new System.Drawing.Size(42, 56);
             this.Data.TabIndex = 24;
@@ -195,7 +197,7 @@ namespace Miriam
             legend1.Name = "Legend1";
             this.Results.Legends.Add(legend1);
             this.Results.Location = new System.Drawing.Point(8, 332);
-            this.Results.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Results.Margin = new System.Windows.Forms.Padding(2);
             this.Results.Name = "Results";
             this.Results.Size = new System.Drawing.Size(537, 315);
             this.Results.TabIndex = 25;
@@ -205,7 +207,7 @@ namespace Miriam
             // ButtonWrite
             // 
             this.ButtonWrite.Location = new System.Drawing.Point(517, 6);
-            this.ButtonWrite.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ButtonWrite.Margin = new System.Windows.Forms.Padding(2);
             this.ButtonWrite.Name = "ButtonWrite";
             this.ButtonWrite.Size = new System.Drawing.Size(75, 30);
             this.ButtonWrite.TabIndex = 26;
@@ -227,7 +229,7 @@ namespace Miriam
             // 
             this.COM.FormattingEnabled = true;
             this.COM.Location = new System.Drawing.Point(517, 51);
-            this.COM.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.COM.Margin = new System.Windows.Forms.Padding(2);
             this.COM.Name = "COM";
             this.COM.Size = new System.Drawing.Size(82, 21);
             this.COM.TabIndex = 29;
@@ -251,12 +253,34 @@ namespace Miriam
             this.CboxInterval.Size = new System.Drawing.Size(85, 21);
             this.CboxInterval.TabIndex = 30;
             // 
+            // buttonFillAll
+            // 
+            this.buttonFillAll.Location = new System.Drawing.Point(550, 100);
+            this.buttonFillAll.Name = "buttonFillAll";
+            this.buttonFillAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonFillAll.TabIndex = 33;
+            this.buttonFillAll.Text = "Fill all";
+            this.buttonFillAll.UseVisualStyleBackColor = true;
+            this.buttonFillAll.Click += new System.EventHandler(this.buttonFillAll_Click);
+            // 
+            // buttonClearAll
+            // 
+            this.buttonClearAll.Location = new System.Drawing.Point(550, 129);
+            this.buttonClearAll.Name = "buttonClearAll";
+            this.buttonClearAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonClearAll.TabIndex = 34;
+            this.buttonClearAll.Text = "Clear all";
+            this.buttonClearAll.UseVisualStyleBackColor = true;
+            this.buttonClearAll.Click += new System.EventHandler(this.buttonClearAll_Click);
+            // 
             // Control
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(602, 341);
+            this.ClientSize = new System.Drawing.Size(638, 330);
+            this.Controls.Add(this.buttonClearAll);
+            this.Controls.Add(this.buttonFillAll);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.CboxInterval);
             this.Controls.Add(this.COM);
@@ -277,9 +301,10 @@ namespace Miriam
             this.Controls.Add(this.CboxDuration);
             this.Controls.Add(this.ButtonStart);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Control";
             this.Text = "Control_Serial";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Control_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).EndInit();
             this.ResumeLayout(false);
@@ -308,6 +333,8 @@ namespace Miriam
         private ComboBox COM;
         private Label label1;
         private ComboBox CboxInterval;
+        private Button buttonFillAll;
+        private Button buttonClearAll;
     }
 }
 

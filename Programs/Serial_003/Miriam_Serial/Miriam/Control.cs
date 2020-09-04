@@ -47,6 +47,7 @@ namespace Miriam
         private Boolean started = false;
         private readonly int nGridRows = 8;
         private readonly int nGridCols = 12;
+        private readonly string cells_fname = @".cells.tsv";
         private int betweenMesSec;
 
         private Dictionary<string, string> wellNames;
@@ -58,17 +59,17 @@ namespace Miriam
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
 
             string[] ports = SerialPort.GetPortNames();
-            
-            for(int i = 0; i <ports.Length;i++)
+
+            for (int i = 0; i < ports.Length; i++)
             {
                 COM.Items.Add(ports[i]);
             }
 
-            if(ports.Length != 0)
+            if (ports.Length != 0)
             {
                 COM.SelectedIndex = 0;
             }
-            
+
 
             for (int i = 55; i < 70; i++)
             {
@@ -80,7 +81,7 @@ namespace Miriam
             }
             for (int i = 0; i < 150; i++)
             {
-                CboxDuration.Items.Add(i);                
+                CboxDuration.Items.Add(i);
             }
             for (int i = 10; i < 600; i++)
             {
@@ -92,12 +93,10 @@ namespace Miriam
             CboxInterval.Text = "10";
 
             //CreatePlate();
-            CreateEmptyPlate();
-            //todo: on exit save to tsv. 
-            // todo: Default name .wellnames.tsv; 
+            CreateEmptyPlate();            
             // todo: load from file button
-            // todo: auto_fill all cells button
-            FillPlate(@"1some_names.tsv");
+            // todo: don't load if cannot load
+            FillPlate(cells_fname);
             //Results.Visible = true;
 
         }
@@ -113,7 +112,7 @@ namespace Miriam
                 column.Width = 40;
             }
             Plate.AllowUserToAddRows = false;
-            
+
             String alphabets = "ABCDEFGH";
             String cur_letter;
             for (int i = 0; i < nGridRows; i++)
@@ -128,7 +127,7 @@ namespace Miriam
         private void FillPlate(string filename)
         {
             if (!File.Exists(filename))
-                { return; }
+            { return; }
             using (TextFieldParser parser = new TextFieldParser(filename))
             {
                 parser.TextFieldType = FieldType.Delimited;
@@ -147,40 +146,23 @@ namespace Miriam
                     }
                     istring++;
                 }
-            }
+            }            
         }
 
-
-        private void CreatePlate()
+        private void AutofillPlate()
         {
-            Plate.ColumnCount = nGridCols;
-
-            for (int i = 0; i < nGridCols; i++)
-            {
-                DataGridViewColumn column = Plate.Columns[i];
-
-                column.Name = (i + 1).ToString();
-                column.Width = 40;
-            }
-
-            Plate.AllowUserToAddRows = false;
-
-            //Plate.RowCount = 8;
-
             String alphabets = "ABCDEFGH";
             String cur_letter;
             for (int i = 0; i < nGridRows; i++)
-            {
-                Plate.Rows.Add("", "", "", "", "", "", "", "", "", "", "", ""); // [AT] todo: use nGridCols as a number of elements
-                cur_letter = alphabets[i].ToString(); //[AT] fill cells automatically 
-                Plate.Rows[i].HeaderCell.Value = cur_letter;
-                Plate.RowHeadersWidth = Plate.RowHeadersWidth + 1;
+            {                
+                cur_letter = alphabets[i].ToString();                                
                 for (int col = 0; col < Plate.ColumnCount; col++)
                 {
                     Plate.Rows[i].Cells[col].Value = cur_letter + Plate.Columns[col].Name;
                 }
             }
         }
+
         private void ButtonHeat_Click(object sender, EventArgs e)
         {
             // Set upper temperature
@@ -830,6 +812,43 @@ namespace Miriam
                 MessageBox.Show("Serial could not be opened, please check that the device is correct one. The heat could not be turned off.");
                 serialPortCancel.Close();
             }
+        }
+
+        private void buttonFillAll_Click(object sender, EventArgs e)
+        {
+            AutofillPlate();
+        }
+
+        private void buttonClearAll_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in Plate.Rows)
+                foreach (DataGridViewCell cell in row.Cells)
+                { cell.Value = ""; }
+        }
+
+        private void Control_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            savePlateCells(cells_fname);
+        }
+
+        private void savePlateCells(string filename, string sep="\t")
+        {            
+            string columnNames = "";
+            string[] output = new string[Plate.RowCount + 1];
+            for (int i = 0; i < nGridCols; i++)
+            {
+                columnNames += sep + Plate.Columns[i].Name.ToString();
+            }
+            output[0] += columnNames;
+            for (int row = 0; row < Plate.RowCount; row++)
+            {
+                output[row + 1] += Plate.Rows[row].HeaderCell.Value.ToString();
+                for (int j = 0; j < nGridCols; j++)
+                {
+                    output[row + 1] += sep+ Plate.Rows[row].Cells[j].Value.ToString();
+                }
+            }
+            File.WriteAllLines(filename, output, System.Text.Encoding.UTF8);
         }
     }
 }
