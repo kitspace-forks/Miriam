@@ -50,7 +50,7 @@ namespace Miriam
         private readonly string cells_fname = @".cells.tsv";
         private int betweenMesSec;
 
-        private Dictionary<string, string> wellNames;
+        // private Dictionary<string, string> wellNames;
 
 
         public Control()
@@ -750,7 +750,12 @@ namespace Miriam
 
                 //after your loop
                 //[AT] todo: change path option
-                File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Miriam_serial_data.csv", csv.ToString());
+                //string fname = "Miriam_serial_data.csv";
+                string fname = @"miriam_" + DateTime.Now.ToString("yyyyddMM_HHmmss") + ".csv";
+                Console.WriteLine();                
+                Console.WriteLine("Saving csv: {0}", fname);
+                // string fname = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Miriam_serial_data.csv";
+                File.WriteAllText(fname, csv.ToString());                                                                
             }
             catch (IOException)
             {
