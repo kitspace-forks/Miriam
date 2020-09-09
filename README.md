@@ -34,17 +34,17 @@ If you're interested in modifying or extending the Miriam platform, we strongly 
 
 ## Design
 
-The optics of Miriam are designed to support calcein dye. Calcein emission and excitation spectra are represented in Figure 2.
+The optics of Miriam plus are designed to support Syto9 + DNA. The emission and absorption spectra of Syto9 + DNA are represented in Figure 2.
 
-![](calcein.PNG)
+![](Syto9_ex_em.png)
 
-**Figure 2.** Calcein normalized emission and excitation spectra.
+**Figure 2.** Syto9+DNA emission and excitation spectra.
 
-The optical filter for blocking the excitation light has been purchased from a theatrical supply store and has the transmission spectra represented in Figure 3.
+LEE filter 738 is used for blocking the excitation light. Whole optic design of Miriam plus is shown in Figure 3.
 
-![](emission.PNG)
+![](Syto9_dna_optics.png)
 
-**Figure 3.** Emission filter transmission specter.
+**Figure 3.** Optic design for Miriam plus to detect Syto9 + DNA.
 
 The middle heating board and the LED and PD arrangements have been designed to support 96-well plates with the following dimensions (figure 4).
 
