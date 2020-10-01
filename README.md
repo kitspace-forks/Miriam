@@ -1,5 +1,6 @@
 Miriam
 ========
+**HOT!!!** The new [BOM list](https://docs.google.com/spreadsheets/d/1jToRLCrUTaD4QrNjGMmmIuaWwqO89PiL6eRc0J-1mlM/edit?usp=sharing) of the Covid-19 adapted Miriam is updated constantly during our test.
 
 [![License](https://i.creativecommons.org/l/by-sa/3.0/80x15.png?style=flat-square)](http://creativecommons.org/licenses/by-sa/3.0/)
 
@@ -60,7 +61,7 @@ To control the heating of Miriam there are two heater PCBs. They have been desig
 
 ![](FR4_heater.png)
 
-**Figure 5a.** The distribution of heat in the FR4 heaters. After heating, the temperature difference of the middle wells and the side ones can vary from 10 to 20 degrees C.
+**Figure 5a.** The distribution of heat in the FR4 and Al heaters. FR4 heaters may work with small number of wells setup. For Miriam, we recommend using Al boards for better heat distribution.
 
 The detection of fluorescence is done with 96 LEDs and 96 photodiodes creating LED and photodiode PCBs. The LED peak wavelength is 470 nm and photodiode is a green RGB photodiode. The measured voltage is amplified with an operational amplifier to 0-5 V that is then converted by Arduino’s 8-bit ADC to be a numerical value. (figure 6.)
 
@@ -90,6 +91,7 @@ The wiring problem of original sensor board has been fixed in this new version.
 
 Credits
 --------
-Miriam is an open source project, supported by Miroculus in collaboration with Arduino (Sweden). The team is led by Juho Terrijarvi.
+The original Miriam is an open source project, supported by Miroculus in collaboration with Arduino (Sweden). The team is led by Juho Terrijarvi.
 
+This version of Miriam plus has been improved by Strawlab to make it work with Syto-9 + DNA for potentially Covid-19 test.
 Icon and image designed by Miroculus.
