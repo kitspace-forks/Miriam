@@ -49,6 +49,7 @@ namespace Miriam
         private readonly int nGridCols = 12;
         private readonly string cells_fname = @".cells.tsv";
         private int betweenMesSec;
+        private string folderName;
 
         // private Dictionary<string, string> wellNames;
 
@@ -98,7 +99,6 @@ namespace Miriam
             // todo: don't load if cannot load
             FillPlate(cells_fname);
             //Results.Visible = true;
-
         }
 
         private void CreateEmptyPlate()
@@ -751,7 +751,7 @@ namespace Miriam
                 //after your loop
                 //[AT] todo: change path option
                 //string fname = "Miriam_serial_data.csv";
-                string fname = @"miriam_" + DateTime.Now.ToString("yyyyddMM_HHmmss") + ".csv";
+                string fname = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyddMM_HHmmss") + ".csv";
                 Console.WriteLine();                
                 Console.WriteLine("Saving csv: {0}", fname);
                 // string fname = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Miriam_serial_data.csv";
@@ -766,6 +766,7 @@ namespace Miriam
         void OnProcessExit(object sender, EventArgs e)
         {
             // Cancel the heat
+            // [AT] todo: if closing during the measurement, the heat can not be turned off. Because the SerialPort is already open for measurement...
             SerialPort serialPortCancel = null;
             try
             {
@@ -834,6 +835,14 @@ namespace Miriam
         private void Control_FormClosing(object sender, FormClosingEventArgs e)
         {
             savePlateCells(cells_fname);
+            Miriam_Serial.Properties.Settings.Default.settFolderRes = folderBrowserSaveRes.SelectedPath;
+
+            Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
+            Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
+            Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
+
+            Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
+            Miriam_Serial.Properties.Settings.Default.Save();
         }
 
         private void savePlateCells(string filename, string sep="\t")
@@ -854,6 +863,34 @@ namespace Miriam
                 }
             }
             File.WriteAllLines(filename, output, System.Text.Encoding.UTF8);
+        }
+
+        private void buttonSaveAs_Click(object sender, EventArgs e)
+        {
+            // Show the FolderBrowserDialog.
+            DialogResult result = folderBrowserSaveRes.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                folderName = folderBrowserSaveRes.SelectedPath;                
+            }
+        }
+
+        private void Control_Load(object sender, EventArgs e)
+        {
+            Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
+            if (Miriam_Serial.Properties.Settings.Default.settFolderRes == "")
+            {
+                folderName = folderBrowserSaveRes.RootFolder.ToString();                                
+            }
+            else
+            {
+                folderName = Miriam_Serial.Properties.Settings.Default.settFolderRes;
+                folderBrowserSaveRes.SelectedPath = Miriam_Serial.Properties.Settings.Default.settFolderRes;
+            }
+            Console.WriteLine("folder: {0}", folderName);
+            CboxTempU.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureUp;
+            CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
+            CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
         }
     }
 }

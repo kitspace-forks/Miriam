@@ -55,6 +55,9 @@ namespace Miriam
             this.CboxInterval = new System.Windows.Forms.ComboBox();
             this.buttonFillAll = new System.Windows.Forms.Button();
             this.buttonClearAll = new System.Windows.Forms.Button();
+            this.buttonSaveAs = new System.Windows.Forms.Button();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.folderBrowserSaveRes = new System.Windows.Forms.FolderBrowserDialog();
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).BeginInit();
             this.SuspendLayout();
@@ -273,12 +276,27 @@ namespace Miriam
             this.buttonClearAll.UseVisualStyleBackColor = true;
             this.buttonClearAll.Click += new System.EventHandler(this.buttonClearAll_Click);
             // 
+            // buttonSaveAs
+            // 
+            this.buttonSaveAs.Location = new System.Drawing.Point(597, 7);
+            this.buttonSaveAs.Name = "buttonSaveAs";
+            this.buttonSaveAs.Size = new System.Drawing.Size(28, 29);
+            this.buttonSaveAs.TabIndex = 35;
+            this.buttonSaveAs.Text = "...";
+            this.buttonSaveAs.UseVisualStyleBackColor = true;
+            this.buttonSaveAs.Click += new System.EventHandler(this.buttonSaveAs_Click);
+            // 
+            // folderBrowserSaveRes
+            // 
+            this.folderBrowserSaveRes.Description = "Select the directory to save the measurements data";
+            // 
             // Control
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(638, 330);
+            this.Controls.Add(this.buttonSaveAs);
             this.Controls.Add(this.buttonClearAll);
             this.Controls.Add(this.buttonFillAll);
             this.Controls.Add(this.label1);
@@ -305,6 +323,7 @@ namespace Miriam
             this.Name = "Control";
             this.Text = "Control_Serial";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Control_FormClosing);
+            this.Load += new System.EventHandler(this.Control_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).EndInit();
             this.ResumeLayout(false);
@@ -335,6 +354,9 @@ namespace Miriam
         private ComboBox CboxInterval;
         private Button buttonFillAll;
         private Button buttonClearAll;
+        private Button buttonSaveAs;
+        private SaveFileDialog saveFileDialog1;
+        private FolderBrowserDialog folderBrowserSaveRes;
     }
 }
 
