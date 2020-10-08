@@ -1,5 +1,6 @@
 Miriam
 ========
+**HOT!!!** The new [BOM list](https://docs.google.com/spreadsheets/d/1jToRLCrUTaD4QrNjGMmmIuaWwqO89PiL6eRc0J-1mlM/edit?usp=sharing) of the Covid-19 adapted Miriam is updated constantly during our test.
 
 [![License](https://i.creativecommons.org/l/by-sa/3.0/80x15.png?style=flat-square)](http://creativecommons.org/licenses/by-sa/3.0/)
 
@@ -18,7 +19,7 @@ Miriam is an open-source instrument for isothermal amplification reactions. The 
 
 ![](miriam.jpg)
 
-The detection optics have been designed for [calcein dye](http://loopamp.eiken.co.jp/e/products/fluore/index.html). The selected LED is an angle SMD led with peak wavelength 461nm. The photodiode is an RGB photodiode most sensitive to green light. The optics also include an emission filter utilized in theatrical lighting.  The development and selection of components is further described in a [Master's thesis](http://lutpub.lut.fi/handle/10024/159386) done from miriam. 
+The detection optics of orignal Miriam was designed for [calcein dye](http://loopamp.eiken.co.jp/e/products/fluore/index.html). The selected LED is an angle SMD led with peak wavelength 461nm. The photodiode is an RGB photodiode most sensitive to green light. The optics also include an emission filter utilized in theatrical lighting.  The development and selection of components is further described in a [Master's thesis](http://lutpub.lut.fi/handle/10024/159386) done from miriam. 
 
 In the performance testing of Miriam, the detection limit for DNA using LAMP as amplification platform has been 2amol in 10ul of sample (figure 1).
 
@@ -34,17 +35,17 @@ If you're interested in modifying or extending the Miriam platform, we strongly 
 
 ## Design
 
-The optics of Miriam are designed to support calcein dye. Calcein emission and excitation spectra are represented in Figure 2.
+The optics of Miriam plus are designed to support Syto9 + DNA. The emission and absorption spectra of Syto9 + DNA are represented in Figure 2.
 
-![](calcein.PNG)
+![](Syto9_ex_em.png)
 
-**Figure 2.** Calcein normalized emission and excitation spectra.
+**Figure 2.** Syto9+DNA emission and excitation spectra.
 
-The optical filter for blocking the excitation light has been purchased from a theatrical supply store and has the transmission spectra represented in Figure 3.
+LEE filter 738 is used for blocking the excitation light. Whole optic design of Miriam plus is shown in Figure 3.
 
-![](emission.PNG)
+![](Syto9_dna_optics.png)
 
-**Figure 3.** Emission filter transmission specter.
+**Figure 3.** Optic design for Miriam plus to detect Syto9 + DNA.
 
 The middle heating board and the LED and PD arrangements have been designed to support 96-well plates with the following dimensions (figure 4).
 
@@ -60,7 +61,7 @@ To control the heating of Miriam there are two heater PCBs. They have been desig
 
 ![](FR4_heater.png)
 
-**Figure 5a.** The distribution of heat in the FR4 heaters. After heating, the temperature difference of the middle wells and the side ones can vary from 10 to 20 degrees C.
+**Figure 5a.** The distribution of heat in the FR4 and Al heaters. FR4 heaters may work with small number of wells setup. For Miriam, we recommend using Al boards for better heat distribution.
 
 The detection of fluorescence is done with 96 LEDs and 96 photodiodes creating LED and photodiode PCBs. The LED peak wavelength is 470 nm and photodiode is a green RGB photodiode. The measured voltage is amplified with an operational amplifier to 0-5 V that is then converted by Arduino’s 8-bit ADC to be a numerical value. (figure 6.)
 
@@ -82,13 +83,7 @@ Installation
 
 **Figure 8.** PCB board assembly information.
 
-The screws are attached to the cover and the base with heat durable epoxy. 
-
-![Sensor2 cable](sensor2_wiring.png)
-
-**Figure 9.** Power pins of sensor2 connector are flipped on the sensor board.
-
-For immediate use of Miriam device, we need to rewire the cable of sensor2 connector as in Figure 9.
+The wiring problem of original sensor board has been fixed in this new version.
 
 **Note:** All the cables used for Miriam must be "Opposite Side Contacts".
 
@@ -96,6 +91,7 @@ For immediate use of Miriam device, we need to rewire the cable of sensor2 conne
 
 Credits
 --------
-Miriam is an open source project, supported by Miroculus in collaboration with Arduino (Sweden). The team is led by Juho Terrijarvi.
+The original Miriam is an open source project, supported by Miroculus in collaboration with Arduino (Sweden). The team is led by Juho Terrijarvi.
 
+This version of Miriam plus has been improved by Strawlab to make it work with Syto-9 + DNA for potentially Covid-19 test.
 Icon and image designed by Miroculus.
