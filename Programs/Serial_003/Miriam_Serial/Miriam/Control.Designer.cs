@@ -195,6 +195,8 @@ namespace Miriam
             // 
             // Results
             // 
+            this.Results.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             chartArea1.Name = "ChartArea1";
             this.Results.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
@@ -202,7 +204,7 @@ namespace Miriam
             this.Results.Location = new System.Drawing.Point(8, 332);
             this.Results.Margin = new System.Windows.Forms.Padding(2);
             this.Results.Name = "Results";
-            this.Results.Size = new System.Drawing.Size(537, 315);
+            this.Results.Size = new System.Drawing.Size(617, 315);
             this.Results.TabIndex = 25;
             this.Results.Text = "chart1";
             this.Results.Visible = false;

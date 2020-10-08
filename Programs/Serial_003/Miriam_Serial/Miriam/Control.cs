@@ -362,8 +362,9 @@ namespace Miriam
                 f.Size = new Size(f.Size.Width, 700);
                 started = true;
                 Results.Visible = true;
+                Results.Anchor |= AnchorStyles.Bottom;
                 port = COM.Text;
-
+                
                 DateTime localDate = DateTime.Now;
 
 
@@ -433,7 +434,7 @@ namespace Miriam
                 clr = new Color[10];
                 clr[0] = Color.Red;
                 clr[1] = Color.Blue;
-                clr[2] = Color.Yellow;
+                clr[2] = Color.Chocolate;
                 clr[3] = Color.Green;
                 clr[4] = Color.Black;
                 clr[5] = Color.Aqua;
@@ -443,16 +444,14 @@ namespace Miriam
                 clr[9] = Color.Gray;
 
                 int clrsUsed = 0;
-
                 
                 //[AT] add series for all named wells 
                 for (int i = 0; i < list.Count; i++)
                 {
                     Results.Series.Add(msg.Split(',')[list[i]]);
                     Results.Series[msg.Split(',')[list[i]]].ChartType =
-                                    SeriesChartType.FastLine;
+                                    SeriesChartType.FastLine;                    
                     Results.Series[msg.Split(',')[list[i]]].Color = clr[clrsUsed];
-
                     clrsUsed += 1;
                     if (clrsUsed > 9)
                     {
