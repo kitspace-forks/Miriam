@@ -72,6 +72,17 @@ To control the heating of Miriam there are two heater PCBs. They have been desig
 
 **Figure 5a.** The distribution of heat in the FR4 and Al heaters. FR4 heaters may work with small number of wells setup. For Miriam, we recommend using Al boards for better heat distribution.
 
+Original Miriam design has 2.5 oC difference in temperature of the central wells and those on the far edge. Adding a heating wire on the edge of the lower heater can improve the uniformity (Fig. 5b). The temperature difference is reduced as low as 1oC or +/-0.5 oC by tuning the heat wire temperature (current) manually. An additional close-loop control for the heating wire would further improve the temperature uniformity.    
+![](Heat_uniformity.png)
+
+**Figure 5b.** Additional heat wire helps to improve heat uniformity of the plate.
+
+The heat uniformity of Miriam would be improved further by optimizing the heating traces of the heaters. Using a PCB thermal analysis software (Fig. 5C) with certain protocol for heat trace optimization would help to boost the design process.
+
+![](heat_simulation.png)
+
+**Figure 5c.** Heat distribution of the lower heater obtained from PCB thermal analysis software [(TRM, ADAM research)](https://www.adam-research.de/en/).
+
 The detection of fluorescence is done with 96 LEDs and 96 photodiodes creating LED and photodiode PCBs. The LED peak wavelength is 470 nm and photodiode is a green RGB photodiode. The measured voltage is amplified with an operational amplifier to 0-5 V that is then converted by Arduino’s 8-bit ADC to be a numerical value. (figure 6.)
 
 ![](ledpd.jpg)
