@@ -87,7 +87,7 @@ The detection of fluorescence is done with 96 LEDs and 96 photodiodes creating L
 
 ![](ledpd.jpg)
 
-**Figure 6.** LED (left) and photodiode (right) PCBs.
+**Figure 6.** LED (left) and new photodiode (right) PCBs.
 
 All of these boards are controlled by a shield that is directly mounted to the Arduino mega board (figure 7). The shield contains three MOSFETs to control LED board and the two heater boards, the required components to read the heat from the thermistors as well as a WIFI chip. The WIFI chip makes it possible for Arduino to be connected to a local WIFI and this way communicate autonomously to a web service.
 
