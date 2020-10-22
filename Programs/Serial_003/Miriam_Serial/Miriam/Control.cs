@@ -52,12 +52,15 @@ namespace Miriam
         private string folderName;
 
         // private Dictionary<string, string> wellNames;
-
+        private bool cont_assay = false;
+        private Thread assay_thread;
 
         public Control()
         {
             InitializeComponent();
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+
+            assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
 
             string[] ports = SerialPort.GetPortNames();
 
@@ -257,7 +260,8 @@ namespace Miriam
                 ReceivedData = ReceivedData.Replace("\n", "");
 
                 AppendHeatLabel("Temperature U:" + ReceivedData.Split(',')[4] + "," + "Temperature M:" + ReceivedData.Split(',')[5]);
-
+                Console.WriteLine();
+                Console.WriteLine("i output: {0}", ReceivedData);
 
                 serialPort.Close();
 
@@ -460,13 +464,12 @@ namespace Miriam
                 }
 
 
-                Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
+                // assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
 
                 // put to background to force to close if program exit
-                t.IsBackground = true;
+                assay_thread.IsBackground = true;
 
-
-                t.Start();
+                assay_thread.Start();
             }
             
 
@@ -547,9 +550,11 @@ namespace Miriam
 
         private void doAssay()
         {
-            Boolean cont = true;
-
+            // Boolean cont = true;
+            cont_assay = true;            
             int loop = 0;
+            Boolean assay_ready = false;
+
 
             do
             {
@@ -561,8 +566,8 @@ namespace Miriam
 				// AT:stop if the specified duration passed (from the textbox)
 				if (duration < endCycle) 
                 {
-                    cont = false;
-                    
+                    cont_assay = false;
+                    assay_ready = true;
                 }
                 
                 // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
@@ -677,7 +682,7 @@ namespace Miriam
                 } while (timeRunning);
                 loop += 1;
 
-            } while (cont);
+            } while (cont_assay);
 
             // Cancel the heat
             SerialPort serialPortCancel = null; 
@@ -731,7 +736,8 @@ namespace Miriam
                 MessageBox.Show("Serial could not be opened, please check that the device is correct one");
                 serialPortCancel.Close();
             }
-            MessageBox.Show("Assay ready");
+            if (assay_ready)
+                MessageBox.Show("Assay ready");            
         }
 
         private void ButtonWrite_Click(object sender, EventArgs e)
@@ -764,6 +770,17 @@ namespace Miriam
 
         void OnProcessExit(object sender, EventArgs e)
         {
+            cont_assay = false;
+            if (assay_thread.IsAlive)
+            {
+                Console.WriteLine("Waiting end of measurement...");
+                assay_thread.Join();
+            }
+            else 
+            {
+                Console.WriteLine("No measurement, canceling heat...");
+            }
+
             // Cancel the heat
             // [AT] todo: if closing during the measurement, the heat can not be turned off. Because the SerialPort is already open for measurement...
             SerialPort serialPortCancel = null;
