@@ -100,6 +100,11 @@ namespace Miriam
             {
                 CboxTempU.Items.Add(i);
             }
+            for (int i = 55; i < 90; i++)
+            {
+                CboxTempE.Items.Add(i);
+            }
+
             for (int i = 0; i < 150; i++)
             {
                 CboxDuration.Items.Add(i);
@@ -110,6 +115,7 @@ namespace Miriam
             }
             CboxTempU.Text = "90";
             CboxTempM.Text = "65";
+            CboxTempE.Text = "65";
             CboxDuration.Text = "120";
             CboxInterval.Text = "10";
 
@@ -125,11 +131,14 @@ namespace Miriam
         {
             Console.WriteLine(received_data);
             List<string> keys = new List<string>(currentTemperatureInfo.Keys);
+            int tindex;
 
             foreach (var loc in keys)
             {
-                currentTemperatureInfo[loc] = received_data.Split(',')[temperatureInfoMap[loc]];
-                Console.WriteLine("T {0}: {1}", loc, currentTemperatureInfo[loc]);
+                tindex = temperatureInfoMap[loc];
+                if(received_data.Split(',').Length >= tindex+1)
+                    currentTemperatureInfo[loc] = received_data.Split(',')[temperatureInfoMap[loc]];
+                    Console.WriteLine("T {0}: {1}", loc, currentTemperatureInfo[loc]);
             }                        
         }
 
@@ -255,12 +264,19 @@ namespace Miriam
                 s = ArduinoReadout(serialPort, "U " + CboxTempU.Text);
                 Console.WriteLine(s);
 
+                s = ArduinoReadout(serialPort, "E " + CboxTempE.Text);
+                Console.WriteLine(s);
+
                 s = ArduinoReadout(serialPort, "H");
                 Console.WriteLine(s);
 
                 ReceivedData = ArduinoReadout(serialPort, "i");
                 ParseTemperatureInfo(ReceivedData);
-                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," + "Temperature M:" + currentTemperatureInfo["Middle"]);
+//                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," + "Temperature M:" + currentTemperatureInfo["Middle"]);
+                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," +
+                    "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                    "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                    "Temperature Box:" + currentTemperatureInfo["Box"]);
 
                 // AppendHeatLabel("Temperature U:" + ReceivedData.Split(',')[4] + "," + "Temperature M:" + ReceivedData.Split(',')[5]);
                 Console.WriteLine();
@@ -287,8 +303,11 @@ namespace Miriam
                 this.Invoke(new Action<string>(AppendHeatLabel), new object[] { value });
                 return;
             }
+            Console.WriteLine(value);
             LabelTempUC.Text = value.Split(',')[0];
             LabelTempMC.Text = value.Split(',')[1];
+            LabelTempEC.Text = value.Split(',')[2];
+            LabelTempBoxC.Text = value.Split(',')[3];
 
         }
 
@@ -318,7 +337,10 @@ namespace Miriam
 
                 String ReceivedData = ArduinoReadout(serialPort, "i");
                 ParseTemperatureInfo(ReceivedData);
-                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," + "Temperature M:" + currentTemperatureInfo["Middle"]);
+                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," + 
+                    "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                    "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                    "Temperature Box:" + currentTemperatureInfo["Box"]);
 
                 serialPort.Close();
 
@@ -348,7 +370,7 @@ namespace Miriam
             {
                 Results.Visible = true;
                 Form f = Control.ActiveForm;
-                f.Size = new Size(f.Size.Width, 700);
+                f.Size = new Size(f.Size.Width, 750);
                 started = true;
                 Results.Visible = true;
                 Results.Anchor |= AnchorStyles.Bottom;
@@ -398,8 +420,9 @@ namespace Miriam
                 }
 
                 List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
-                int counter = 3;
-                string msg = "Time,U,M,"; // [AT] csv file header. 
+                int counter = 5;
+                //string msg = "Time,U,M,"; // [AT] csv file header. 
+                string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
 
                 for (int i = 0; i < Plate.RowCount; i++)
                 {
@@ -414,7 +437,6 @@ namespace Miriam
                         counter += 1;
                     }
                 }
-
                 Data.Items.Add(msg); //[AT] Data -- invisible ListBox
                 arrayNames = msg; //[AT] header
 
@@ -470,7 +492,7 @@ namespace Miriam
                 return;
             }
 
-            for(int i = 3;i<arrayNames.Split(',').Length;i++)
+            for(int i = 5;i<arrayNames.Split(',').Length;i++)
             {
                 if(!arrayNames.Split(',')[i].Equals(""))
                 {
@@ -578,68 +600,42 @@ namespace Miriam
                     serialPort.DiscardOutBuffer();
                     serialPort.DiscardInBuffer();
 
-                    String ReceivedData;
-                    //RecievedData = serialPort.ReadLine();
-                    //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                    serialPort.Write("R" + "\r\n"); // [AT] SW 'R' (read assay) - FW 'A1,A2,A3...E12' 
-
-                    Boolean conti = true;
-                    do
-                    {
-                        ReceivedData = serialPort.ReadLine(); // [AT] can be more than 1 line coming from the serial port, and we are interested in one containing $ 
-                        if (ReceivedData.Contains('$'))
-                        {
-                            conti = false;
-                        }
-                    } while (conti);                    
-
-                    conti = true;
+                    String ReceivedData = ArduinoReadout(serialPort, "R");
 
                     // [AT] ReceivedData -- string of values for each well
                     // [AT] ReceivedData1 -- info string (temperatures etc)
 
-
-                    serialPort.Write("i" + "\r\n");
-                    // [AT] SW 'i' (info) - FW '[0] outputMiddle, [1] outputUpper, [2] temperatureMiddle, [3] temperatureUpper, [4] temperatureMiddleC, [5] temperatureUpperC'
-                    String ReceivedData1;
-                    do
-                    {
-                        ReceivedData1 = serialPort.ReadLine();
-                        if (ReceivedData1.Contains('$'))
-                        {
-                            conti = false;
-                        }
-                    } while (conti);
-
-
-                    conti = true;
-
+                    String ReceivedData1 = ArduinoReadout(serialPort, "i");
 
                     Thread.Sleep(2000); // [AT] sleep 2s
                    
-                    ReceivedData = ReceivedData.Replace("$", "");
-                    ReceivedData1 = ReceivedData1.Replace("$", "");
-                    ReceivedData = ReceivedData.Replace("\r", "");
-                    ReceivedData1 = ReceivedData1.Replace("\r", "");
-                    ReceivedData = ReceivedData.Replace("\n", "");
-                    ReceivedData1 = ReceivedData1.Replace("\n", "");
-                    
-                    // [AT] 4: temperatureMiddleC, 5: temperatureUpperC. Check what is C and what is correct? (in this string it is the other way around). Upd: works correct, so probably there is a typo in the documentation.
-                    AppendHeatLabel("Temperature U:" + ReceivedData1.Split(',')[4] + "," + "Temperature M:" + ReceivedData1.Split(',')[5]);
-
+                    ParseTemperatureInfo(ReceivedData1);
+                                        
+                    AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," +
+                        "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                        "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                        "Temperature Box:" + currentTemperatureInfo["Box"]);
                     // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
                     // ReceivedData = ReverseColumnOrder(ReceivedData);
                     // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
                     ReceivedData = RearrangeColumnOrder(ReceivedData);
-
-                    //AppendData(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
-                    //ReceivedData1.Split(',')[5] + "," + ReceivedData);
-                    AppendData(timestr + "," + ReceivedData1.Split(',')[4] + "," + ReceivedData1.Split(',')[5] + "," + ReceivedData);
-
+                    
+                    AppendData(timestr + "," +
+                        currentTemperatureInfo["Up"] + "," +
+                        currentTemperatureInfo["Middle"] + "," +
+                        currentTemperatureInfo["Extra"] + "," +
+                        currentTemperatureInfo["Box"] + "," +
+                        ReceivedData);
+                        
+                    // todo: fix appendData and AppendResult
                     //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
-                
-                    AppendResult(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
-                        ReceivedData1.Split(',')[5] + "," + ReceivedData);
+
+                    AppendResult(loop.ToString() + "," + 
+                        currentTemperatureInfo["Up"] + "," +
+                        currentTemperatureInfo["Middle"] + "," +
+                        currentTemperatureInfo["Extra"] + "," +
+                        currentTemperatureInfo["Box"] + "," +
+                        ReceivedData);
 
                     Thread.Sleep(2000); // 2s
 
@@ -697,22 +693,9 @@ namespace Miriam
                 String ReceivedData;
                 //RecievedData = serialPort.ReadLine();
                 //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                serialPortCancel.Write("C" + "\r\n");
 
-                Boolean conti = true;
-                do
-                {
-                    ReceivedData = serialPortCancel.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = ReceivedData.Replace("$", "");
-                ReceivedData = ReceivedData.Replace("\r", "");
-                ReceivedData = ReceivedData.Replace("\n", "");
+                string s = ArduinoReadout(serialPortCancel, "C");
+                Console.WriteLine(s);
 
                 serialPortCancel.Close();
 
@@ -767,13 +750,10 @@ namespace Miriam
                 Console.WriteLine("No measurement, canceling heat...");
             }
 
-            // Cancel the heat
-            // [AT] todo: if closing during the measurement, the heat can not be turned off. Because the SerialPort is already open for measurement...
+            // Cancel the heat            
             SerialPort serialPortCancel = null;
             try
             {
-
-
                 // Create a new SerialPort object with default settings.
                 serialPortCancel = new SerialPort();
 
@@ -792,25 +772,8 @@ namespace Miriam
                 serialPortCancel.DiscardOutBuffer();
                 serialPortCancel.DiscardInBuffer();
 
-                String ReceivedData;
-                //RecievedData = serialPort.ReadLine();
-                //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                serialPortCancel.Write("C" + "\r\n");
-
-                Boolean conti = true;
-                do
-                {
-                    ReceivedData = serialPortCancel.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = ReceivedData.Replace("$", "");
-                ReceivedData = ReceivedData.Replace("\r", "");
-                ReceivedData = ReceivedData.Replace("\n", "");
+                String ReceivedData = ArduinoReadout(serialPortCancel, "C");
+                Console.WriteLine(ReceivedData);
 
                 serialPortCancel.Close();
 
@@ -841,6 +804,7 @@ namespace Miriam
 
             Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
             Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
+            Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
             Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
@@ -892,6 +856,7 @@ namespace Miriam
             Console.WriteLine("folder: {0}", folderName);
             CboxTempU.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureUp;
             CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
+            CboxTempE.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureExtra;
             CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
         }
     }

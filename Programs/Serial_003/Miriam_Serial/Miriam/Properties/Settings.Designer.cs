@@ -82,5 +82,17 @@ namespace Miriam_Serial.Properties {
                 this["settFolderRes"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("65")]
+        public string settTemperatureExtra {
+            get {
+                return ((string)(this["settTemperatureExtra"]));
+            }
+            set {
+                this["settTemperatureExtra"] = value;
+            }
+        }
     }
 }

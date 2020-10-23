@@ -17,5 +17,8 @@
     <Setting Name="settFolderRes" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="settTemperatureExtra" Type="System.String" Scope="User">
+      <Value Profile="(Default)">65</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
