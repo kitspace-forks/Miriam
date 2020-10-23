@@ -247,23 +247,26 @@ void loop () {
 
   case INFO:
 
-    Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," + String(Output_EXTRA) + "," + 
-      String(analogRead(TH_UPPERBED)) + "," + String((analogRead(TH_MIDDLEBED_2))) + "," + String((analogRead(TH_EXTRA))) + "," + String((analogRead(TH_BOX))) + "," +
+    Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," 
+      String(analogRead(TH_UPPERBED)) + "," + String((analogRead(TH_MIDDLEBED_2))) + "," 
       String(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
       String(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f) * 0.6548 + 17.931)+ "," + 
+      + String(Output_EXTRA) + "," + 
+      + String((analogRead(TH_EXTRA))) + "," + String((analogRead(TH_BOX))) + "," +
 //      String(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f) * 0.6548 + 17.931) + "," + 
       String(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
       String(Temperature(TH_BOX,T_CELSIUS,NCP18XH103F03RB,10000.0f))+ "$");
 
+
     // 0: output_M, 
-    // 1: output_U
-    // 2: output_E
-    // 3: T_U
-    // 4: T_M
-    // 5: T_E
-    // 6: T_Box
-    // 7: T_U_C
-    // 8: T_M_C
+    // 1: output_U    
+    // 2: T_U
+    // 3: T_M    
+    // 4: T_U_C
+    // 5: T_M_C
+    // 6: output_E    
+    // 7: T_E
+    // 8: T_Box
     // 9: T_E_C
     // 10: T_Box_C
     
