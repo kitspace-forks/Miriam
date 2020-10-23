@@ -247,12 +247,12 @@ void loop () {
 
   case INFO:
 
-    Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," 
-      String(analogRead(TH_UPPERBED)) + "," + String((analogRead(TH_MIDDLEBED_2))) + "," 
+    Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," +  
+      String(analogRead(TH_UPPERBED)) + "," + String((analogRead(TH_MIDDLEBED_2))) + ","  + 
       String(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
       String(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f) * 0.6548 + 17.931)+ "," + 
-      + String(Output_EXTRA) + "," + 
-      + String((analogRead(TH_EXTRA))) + "," + String((analogRead(TH_BOX))) + "," +
+      String(Output_EXTRA) + "," + 
+      String((analogRead(TH_EXTRA))) + "," + String((analogRead(TH_BOX))) + "," +
 //      String(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f) * 0.6548 + 17.931) + "," + 
       String(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
       String(Temperature(TH_BOX,T_CELSIUS,NCP18XH103F03RB,10000.0f))+ "$");
