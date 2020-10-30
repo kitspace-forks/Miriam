@@ -60,6 +60,9 @@
 // or use this idea to define your own thermistors
 #define NCP18XH103F03RB 3380.0f,298.15f,10000.0f  // B,T0,R0
 
+// temperature calculation correction - linear fit coefficients
+#define LR_CORR_SLOPE 0.8433
+#define LR_CORR_INTERCEPT 4.2213
 
 // STATES FOR STATE MACHINE
 #define INIT      'I'
@@ -242,7 +245,7 @@ void loop () {
 
     Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," + String(analogRead(TH_UPPERBED)) + "," + 
       String((analogRead(TH_MIDDLEBED_2))) + "," + 
-      String(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + String(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f) * 0.6548 + 17.931) + "$");
+      String(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + String(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "$");
     
     state = defaultState;
 
@@ -260,9 +263,9 @@ void loop () {
 
   case SET_TEMP_MIDDLE:
 
-    Setpoint_MIDDLE = (parameters.toInt() - 17.931)/0.6548;  
+    Setpoint_MIDDLE = parameters.toInt();  
     Serial.print(F("NEW MIDDLE TEMP:"));       
-    Serial.print(Setpoint_MIDDLE * 0.6548 + 17.931);
+    Serial.print(Setpoint_MIDDLE);
     Serial.println("$");
         
     state = defaultState;
@@ -572,6 +575,7 @@ float Temperature(int AnalogInputNumber,int OutputUnit,float B,float T0,float R0
   switch(OutputUnit) {
   case T_CELSIUS :
     T-=273.15f;
+    T = T*LR_CORR_SLOPE + LR_CORR_INTERCEPT;  // linear correction
     break;
   case T_FAHRENHEIT :
     T=9.0f*(T-273.15f)/5.0f+32.0f;
@@ -608,19 +612,3 @@ void serialEvent() {
   }
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
