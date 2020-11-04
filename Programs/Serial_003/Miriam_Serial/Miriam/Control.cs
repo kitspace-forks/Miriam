@@ -50,10 +50,10 @@ namespace Miriam
         private readonly string cells_fname = @".cells.tsv";
         private int betweenMesSec;
         private string folderName;
-
-        // private Dictionary<string, string> wellNames;
-        private bool cont_assay = false;
+        private volatile bool _exiting = false;
         private Thread assay_thread;
+        // private Dictionary<string, string> wellNames;
+        //private volatile bool cont_assay = false;        
 
         private Dictionary<string, int> temperatureInfoMap;
         private Dictionary<string, string> currentTemperatureInfo;
@@ -61,8 +61,6 @@ namespace Miriam
         public Control()
         {
             InitializeComponent();
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
-
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
             temperatureInfoMap = new Dictionary<string, int>
             {
@@ -292,8 +290,6 @@ namespace Miriam
             }
 
         }
-
-
         
 
         private void AppendHeatLabel(string value)
@@ -470,9 +466,6 @@ namespace Miriam
                     }
                 }
 
-
-                // assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
-
                 // put to background to force to close if program exit
                 assay_thread.IsBackground = true;
 
@@ -554,124 +547,11 @@ namespace Miriam
             }
             return ans;
         }
-
-        private void doAssay()
+        private void cancelHeat()
         {
-            // Boolean cont = true;
-            cont_assay = true;            
-            int loop = 0;
-            Boolean assay_ready = false;
-
-
-            do
-            {
-                DateTime current = DateTime.Now;
-				// AT: time when the current measurement started
-				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
-                string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
-
-				// AT:stop if the specified duration passed (from the textbox)
-				if (duration < endCycle) 
-                {
-                    cont_assay = false;
-                    assay_ready = true;
-                }
-                
-                // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
-                SerialPort serialPort = null;
-
-                // Create a new SerialPort object with default settings.
-                serialPort = new SerialPort();
-
-                // Allow the user to set the appropriate properties.
-                serialPort.PortName = port;
-                serialPort.DataBits = 8;
-                serialPort.Parity = Parity.None;
-                serialPort.StopBits = StopBits.One;
-                serialPort.BaudRate = 9600;
-
-                // Set the read/write timeouts
-                serialPort.ReadTimeout = 10000;
-                serialPort.WriteTimeout = 500;
-
-                try
-                {
-                    serialPort.Open();
-                    serialPort.DiscardOutBuffer();
-                    serialPort.DiscardInBuffer();
-
-                    String ReceivedData = ArduinoReadout(serialPort, "R");
-
-                    // [AT] ReceivedData -- string of values for each well
-                    // [AT] ReceivedData1 -- info string (temperatures etc)
-
-                    String ReceivedData1 = ArduinoReadout(serialPort, "i");
-
-                    Thread.Sleep(2000); // [AT] sleep 2s
-                   
-                    ParseTemperatureInfo(ReceivedData1);
-                                        
-                    AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," +
-                        "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
-                        "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
-                        "Temperature Box:" + currentTemperatureInfo["Box"]);
-                    // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
-                    // ReceivedData = ReverseColumnOrder(ReceivedData);
-                    // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
-                    ReceivedData = RearrangeColumnOrder(ReceivedData);
-                    
-                    AppendData(timestr + "," +
-                        currentTemperatureInfo["Up"] + "," +
-                        currentTemperatureInfo["Middle"] + "," +
-                        currentTemperatureInfo["Extra"] + "," +
-                        currentTemperatureInfo["Box"] + "," +
-                        ReceivedData);
-                        
-                    // todo: fix appendData and AppendResult
-                    //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
-
-                    AppendResult(loop.ToString() + "," + 
-                        currentTemperatureInfo["Up"] + "," +
-                        currentTemperatureInfo["Middle"] + "," +
-                        currentTemperatureInfo["Extra"] + "," +
-                        currentTemperatureInfo["Box"] + "," +
-                        ReceivedData);
-
-                    Thread.Sleep(2000); // 2s
-
-                    serialPort.Close();
-
-                }
-                catch (Exception exc)
-                {
-                    MessageBox.Show("Serial could not be opened, please check that the device is correct one");
-                    serialPort.Close();
-                }
-
-
-                Boolean timeRunning = true;
-
-
-                // wait until getting the next measurement
-                do
-                {
-                    DateTime wait = DateTime.Now;
-                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
-                    {
-                        timeRunning = false;
-                    }
-                    Thread.Sleep(100);
-                } while (timeRunning);
-                loop += 1;
-
-            } while (cont_assay);
-
-            // Cancel the heat
-            SerialPort serialPortCancel = null; 
+            SerialPort serialPortCancel = null;
             try
             {
-
-
                 // Create a new SerialPort object with default settings.
                 serialPortCancel = new SerialPort();
 
@@ -698,15 +578,147 @@ namespace Miriam
                 Console.WriteLine(s);
 
                 serialPortCancel.Close();
-
             }
             catch (Exception exc)
             {
                 MessageBox.Show("Serial could not be opened, please check that the device is correct one");
                 serialPortCancel.Close();
             }
+
+        }
+
+        private void doAssay()
+        {
+            // Boolean cont = true;
+            bool cont_assay = true;            
+            int loop = 0;
+            Boolean assay_ready = false;
+
+            do
+            {
+                DateTime current = DateTime.Now;
+				// AT: time when the current measurement started
+				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
+                string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
+
+				// AT:stop if the specified duration passed (from the textbox)
+				if (_exiting || (duration < endCycle))
+                {
+                    cont_assay = false;
+                    if (!_exiting)
+                        assay_ready = true;
+                }
+                
+                // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
+                SerialPort serialPort = null;
+
+                // Create a new SerialPort object with default settings.
+                serialPort = new SerialPort();
+
+                // Allow the user to set the appropriate properties.
+                serialPort.PortName = port;
+                serialPort.DataBits = 8;
+                serialPort.Parity = Parity.None;
+                serialPort.StopBits = StopBits.One;
+                serialPort.BaudRate = 9600;
+
+                // Set the read/write timeouts
+                serialPort.ReadTimeout = 10000;
+                serialPort.WriteTimeout = 500;
+
+                try
+                {
+                    serialPort.Open();
+                    serialPort.DiscardOutBuffer();
+                    serialPort.DiscardInBuffer();
+
+                    String ReceivedData;
+                    ReceivedData = ArduinoReadout(serialPort, "l"); // turn on the status LED (don't need to do it every time...)
+                    Console.WriteLine(ReceivedData);
+
+                    ReceivedData = ArduinoReadout(serialPort, "R"); // read the measurements
+
+                    // [AT] ReceivedData -- string of values for each well
+                    // [AT] ReceivedData1 -- info string (temperatures etc)
+
+                    String ReceivedData1 = ArduinoReadout(serialPort, "i"); // read the temperatures
+
+                    Thread.Sleep(2000); // [AT] sleep 2s
+                    Console.WriteLine("end sleep i");
+
+                    if (_exiting)
+                    {
+                        Console.WriteLine("Exit 2");
+                        serialPort.Close();
+                        break;
+                    }
+
+                    ParseTemperatureInfo(ReceivedData1);
+                                        
+                    AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," +
+                        "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                        "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                        "Temperature Box:" + currentTemperatureInfo["Box"]);
+                    // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
+                    // ReceivedData = ReverseColumnOrder(ReceivedData);
+                    // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
+                    ReceivedData = RearrangeColumnOrder(ReceivedData);
+
+                    AppendData(timestr + "," +
+                        currentTemperatureInfo["Up"] + "," +
+                        currentTemperatureInfo["Middle"] + "," +
+                        currentTemperatureInfo["Extra"] + "," +
+                        currentTemperatureInfo["Box"] + "," +
+                        ReceivedData);
+                        
+                    // todo: fix appendData and AppendResult
+                    //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
+
+                    AppendResult(loop.ToString() + "," + 
+                        currentTemperatureInfo["Up"] + "," +
+                        currentTemperatureInfo["Middle"] + "," +
+                        currentTemperatureInfo["Extra"] + "," +
+                        currentTemperatureInfo["Box"] + "," +
+                        ReceivedData);
+
+                    Thread.Sleep(2000); // 2s
+                    Console.WriteLine("end sleep 2");
+
+                    serialPort.Close();
+
+                }
+                catch (Exception exc)
+                {
+                    MessageBox.Show("Serial could not be opened, please check that the device is correct one");
+                    serialPort.Close();
+                }
+
+
+                Boolean timeRunning = true;
+
+                // wait until getting the next measurement
+                do
+                {
+                    DateTime wait = DateTime.Now;
+                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                    {
+                        timeRunning = false;
+                    }
+                    Thread.Sleep(100);
+                } while (timeRunning);
+                loop += 1;
+
+            } while (cont_assay && (!_exiting));
+
+
+            // Cancel the heat
+            // [AT] don't do canceling here, but only on exit?
+            cancelHeat(); 
+            
             if (assay_ready)
-                MessageBox.Show("Assay ready");            
+                MessageBox.Show("Assay ready");   
+            else if(_exiting)
+                MessageBox.Show("Assay Aborted");
         }
 
         private void ButtonWrite_Click(object sender, EventArgs e)
@@ -737,54 +749,6 @@ namespace Miriam
             }
         }
 
-        void OnProcessExit(object sender, EventArgs e)
-        {
-            cont_assay = false;
-            if (assay_thread.IsAlive)
-            {
-                Console.WriteLine("Waiting end of measurement...");
-                assay_thread.Join();
-            }
-            else 
-            {
-                Console.WriteLine("No measurement, canceling heat...");
-            }
-
-            // Cancel the heat            
-            SerialPort serialPortCancel = null;
-            try
-            {
-                // Create a new SerialPort object with default settings.
-                serialPortCancel = new SerialPort();
-
-                // Allow the user to set the appropriate properties.
-                serialPortCancel.PortName = COM.SelectedItem.ToString();
-                serialPortCancel.DataBits = 8;
-                serialPortCancel.Parity = Parity.None;
-                serialPortCancel.StopBits = StopBits.One;
-                serialPortCancel.BaudRate = 9600;
-
-                // Set the read/write timeouts
-                serialPortCancel.ReadTimeout = 500;
-                serialPortCancel.WriteTimeout = 500;
-
-                serialPortCancel.Open();
-                serialPortCancel.DiscardOutBuffer();
-                serialPortCancel.DiscardInBuffer();
-
-                String ReceivedData = ArduinoReadout(serialPortCancel, "C");
-                Console.WriteLine(ReceivedData);
-
-                serialPortCancel.Close();
-
-            }
-            catch (Exception exc)
-            {
-                MessageBox.Show("Serial could not be opened, please check that the device is correct one. The heat could not be turned off.");
-                serialPortCancel.Close();
-            }
-        }
-
         private void buttonFillAll_Click(object sender, EventArgs e)
         {
             AutofillPlate();
@@ -799,6 +763,8 @@ namespace Miriam
 
         private void Control_FormClosing(object sender, FormClosingEventArgs e)
         {
+            _exiting = true;
+
             savePlateCells(cells_fname);
             Miriam_Serial.Properties.Settings.Default.settFolderRes = folderBrowserSaveRes.SelectedPath;
 
@@ -809,6 +775,21 @@ namespace Miriam
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
+
+            if (assay_thread.IsAlive)
+            {
+                Console.WriteLine("Waiting end of measurement...");
+                assay_thread.Join(10000);
+            }
+            else
+            {
+                Console.WriteLine("No measurement, canceling heat...");
+            }
+
+            // Cancel the heat    
+            cancelHeat();
+            Console.WriteLine("Heat cancelled?");
+
         }
 
         private void savePlateCells(string filename, string sep="\t")
