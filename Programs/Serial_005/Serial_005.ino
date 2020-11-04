@@ -50,7 +50,7 @@
 #define OPTIMAL_EXTRA_TEMP 63
 #define IDDLE_MIDDLE_TEMP 30
 #define IDDLE_UPPER_TEMP 20
-#define Threshold_temp 0.5
+//#define Threshold_temp 0.5
 //Heater pins
 #define HEAT_MIDDLE 2             // Heat 1
 #define HEAT_UPPER 3            // Heat 2
@@ -84,6 +84,9 @@
 #define READ_ASSAY 'R'
 #define PLAY_SOUND 's'
 #define STATUS_LED_ON 'l'
+#define STATUS_LED_OFF 'o'
+#define SET_BOX_THR 'T'
+
 
 int MUL[6] = {
   A0,A1,A2,A3,A4,A5};				// Multiplexer  1
@@ -120,7 +123,7 @@ double consKp=1, consKi=0.05, consKd=0.25; //1, 0.25
 double Setpoint;
 //Define Variables we'll be connecting to PID's
 double Input_MIDDLE, Output_MIDDLE, Setpoint_MIDDLE,Input_UPPER, Input_BOX, Setpoint_UPPER, Output_UPPER,Input_MIDDLE_2,Input_EXTRA, Output_EXTRA, Setpoint_EXTRA;
-double threshold_BOX=30;
+double threshold_BOX=60;
 
 //PID Controller for Heater
 PID PID_MIDDLE(&Input_MIDDLE_2, &Output_MIDDLE, &Setpoint_MIDDLE, consKp, consKi, consKd, DIRECT);
@@ -135,7 +138,7 @@ enum {
 };
 
 byte states[] = {
-  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON};
+  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR};
 
 
 // serial data
@@ -344,9 +347,31 @@ void loop () {
     break;
     
   case STATUS_LED_ON:   
+  
     status_led.SwitchMode(LED_ON);
-    break;
+    Serial.println(F("Status LED on$"));
     
+    state=defaultState;    
+    break;
+
+  case STATUS_LED_OFF:   
+  
+    status_led.SwitchMode(LED_OFF);
+    Serial.println(F("Status LED off$"));
+    
+    state=defaultState;    
+    break;
+
+    
+  case SET_BOX_THR:
+  
+    threshold_BOX = parameters.toInt();
+    Serial.print(F("NEW TEMP THRESHOLD:"));    
+    Serial.print(threshold_BOX);
+    Serial.println("$"); 
+        
+    state = defaultState;    
+    break;      
   } 
 }
 
@@ -579,12 +604,12 @@ void displayData() {
 
 void update_heat_status(){  
   if(heat_alarm) {
-//    if(Input_BOX >= threshold_BOX)
-    if(Input_MIDDLE_2 >= threshold_BOX)
+    if(Input_BOX >= threshold_BOX)
+//    if(Input_MIDDLE_2 >= threshold_BOX)
     {
-      Serial.print(F("Box temperature exceeded threshold:"));    
-      Serial.print(Input_BOX);
-      Serial.println("$");            
+//      Serial.print(F("Box temperature exceeded threshold:"));    
+//      Serial.print(Input_BOX);
+//      Serial.println("$");            
       status_led.SwitchMode(LED_ON);
       play_sound();
       heat_alarm=false;           
