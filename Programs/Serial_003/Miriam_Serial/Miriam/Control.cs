@@ -52,8 +52,6 @@ namespace Miriam
         private string folderName;
         private volatile bool _exiting = false;
         private Thread assay_thread;
-        // private Dictionary<string, string> wellNames;
-        //private volatile bool cont_assay = false;        
 
         private Dictionary<string, int> temperatureInfoMap;
         private Dictionary<string, string> currentTemperatureInfo;
