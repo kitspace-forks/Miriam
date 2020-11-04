@@ -30,7 +30,7 @@
 
 #include <PID_v1.h>
 #include <math.h>
-//#include <led_blink.h>
+#include "MyStatusLed.h"
 
 
 //Selector ping
@@ -153,78 +153,6 @@ int defaultState = INIT;
 bool heat_alarm = false;
 //bool status_led_state_on=false;
 //bool status_led_busy=false;
-
-
-enum LED_MODE {LED_OFF = 0, LED_ON = 1, LED_BLINK=2};
-// modified from here: https://www.digikey.com/en/maker/projects/multi-tasking-the-arduino-part-1/b23d9e65c4d342389d20cbd542c46a28
-class MyStatusLed
-{
-  private:
-    int ledPin;      // the number of the LED pin
-    long OnTime;     // milliseconds of on-time
-    long OffTime;    // milliseconds of off-time
-  
-    LED_MODE mode;    
-      
-    // These maintain the current state
-    int ledState;                 // ledState used to set the LED
-    unsigned long previousMillis;   // will store last time LED was updated     
-  public:
-    MyStatusLed(int pin, long on_time, long off_time);
-    void Update();
-    void SwitchMode(LED_MODE mode);
-};
-
-    MyStatusLed::MyStatusLed(int pin, long on_time, long off_time)
-    {
-      ledPin = pin;
-      pinMode(ledPin, OUTPUT);
-          
-      OnTime = on_time;
-      OffTime = off_time;
-        
-      ledState = LOW; 
-      previousMillis = 0;
-      mode=LED_OFF;
-    }
-       
-    void MyStatusLed::Update()
-    {
-      if ((mode==LED_OFF) or (mode==LED_ON)) return;
-      
-      // check to see if it's time to change the state of the LED
-      unsigned long currentMillis = millis();         
-      if((ledState == HIGH) && (currentMillis - previousMillis >= OnTime))
-      {
-        ledState = LOW;  // Turn it off
-        previousMillis = currentMillis;  // Remember the time
-        digitalWrite(ledPin, ledState);  // Update the actual LED
-      }
-      else if ((ledState == LOW) && (currentMillis - previousMillis >= OffTime))
-      {
-        ledState = HIGH;  // turn it on
-        previousMillis = currentMillis;   // Remember the time
-        digitalWrite(ledPin, ledState);   // Update the actual LED
-      }
-    }
-    void MyStatusLed::SwitchMode(LED_MODE set_mode)
-    {    
-      if(set_mode==mode) return;
-      mode=set_mode;
-      switch (set_mode)
-      {
-        case LED_ON:
-          ledState=HIGH;        
-          break;
-        case LED_OFF:
-          ledState=LOW;
-          break;
-        case LED_BLINK:
-          ledState=LOW;
-          break;
-      }
-      digitalWrite(ledPin, ledState);
-    }
 
 
 MyStatusLed status_led(STATUS_LED_PIN, 500, 500);
