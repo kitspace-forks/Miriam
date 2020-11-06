@@ -107,7 +107,7 @@ Assembly
 
 ![screws](Miriam_assembly_guide.png)
 
-**Figure 9.** Miriam assembly instruction. [High resolution for printing](../Miriam_assembly_guide.pdf)
+**Figure 9.** Miriam assembly instruction. [High resolution for printing](Miriam_assembly_guide.pdf)
 
 **Note:** All the cables used for Miriam must be "Opposite Side Contacts".
           For hand soldering, it is recommended to use solder paste and stencils for the sensor board. If it is possible, use reflow oven for the bottom side.
