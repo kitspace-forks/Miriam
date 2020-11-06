@@ -4,7 +4,7 @@ Miriam box is composed of 3D printed parts. It is designed to fit the bed of Pru
 Printer setting is: PETG with 20% cubic infill, 200% speed.
 
 ![](Miriam_exploded_view.jpg)
-Exploded view with part list of Miriam. [High resolution for printing](Miriam_exploded_view.pdf)
+Exploded view with part list of Miriam. [High resolution version for printing](Miriam_exploded_view.pdf)
 
 ## [box.stl](box.stl)
 
