@@ -99,17 +99,15 @@ All of these boards are controlled by a shield that is directly mounted to the A
 
 ![shield](shield.jpg)
 
-**Figure 8.** The Arduino shield. The power connector is a 20-pin ATX connector that can be connected to a computer ATX power.
+**Figure 8.** The Arduino shield. 
 
-Installation
+Assembly
 ------------
-3D print the printable parts under folder "3D model", sand them to make them align with each other. Assemble the boards as presented in the Figure 9. In the assembly cut with scissors the emission filter to fit between the LED and the sensor PCBs so that it aligns with the bolts.
+3D print the printable parts under folder ["3D model"](../3D%20Model), sand them if nescessary to make them align with each other. Assemble the boards as presented in the Figure 9. In the assembly cut with scissors the emission filter and glue to the filter holder.
 
-![screws](assembly.JPG)
+![screws](Miriam_assembly_guide.png)
 
-**Figure 9.** PCB board assembly information.
-
-The wiring problem of original sensor board has been fixed in this new version.
+**Figure 9.** Miriam assembly instruction. [High resolution for printing](../Miriam_assembly_guide.pdf)
 
 **Note:** All the cables used for Miriam must be "Opposite Side Contacts".
           For hand soldering, it is recommended to use solder paste and stencils for the sensor board. If it is possible, use reflow oven for the bottom side.
@@ -118,7 +116,7 @@ The wiring problem of original sensor board has been fixed in this new version.
 
 Software
 ------------
-We just tested and improved the serial version of the software [Serial_003](https://github.com/strawlab/Miriam/tree/main/Programs/Serial_003).
+We just tested and improved the serial version of the software [Serial_003](../Programs/Serial_003).
 
 Improvement wish list
 ------------
