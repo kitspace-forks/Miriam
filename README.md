@@ -3,6 +3,8 @@ Miriam
 
 Miriam is an open-source instrument for isothermal amplification reactions such as LAMP and realtime fluorescence detection. The costs per instrument are below 1000 USD, and our goal is to make it less expensive, more robust, and ready for volume production. It could be used as part of a test for Covid-19 😷. 
 
+![](Miriam_RT_LAMP.png)
+
 **🔥 Update 2020 Oct 15 🔥** Updates are coming. We have built and tested a Miriam device and will be updating this repository with details soon. In the meantime, the new [BOM list](https://docs.google.com/spreadsheets/d/1jToRLCrUTaD4QrNjGMmmIuaWwqO89PiL6eRc0J-1mlM/edit?usp=sharing) of the Covid-19 adapted Miriam is updated constantly during our test.
 
 ## User guide ##
