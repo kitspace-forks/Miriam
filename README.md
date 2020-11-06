@@ -103,7 +103,7 @@ All of these boards are controlled by a shield that is directly mounted to the A
 
 Assembly
 ------------
-3D print the printable parts under folder ["3D model"](../3D%20Model), sand them if nescessary to make them align with each other. Assemble the boards as presented in the Figure 9. In the assembly cut with scissors the emission filter and glue to the filter holder.
+3D print the printable parts under folder ["3D model"](3D%20Model), sand them if nescessary to make them align with each other. Assemble the boards as presented in the Figure 9. In the assembly cut with scissors the emission filter and glue to the filter holder.
 
 ![screws](Miriam_assembly_guide.png)
 
@@ -116,7 +116,7 @@ Assembly
 
 Software
 ------------
-We just tested and improved the serial version of the software [Serial_003](../Programs/Serial_003).
+We just tested and improved the serial version of the software [Serial_003](Programs/Serial_003).
 
 Improvement wish list
 ------------
