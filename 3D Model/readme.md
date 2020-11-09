@@ -32,5 +32,9 @@ Cut the filter and glue it in the middle of these two filters. The bottom one is
 
 The lock is meant to tighten the lid during testing.
 
+## [pw_stop_2mm.stl](pw_stop_2mm.stl)
+
+The stopper for the power plug to avoid it to go all the way 
+
 
 
