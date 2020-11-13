@@ -43,7 +43,8 @@ namespace Miriam
         private int duration;
         private string arrayNames;
         private int maximumValue = 0;
-        private string port = "";
+        private string port_measurement = "";
+        private string port_heating = "";
         private Boolean started = false;
         private readonly int nGridRows = 8;
         private readonly int nGridCols = 12;
@@ -234,6 +235,7 @@ namespace Miriam
 
             // Allow the user to set the appropriate properties.
             serialPort.PortName = COM.Text;
+            port_heating = COM.Text;
             serialPort.DataBits = 8;
             serialPort.Parity = Parity.None;
             serialPort.StopBits = StopBits.One;
@@ -368,7 +370,7 @@ namespace Miriam
                 started = true;
                 Results.Visible = true;
                 Results.Anchor |= AnchorStyles.Bottom;
-                port = COM.Text;
+                port_measurement = COM.Text;
                 
                 DateTime localDate = DateTime.Now;
 
@@ -552,9 +554,21 @@ namespace Miriam
             {
                 // Create a new SerialPort object with default settings.
                 serialPortCancel = new SerialPort();
-
-                // Allow the user to set the appropriate properties.
-                serialPortCancel.PortName = port;
+                
+                if (port_measurement == "")
+                {
+                    serialPortCancel.PortName = port_heating;
+                }
+                else
+                {
+                    serialPortCancel.PortName = port_measurement;
+                }
+                if (serialPortCancel.PortName == "")
+                {
+                    serialPortCancel.PortName = COM.Text;                    
+                }
+                    
+                    
                 serialPortCancel.DataBits = 8;
                 serialPortCancel.Parity = Parity.None;
                 serialPortCancel.StopBits = StopBits.One;
@@ -614,7 +628,7 @@ namespace Miriam
                 serialPort = new SerialPort();
 
                 // Allow the user to set the appropriate properties.
-                serialPort.PortName = port;
+                serialPort.PortName = port_measurement;
                 serialPort.DataBits = 8;
                 serialPort.Parity = Parity.None;
                 serialPort.StopBits = StopBits.One;
