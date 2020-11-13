@@ -101,6 +101,10 @@ namespace Miriam
             {
                 CboxTempE.Items.Add(i);
             }
+            for (int i = 40; i < 80; i++)
+            {
+                CboxTempThr.Items.Add(i);
+            }
 
             for (int i = 0; i < 150; i++)
             {
@@ -265,8 +269,12 @@ namespace Miriam
                 s = ArduinoReadout(serialPort, "E " + CboxTempE.Text);
                 Console.WriteLine(s);
 
+                s = ArduinoReadout(serialPort, "T " + CboxTempThr.Text);
+                Console.WriteLine(s);
+
                 s = ArduinoReadout(serialPort, "H");
                 Console.WriteLine(s);
+                // [AT] maybe sleep here a bit?
 
                 ReceivedData = ArduinoReadout(serialPort, "i");
                 ParseTemperatureInfo(ReceivedData);
@@ -281,10 +289,10 @@ namespace Miriam
                 Console.WriteLine("i output: {0}", ReceivedData);
 
                 serialPort.Close();
-
-            }
-            catch (Exception exc)
+            }            
+            catch (Exception exc) 
             {
+                // [AT] todo: show exception
                 MessageBox.Show("Serial could not be opened, please check that the device is correct one");
                 serialPort.Close();
             }
@@ -783,6 +791,7 @@ namespace Miriam
             Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
             Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
             Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
+            Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = CboxTempThr.Text;
             Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
@@ -851,6 +860,7 @@ namespace Miriam
             CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
             CboxTempE.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureExtra;
             CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
+            CboxTempThr.Text = Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold;
         }
     }
 }

@@ -12,13 +12,16 @@
       <Value Profile="(Default)">120</Value>
     </Setting>
     <Setting Name="settInterval" Type="System.String" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">60</Value>
     </Setting>
     <Setting Name="settFolderRes" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="settTemperatureExtra" Type="System.String" Scope="User">
       <Value Profile="(Default)">65</Value>
+    </Setting>
+    <Setting Name="settBoxTemperatureThreshold" Type="System.String" Scope="User">
+      <Value Profile="(Default)">60</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -62,6 +62,8 @@ namespace Miriam
             this.LabelTempEC = new System.Windows.Forms.Label();
             this.labelTempE = new System.Windows.Forms.Label();
             this.CboxTempE = new System.Windows.Forms.ComboBox();
+            this.labelThr = new System.Windows.Forms.Label();
+            this.CboxTempThr = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).BeginInit();
             this.SuspendLayout();
@@ -335,12 +337,33 @@ namespace Miriam
             this.CboxTempE.Size = new System.Drawing.Size(82, 21);
             this.CboxTempE.TabIndex = 38;
             // 
+            // labelThr
+            // 
+            this.labelThr.AutoSize = true;
+            this.labelThr.Location = new System.Drawing.Point(221, 87);
+            this.labelThr.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelThr.Name = "labelThr";
+            this.labelThr.Size = new System.Drawing.Size(97, 13);
+            this.labelThr.TabIndex = 41;
+            this.labelThr.Text = "Box temp threshold";
+            // 
+            // CboxTempThr
+            // 
+            this.CboxTempThr.FormattingEnabled = true;
+            this.CboxTempThr.Location = new System.Drawing.Point(221, 100);
+            this.CboxTempThr.Margin = new System.Windows.Forms.Padding(2);
+            this.CboxTempThr.Name = "CboxTempThr";
+            this.CboxTempThr.Size = new System.Drawing.Size(82, 21);
+            this.CboxTempThr.TabIndex = 40;
+            // 
             // Control
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(563, 375);
+            this.Controls.Add(this.labelThr);
+            this.Controls.Add(this.CboxTempThr);
             this.Controls.Add(this.labelTempE);
             this.Controls.Add(this.CboxTempE);
             this.Controls.Add(this.LabelTempBoxC);
@@ -410,6 +433,8 @@ namespace Miriam
         private Label LabelTempEC;
         private Label labelTempE;
         private ComboBox CboxTempE;
+        private Label labelThr;
+        private ComboBox CboxTempThr;
     }
 }
 

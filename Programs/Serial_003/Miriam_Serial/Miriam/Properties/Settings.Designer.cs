@@ -61,7 +61,7 @@ namespace Miriam_Serial.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
         public string settInterval {
             get {
                 return ((string)(this["settInterval"]));
@@ -92,6 +92,18 @@ namespace Miriam_Serial.Properties {
             }
             set {
                 this["settTemperatureExtra"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public string settBoxTemperatureThreshold {
+            get {
+                return ((string)(this["settBoxTemperatureThreshold"]));
+            }
+            set {
+                this["settBoxTemperatureThreshold"] = value;
             }
         }
     }
