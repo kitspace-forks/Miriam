@@ -43,21 +43,38 @@ namespace Miriam
         private int duration;
         private string arrayNames;
         private int maximumValue = 0;
-        private string port = "";
+        private string port_measurement = "";
+        private string port_heating = "";
         private Boolean started = false;
         private readonly int nGridRows = 8;
         private readonly int nGridCols = 12;
         private readonly string cells_fname = @".cells.tsv";
         private int betweenMesSec;
         private string folderName;
+        private volatile bool _exiting = false;
+        private Thread assay_thread;
 
-        // private Dictionary<string, string> wellNames;
-
+        private Dictionary<string, int> temperatureInfoMap;
+        private Dictionary<string, string> currentTemperatureInfo;
 
         public Control()
         {
             InitializeComponent();
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
+            temperatureInfoMap = new Dictionary<string, int>
+            {
+                { "Up", 4 },
+                { "Middle", 5 },
+                { "Extra", 9 },
+                { "Box", 10 }
+            };
+            currentTemperatureInfo = new Dictionary<string, string>
+            {
+                { "Up", "" },
+                { "Middle", "" },
+                { "Extra", "" },
+                { "Box", "" }
+            };
 
             string[] ports = SerialPort.GetPortNames();
 
@@ -80,6 +97,15 @@ namespace Miriam
             {
                 CboxTempU.Items.Add(i);
             }
+            for (int i = 55; i < 90; i++)
+            {
+                CboxTempE.Items.Add(i);
+            }
+            for (int i = 40; i < 80; i++)
+            {
+                CboxTempThr.Items.Add(i);
+            }
+
             for (int i = 0; i < 150; i++)
             {
                 CboxDuration.Items.Add(i);
@@ -90,6 +116,7 @@ namespace Miriam
             }
             CboxTempU.Text = "90";
             CboxTempM.Text = "65";
+            CboxTempE.Text = "65";
             CboxDuration.Text = "120";
             CboxInterval.Text = "10";
 
@@ -99,6 +126,44 @@ namespace Miriam
             // todo: don't load if cannot load
             FillPlate(cells_fname);
             //Results.Visible = true;
+        }
+
+        private void ParseTemperatureInfo(string received_data)
+        {
+            Console.WriteLine(received_data);
+            List<string> keys = new List<string>(currentTemperatureInfo.Keys);
+            int tindex;
+
+            foreach (var loc in keys)
+            {
+                tindex = temperatureInfoMap[loc];
+                if(received_data.Split(',').Length >= tindex+1)
+                    currentTemperatureInfo[loc] = received_data.Split(',')[temperatureInfoMap[loc]];
+                    Console.WriteLine("T {0}: {1}", loc, currentTemperatureInfo[loc]);
+            }                        
+        }
+
+//        private void ArduinoCommand(SerialPort serialPort, string command)
+//          { }
+        private string ArduinoReadout(SerialPort serialPort, string command)
+        {
+            serialPort.Write(command + "\r\n");
+            string ReceivedData;
+            bool conti = true;
+            do
+            {
+                ReceivedData = serialPort.ReadLine();
+                if (ReceivedData.Contains('$'))
+                {
+                    conti = false;
+                }
+            } while (conti);
+
+            ReceivedData = ReceivedData.Replace("$", "");
+            ReceivedData = ReceivedData.Replace("\r", "");
+            ReceivedData = ReceivedData.Replace("\n", "");  
+            
+            return ReceivedData;
         }
 
         private void CreateEmptyPlate()
@@ -174,6 +239,7 @@ namespace Miriam
 
             // Allow the user to set the appropriate properties.
             serialPort.PortName = COM.Text;
+            port_heating = COM.Text;
             serialPort.DataBits = 8;
             serialPort.Parity = Parity.None;
             serialPort.StopBits = StopBits.One;
@@ -194,83 +260,44 @@ namespace Miriam
                 //RecievedData = serialPort.ReadLine();
                 //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
                 // [AT] SW 'M param' (middle wanted temperature, i.e. M 63) - FW 'temperatureMiddleSet'
-                serialPort.Write("M " + CboxTempM.Text + "\r\n");
+                var s = ArduinoReadout(serialPort, "M " + CboxTempM.Text);
+                Console.WriteLine(s);
 
-                Boolean conti = true;
-                do
-                {
-                    ReceivedData = serialPort.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
+                s = ArduinoReadout(serialPort, "U " + CboxTempU.Text);
+                Console.WriteLine(s);
 
+                s = ArduinoReadout(serialPort, "E " + CboxTempE.Text);
+                Console.WriteLine(s);
 
-                ReceivedData = "";
+                s = ArduinoReadout(serialPort, "T " + CboxTempThr.Text);
+                Console.WriteLine(s);
 
-                serialPort.Write("U " + CboxTempU.Text + "\r\n");
+                s = ArduinoReadout(serialPort, "H");
+                Console.WriteLine(s);
+                // [AT] maybe sleep here a bit?
 
-                conti = true;
-                do
-                {
-                    ReceivedData = serialPort.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
+                ReceivedData = ArduinoReadout(serialPort, "i");
+                ParseTemperatureInfo(ReceivedData);
+//                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," + "Temperature M:" + currentTemperatureInfo["Middle"]);
+                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," +
+                    "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                    "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                    "Temperature Box:" + currentTemperatureInfo["Box"]);
 
-
-                ReceivedData = "";
-
-                serialPort.Write("H\r\n");
-
-                conti = true;
-                do
-                {
-                    ReceivedData = serialPort.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = "";
-
-                serialPort.Write("i\r\n");
-
-                conti = true;
-                do
-                {
-                    ReceivedData = serialPort.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = ReceivedData.Replace("$", "");
-                ReceivedData = ReceivedData.Replace("\r", "");
-                ReceivedData = ReceivedData.Replace("\n", "");
-
-                AppendHeatLabel("Temperature U:" + ReceivedData.Split(',')[4] + "," + "Temperature M:" + ReceivedData.Split(',')[5]);
-
+                // AppendHeatLabel("Temperature U:" + ReceivedData.Split(',')[4] + "," + "Temperature M:" + ReceivedData.Split(',')[5]);
+                Console.WriteLine();
+                Console.WriteLine("i output: {0}", ReceivedData);
 
                 serialPort.Close();
-
-            }
-            catch (Exception exc)
+            }            
+            catch (Exception exc) 
             {
+                // [AT] todo: show exception
                 MessageBox.Show("Serial could not be opened, please check that the device is correct one");
                 serialPort.Close();
             }
 
         }
-
-
         
 
         private void AppendHeatLabel(string value)
@@ -280,8 +307,11 @@ namespace Miriam
                 this.Invoke(new Action<string>(AppendHeatLabel), new object[] { value });
                 return;
             }
+            Console.WriteLine(value);
             LabelTempUC.Text = value.Split(',')[0];
             LabelTempMC.Text = value.Split(',')[1];
+            LabelTempEC.Text = value.Split(',')[2];
+            LabelTempBoxC.Text = value.Split(',')[3];
 
         }
 
@@ -309,27 +339,12 @@ namespace Miriam
                 serialPort.DiscardOutBuffer();
                 serialPort.DiscardInBuffer();
 
-                String ReceivedData;
-                //RecievedData = serialPort.ReadLine();
-                //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                serialPort.Write("i" + "\r\n");
-
-                Boolean conti = true;
-                do
-                {
-                    ReceivedData = serialPort.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = ReceivedData.Replace("$", "");
-                ReceivedData = ReceivedData.Replace("\r", "");
-                ReceivedData = ReceivedData.Replace("\n", "");
-
-                AppendHeatLabel("Temperature U:" + ReceivedData.Split(',')[4] + "," + "Temperature M:" + ReceivedData.Split(',')[5]);
+                String ReceivedData = ArduinoReadout(serialPort, "i");
+                ParseTemperatureInfo(ReceivedData);
+                AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," + 
+                    "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                    "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                    "Temperature Box:" + currentTemperatureInfo["Box"]);
 
                 serialPort.Close();
 
@@ -359,11 +374,11 @@ namespace Miriam
             {
                 Results.Visible = true;
                 Form f = Control.ActiveForm;
-                f.Size = new Size(f.Size.Width, 700);
+                f.Size = new Size(f.Size.Width, 750);
                 started = true;
                 Results.Visible = true;
                 Results.Anchor |= AnchorStyles.Bottom;
-                port = COM.Text;
+                port_measurement = COM.Text;
                 
                 DateTime localDate = DateTime.Now;
 
@@ -409,8 +424,9 @@ namespace Miriam
                 }
 
                 List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
-                int counter = 3;
-                string msg = "Time,U,M,"; // [AT] csv file header. 
+                int counter = 5;
+                //string msg = "Time,U,M,"; // [AT] csv file header. 
+                string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
 
                 for (int i = 0; i < Plate.RowCount; i++)
                 {
@@ -425,7 +441,6 @@ namespace Miriam
                         counter += 1;
                     }
                 }
-
                 Data.Items.Add(msg); //[AT] Data -- invisible ListBox
                 arrayNames = msg; //[AT] header
 
@@ -459,14 +474,10 @@ namespace Miriam
                     }
                 }
 
-
-                Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
-
                 // put to background to force to close if program exit
-                t.IsBackground = true;
+                assay_thread.IsBackground = true;
 
-
-                t.Start();
+                assay_thread.Start();
             }
             
 
@@ -482,7 +493,7 @@ namespace Miriam
                 return;
             }
 
-            for(int i = 3;i<arrayNames.Split(',').Length;i++)
+            for(int i = 5;i<arrayNames.Split(',').Length;i++)
             {
                 if(!arrayNames.Split(',')[i].Equals(""))
                 {
@@ -544,152 +555,28 @@ namespace Miriam
             }
             return ans;
         }
-
-        private void doAssay()
+        private void cancelHeat()
         {
-            Boolean cont = true;
-
-            int loop = 0;
-
-            do
-            {
-                DateTime current = DateTime.Now;
-				// AT: time when the current measurement started
-				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
-                string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
-
-				// AT:stop if the specified duration passed (from the textbox)
-				if (duration < endCycle) 
-                {
-                    cont = false;
-                    
-                }
-                
-                // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
-                SerialPort serialPort = null;
-
-                // Create a new SerialPort object with default settings.
-                serialPort = new SerialPort();
-
-                // Allow the user to set the appropriate properties.
-                serialPort.PortName = port;
-                serialPort.DataBits = 8;
-                serialPort.Parity = Parity.None;
-                serialPort.StopBits = StopBits.One;
-                serialPort.BaudRate = 9600;
-
-                // Set the read/write timeouts
-                serialPort.ReadTimeout = 10000;
-                serialPort.WriteTimeout = 500;
-
-                try
-                {
-                    serialPort.Open();
-                    serialPort.DiscardOutBuffer();
-                    serialPort.DiscardInBuffer();
-
-                    String ReceivedData;
-                    //RecievedData = serialPort.ReadLine();
-                    //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                    serialPort.Write("R" + "\r\n"); // [AT] SW 'R' (read assay) - FW 'A1,A2,A3...E12' 
-
-                    Boolean conti = true;
-                    do
-                    {
-                        ReceivedData = serialPort.ReadLine(); // [AT] can be more than 1 line coming from the serial port, and we are interested in one containing $ 
-                        if (ReceivedData.Contains('$'))
-                        {
-                            conti = false;
-                        }
-                    } while (conti);                    
-
-                    conti = true;
-
-                    // [AT] ReceivedData -- string of values for each well
-                    // [AT] ReceivedData1 -- info string (temperatures etc)
-
-
-                    serialPort.Write("i" + "\r\n");
-                    // [AT] SW 'i' (info) - FW '[0] outputMiddle, [1] outputUpper, [2] temperatureMiddle, [3] temperatureUpper, [4] temperatureMiddleC, [5] temperatureUpperC'
-                    String ReceivedData1;
-                    do
-                    {
-                        ReceivedData1 = serialPort.ReadLine();
-                        if (ReceivedData1.Contains('$'))
-                        {
-                            conti = false;
-                        }
-                    } while (conti);
-
-
-                    conti = true;
-
-
-                    Thread.Sleep(2000); // [AT] sleep 2s
-                   
-                    ReceivedData = ReceivedData.Replace("$", "");
-                    ReceivedData1 = ReceivedData1.Replace("$", "");
-                    ReceivedData = ReceivedData.Replace("\r", "");
-                    ReceivedData1 = ReceivedData1.Replace("\r", "");
-                    ReceivedData = ReceivedData.Replace("\n", "");
-                    ReceivedData1 = ReceivedData1.Replace("\n", "");
-                    // [AT] 4: temperatureMiddleC, 5: temperatureUpperC. Check what is C and what is correct? (in this string it is the other way around). Upd: works correct, so probably there is a typo in the documentation.
-                    AppendHeatLabel("Temperature U:" + ReceivedData1.Split(',')[4] + "," + "Temperature M:" + ReceivedData1.Split(',')[5]);
-
-                    // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
-                    // ReceivedData = ReverseColumnOrder(ReceivedData);
-                    // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
-                    ReceivedData = RearrangeColumnOrder(ReceivedData);
-
-                    //AppendData(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
-                    //ReceivedData1.Split(',')[5] + "," + ReceivedData);
-                    AppendData(timestr + "," + ReceivedData1.Split(',')[4] + "," + ReceivedData1.Split(',')[5] + "," + ReceivedData);
-
-                    //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
-                
-                    AppendResult(loop.ToString() + "," + ReceivedData1.Split(',')[4] + "," +
-                        ReceivedData1.Split(',')[5] + "," + ReceivedData);
-
-                    Thread.Sleep(2000); // 2s
-
-                    serialPort.Close();
-
-                }
-                catch (Exception exc)
-                {
-                    MessageBox.Show("Serial could not be opened, please check that the device is correct one");
-                    serialPort.Close();
-                }
-
-
-                Boolean timeRunning = true;
-
-
-                // wait until getting the next measurement
-                do
-                {
-                    DateTime wait = DateTime.Now;
-                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
-                    {
-                        timeRunning = false;
-                    }
-                    Thread.Sleep(100);
-                } while (timeRunning);
-                loop += 1;
-
-            } while (cont);
-
-            // Cancel the heat
-            SerialPort serialPortCancel = null; 
+            SerialPort serialPortCancel = null;
             try
             {
-
-
                 // Create a new SerialPort object with default settings.
                 serialPortCancel = new SerialPort();
-
-                // Allow the user to set the appropriate properties.
-                serialPortCancel.PortName = port;
+                
+                if (port_measurement == "")
+                {
+                    serialPortCancel.PortName = port_heating;
+                }
+                else
+                {
+                    serialPortCancel.PortName = port_measurement;
+                }
+                if (serialPortCancel.PortName == "")
+                {
+                    serialPortCancel.PortName = COM.Text;                    
+                }
+                    
+                    
                 serialPortCancel.DataBits = 8;
                 serialPortCancel.Parity = Parity.None;
                 serialPortCancel.StopBits = StopBits.One;
@@ -706,32 +593,152 @@ namespace Miriam
                 String ReceivedData;
                 //RecievedData = serialPort.ReadLine();
                 //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                serialPortCancel.Write("C" + "\r\n");
 
-                Boolean conti = true;
-                do
-                {
-                    ReceivedData = serialPortCancel.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = ReceivedData.Replace("$", "");
-                ReceivedData = ReceivedData.Replace("\r", "");
-                ReceivedData = ReceivedData.Replace("\n", "");
+                string s = ArduinoReadout(serialPortCancel, "C");
+                Console.WriteLine(s);
 
                 serialPortCancel.Close();
-
             }
             catch (Exception exc)
             {
                 MessageBox.Show("Serial could not be opened, please check that the device is correct one");
                 serialPortCancel.Close();
             }
-            MessageBox.Show("Assay ready");
+
+        }
+
+        private void doAssay()
+        {
+            // Boolean cont = true;
+            bool cont_assay = true;            
+            int loop = 0;
+            Boolean assay_ready = false;
+
+            do
+            {
+                DateTime current = DateTime.Now;
+				// AT: time when the current measurement started
+				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
+                string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
+
+				// AT:stop if the specified duration passed (from the textbox)
+				if (_exiting || (duration < endCycle))
+                {
+                    cont_assay = false;
+                    if (!_exiting)
+                        assay_ready = true;
+                }
+                
+                // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
+                SerialPort serialPort = null;
+
+                // Create a new SerialPort object with default settings.
+                serialPort = new SerialPort();
+
+                // Allow the user to set the appropriate properties.
+                serialPort.PortName = port_measurement;
+                serialPort.DataBits = 8;
+                serialPort.Parity = Parity.None;
+                serialPort.StopBits = StopBits.One;
+                serialPort.BaudRate = 9600;
+
+                // Set the read/write timeouts
+                serialPort.ReadTimeout = 10000;
+                serialPort.WriteTimeout = 500;
+
+                try
+                {
+                    serialPort.Open();
+                    serialPort.DiscardOutBuffer();
+                    serialPort.DiscardInBuffer();
+
+                    String ReceivedData;
+                    ReceivedData = ArduinoReadout(serialPort, "l"); // turn on the status LED (don't need to do it every time...)
+                    Console.WriteLine(ReceivedData);
+
+                    ReceivedData = ArduinoReadout(serialPort, "R"); // read the measurements
+
+                    // [AT] ReceivedData -- string of values for each well
+                    // [AT] ReceivedData1 -- info string (temperatures etc)
+
+                    String ReceivedData1 = ArduinoReadout(serialPort, "i"); // read the temperatures
+
+                    Thread.Sleep(2000); // [AT] sleep 2s
+                    Console.WriteLine("end sleep i");
+
+                    if (_exiting)
+                    {
+                        Console.WriteLine("Exit 2");
+                        serialPort.Close();
+                        break;
+                    }
+
+                    ParseTemperatureInfo(ReceivedData1);
+                                        
+                    AppendHeatLabel("Temperature U:" + currentTemperatureInfo["Up"] + "," +
+                        "Temperature M:" + currentTemperatureInfo["Middle"] + "," +
+                        "Temperature Extra:" + currentTemperatureInfo["Extra"] + "," +
+                        "Temperature Box:" + currentTemperatureInfo["Box"]);
+                    // [AT] The columns of the grid are reversed, it is received as A12,...A1, B12,...,B1, ...
+                    // ReceivedData = ReverseColumnOrder(ReceivedData);
+                    // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
+                    ReceivedData = RearrangeColumnOrder(ReceivedData);
+
+                    AppendData(timestr + "," +
+                        currentTemperatureInfo["Up"] + "," +
+                        currentTemperatureInfo["Middle"] + "," +
+                        currentTemperatureInfo["Extra"] + "," +
+                        currentTemperatureInfo["Box"] + "," +
+                        ReceivedData);
+                        
+                    // todo: fix appendData and AppendResult
+                    //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
+
+                    AppendResult(loop.ToString() + "," + 
+                        currentTemperatureInfo["Up"] + "," +
+                        currentTemperatureInfo["Middle"] + "," +
+                        currentTemperatureInfo["Extra"] + "," +
+                        currentTemperatureInfo["Box"] + "," +
+                        ReceivedData);
+
+                    Thread.Sleep(2000); // 2s
+                    Console.WriteLine("end sleep 2");
+
+                    serialPort.Close();
+
+                }
+                catch (Exception exc)
+                {
+                    MessageBox.Show("Serial could not be opened, please check that the device is correct one");
+                    serialPort.Close();
+                }
+
+
+                Boolean timeRunning = true;
+
+                // wait until getting the next measurement
+                do
+                {
+                    DateTime wait = DateTime.Now;
+                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                    {
+                        timeRunning = false;
+                    }
+                    Thread.Sleep(100);
+                } while (timeRunning);
+                loop += 1;
+
+            } while (cont_assay && (!_exiting));
+
+
+            // Cancel the heat
+            // [AT] don't do canceling here, but only on exit?
+            cancelHeat(); 
+            
+            if (assay_ready)
+                MessageBox.Show("Assay ready");   
+            else if(_exiting)
+                MessageBox.Show("Assay Aborted");
         }
 
         private void ButtonWrite_Click(object sender, EventArgs e)
@@ -762,63 +769,6 @@ namespace Miriam
             }
         }
 
-        void OnProcessExit(object sender, EventArgs e)
-        {
-            // Cancel the heat
-            // [AT] todo: if closing during the measurement, the heat can not be turned off. Because the SerialPort is already open for measurement...
-            SerialPort serialPortCancel = null;
-            try
-            {
-
-
-                // Create a new SerialPort object with default settings.
-                serialPortCancel = new SerialPort();
-
-                // Allow the user to set the appropriate properties.
-                serialPortCancel.PortName = COM.SelectedItem.ToString();
-                serialPortCancel.DataBits = 8;
-                serialPortCancel.Parity = Parity.None;
-                serialPortCancel.StopBits = StopBits.One;
-                serialPortCancel.BaudRate = 9600;
-
-                // Set the read/write timeouts
-                serialPortCancel.ReadTimeout = 500;
-                serialPortCancel.WriteTimeout = 500;
-
-                serialPortCancel.Open();
-                serialPortCancel.DiscardOutBuffer();
-                serialPortCancel.DiscardInBuffer();
-
-                String ReceivedData;
-                //RecievedData = serialPort.ReadLine();
-                //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
-                serialPortCancel.Write("C" + "\r\n");
-
-                Boolean conti = true;
-                do
-                {
-                    ReceivedData = serialPortCancel.ReadLine();
-                    if (ReceivedData.Contains('$'))
-                    {
-                        conti = false;
-                    }
-                } while (conti);
-
-
-                ReceivedData = ReceivedData.Replace("$", "");
-                ReceivedData = ReceivedData.Replace("\r", "");
-                ReceivedData = ReceivedData.Replace("\n", "");
-
-                serialPortCancel.Close();
-
-            }
-            catch (Exception exc)
-            {
-                MessageBox.Show("Serial could not be opened, please check that the device is correct one. The heat could not be turned off.");
-                serialPortCancel.Close();
-            }
-        }
-
         private void buttonFillAll_Click(object sender, EventArgs e)
         {
             AutofillPlate();
@@ -833,15 +783,34 @@ namespace Miriam
 
         private void Control_FormClosing(object sender, FormClosingEventArgs e)
         {
+            _exiting = true;
+
             savePlateCells(cells_fname);
             Miriam_Serial.Properties.Settings.Default.settFolderRes = folderBrowserSaveRes.SelectedPath;
 
             Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
             Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
+            Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
+            Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = CboxTempThr.Text;
             Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
+
+            if (assay_thread.IsAlive)
+            {
+                Console.WriteLine("Waiting end of measurement...");
+                assay_thread.Join(10000);
+            }
+            else
+            {
+                Console.WriteLine("No measurement, canceling heat...");
+            }
+
+            // Cancel the heat    
+            cancelHeat();
+            Console.WriteLine("Heat cancelled?");
+
         }
 
         private void savePlateCells(string filename, string sep="\t")
@@ -889,7 +858,9 @@ namespace Miriam
             Console.WriteLine("folder: {0}", folderName);
             CboxTempU.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureUp;
             CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
+            CboxTempE.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureExtra;
             CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
+            CboxTempThr.Text = Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold;
         }
     }
 }
