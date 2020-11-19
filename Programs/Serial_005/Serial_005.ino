@@ -70,8 +70,8 @@
 #define NCP18XH103F03RB 3380.0f,298.15f,10000.0f  // B,T0,R0
 
 // temperature calculation correction - linear fit coefficients. Applied only for t in Celsius
-#define LR_CORR_SLOPE 0.8433
-#define LR_CORR_INTERCEPT 4.2213
+#define LR_CORR_SLOPE 0.96
+#define LR_CORR_INTERCEPT 2.6
 
 // STATES FOR STATE MACHINE
 #define INIT      'I'
@@ -123,7 +123,7 @@ double consKp=1, consKi=0.05, consKd=0.25; //1, 0.25
 double Setpoint;
 //Define Variables we'll be connecting to PID's
 double Input_MIDDLE, Output_MIDDLE, Setpoint_MIDDLE,Input_UPPER, Input_BOX, Setpoint_UPPER, Output_UPPER,Input_MIDDLE_2,Input_EXTRA, Output_EXTRA, Setpoint_EXTRA;
-double threshold_BOX=60;
+double threshold_BOX=45;
 
 //PID Controller for Heater
 PID PID_MIDDLE(&Input_MIDDLE_2, &Output_MIDDLE, &Setpoint_MIDDLE, consKp, consKi, consKd, DIRECT);
@@ -377,17 +377,15 @@ void loop () {
 
 
 void play_sound() {
+  for (int i = 0; i < 10; i++)
+  {
+    tone(SOUND, 3000, 5000);
+    delay(1000);
+    noTone(SOUND);
+    delay(1000);
 
-  tone(SOUND, 3000, 5000);
-  delay(1000);
-  tone(SOUND, 1000, 5000);
-  delay(1000);
-  tone(SOUND, 2000, 5000);
-  delay(1000);
-  tone(SOUND, 500, 5000); 
-  delay(1000);
-  noTone(SOUND);
-  delay(1000);
+  } 
+
   //tone(piezoPin, 1000, 500);
   //delay(1000);
 }
