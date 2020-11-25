@@ -16,9 +16,17 @@ Temperature U: measured temperature of the upper heater.
 
 Temperature M: measured temperature of the lower heater.
 
+Temperature Extra: measured temperature of the extra heater (wire).
+
+Temperature Box: measured temperature of the box.
+
 Middle temp: set temperature of the lower heater.
 
 Upper temp: set temperature of the upper heater.
+
+Extra temp: set temperature of the upper heater.
+
+Box threshold: set designed temperature of the box for preheating.
 
 Duration: Total reaction time in minute. After this period, the heaters and sensor readout will stop.
 
