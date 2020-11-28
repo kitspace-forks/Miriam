@@ -9,7 +9,9 @@ This SW / FW combination is meant for serial communication between a computer an
 - SW 'C' (cancel, turn off the heat) - FW 'Cancel'
 
 Once the temperature has been set, the actual temperature needs to be refreshed by clicking 'Ask heat'. The assay, once started, can always be turned off simply by closing the program. The assay results are saved to the desktop in a .csv file.
+
 ![screws](soft_ware.png)
+
 **Figure 1.** User interface of Serial_003.
 
 Temperature U: measured temperature of the upper heater.
