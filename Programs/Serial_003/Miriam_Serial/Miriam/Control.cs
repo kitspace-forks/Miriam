@@ -57,6 +57,8 @@ namespace Miriam
         private Dictionary<string, int> temperatureInfoMap;
         private Dictionary<string, string> currentTemperatureInfo;
 
+        private string csv_filename;
+
         public Control()
         {
             InitializeComponent();
@@ -357,6 +359,13 @@ namespace Miriam
         }
 
 
+        private void AppendToCsv(string value)
+        {
+            //[AT] value has the ',' after the last value, don't write it to the csv
+            File.AppendAllText(csv_filename, value.TrimEnd(',') + Environment.NewLine, Encoding.UTF8);
+            Console.WriteLine("Append to csv: {0}", value);
+        }
+
         private void AppendData(string value)
         {
             if (InvokeRequired)
@@ -365,123 +374,129 @@ namespace Miriam
                 return;
             }
             Data.Items.Add(value);
+            AppendToCsv(value);
+        }
 
+        private void CreateCsv(string header)
+        {
+            csv_filename = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyddMM_HHmmss") + ".csv";
+            Console.WriteLine();
+            Console.WriteLine("Creating csv: {0}", csv_filename);                        
+            File.WriteAllText(csv_filename, header.Remove(header.Length-1,1) + Environment.NewLine, Encoding.UTF8);
         }
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {
-            if(started == false)
+            if (started) return;            
+
+            Results.Visible = true;
+            Form f = Control.ActiveForm;
+            f.Size = new Size(f.Size.Width, 750);
+            started = true;
+            Results.Visible = true;
+            Results.Anchor |= AnchorStyles.Bottom;
+            port_measurement = COM.Text;
+                
+            DateTime localDate = DateTime.Now;
+
+
+            duration = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
+                Convert.ToInt32(CboxDuration.Text) * 60;
+
+            betweenMesSec = Convert.ToInt32(CboxInterval.Text);
+
+            Boolean noneFound = true;
+            List<String> dupl = new List<String>();
+            // clear duplicates
+            for (int i = 0; i < Plate.RowCount; i++)
             {
-                Results.Visible = true;
-                Form f = Control.ActiveForm;
-                f.Size = new Size(f.Size.Width, 750);
-                started = true;
-                Results.Visible = true;
-                Results.Anchor |= AnchorStyles.Bottom;
-                port_measurement = COM.Text;
-                
-                DateTime localDate = DateTime.Now;
-
-
-                duration = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
-                    Convert.ToInt32(CboxDuration.Text) * 60;
-
-                betweenMesSec = Convert.ToInt32(CboxInterval.Text);
-
-                Boolean noneFound = true;
-                List<String> dupl = new List<String>();
-                // clear duplicates
-                for (int i = 0; i < Plate.RowCount; i++)
+                for (int j = 0; j < Plate.ColumnCount; j++)
                 {
-                    for (int j = 0; j < Plate.ColumnCount; j++)
+                    if (Plate.Rows[i].Cells[j].Value != null)
                     {
-                        if (Plate.Rows[i].Cells[j].Value != null)
-                        {
-                            if (!Plate.Rows[i].Cells[j].Value.ToString().Equals(""))
-                            {
-                                for (int k = 0; k < dupl.Count; k++)
-                                {
-                                    if (dupl[k].Equals(Plate.Rows[i].Cells[j].Value.ToString()))
-                                    {
-                                        Plate.Rows[i].Cells[j].Value = Plate.Rows[i].Cells[j].Value.ToString() + "_";
-                                    }
-
-                                }
-                                dupl.Add(Plate.Rows[i].Cells[j].Value.ToString());
-                                noneFound = false;
-                            }
-                        } else
-                        {
-                            Plate.Rows[i].Cells[j].Value = "";
-                        }
-                        
-                    }
-                }
-                
-                if (noneFound)
-                {
-                    Plate.Rows[0].Cells[0].Value = "TimeTrack";
-                }
-
-                List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
-                int counter = 5;
-                //string msg = "Time,U,M,"; // [AT] csv file header. 
-                string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
-
-                for (int i = 0; i < Plate.RowCount; i++)
-                {
-                    for (int j = 0; j < Plate.ColumnCount; j++)
-                    {
-
-                        msg += Plate.Rows[i].Cells[j].Value.ToString() + ",";
                         if (!Plate.Rows[i].Cells[j].Value.ToString().Equals(""))
                         {
-                            list.Add(counter);
+                            for (int k = 0; k < dupl.Count; k++)
+                            {
+                                if (dupl[k].Equals(Plate.Rows[i].Cells[j].Value.ToString()))
+                                {
+                                    Plate.Rows[i].Cells[j].Value = Plate.Rows[i].Cells[j].Value.ToString() + "_";
+                                }
+
+                            }
+                            dupl.Add(Plate.Rows[i].Cells[j].Value.ToString());
+                            noneFound = false;
                         }
-                        counter += 1;
-                    }
-                }
-                Data.Items.Add(msg); //[AT] Data -- invisible ListBox
-                arrayNames = msg; //[AT] header
-
-                Color[] clr;
-
-                clr = new Color[10];
-                clr[0] = Color.Red;
-                clr[1] = Color.Blue;
-                clr[2] = Color.Chocolate;
-                clr[3] = Color.Green;
-                clr[4] = Color.Black;
-                clr[5] = Color.Aqua;
-                clr[6] = Color.DimGray;
-                clr[7] = Color.DarkViolet;
-                clr[8] = Color.DeepPink;
-                clr[9] = Color.Gray;
-
-                int clrsUsed = 0;
-                
-                //[AT] add series for all named wells 
-                for (int i = 0; i < list.Count; i++)
-                {
-                    Results.Series.Add(msg.Split(',')[list[i]]);
-                    Results.Series[msg.Split(',')[list[i]]].ChartType =
-                                    SeriesChartType.FastLine;                    
-                    Results.Series[msg.Split(',')[list[i]]].Color = clr[clrsUsed];
-                    clrsUsed += 1;
-                    if (clrsUsed > 9)
+                    } else
                     {
-                        clrsUsed = 0;
+                        Plate.Rows[i].Cells[j].Value = "";
                     }
+                        
                 }
-
-                // put to background to force to close if program exit
-                assay_thread.IsBackground = true;
-
-                assay_thread.Start();
             }
-            
+                
+            if (noneFound)
+            {
+                Plate.Rows[0].Cells[0].Value = "TimeTrack";
+            }
 
+            List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
+            int counter = 5;
+            //string msg = "Time,U,M,"; // [AT] csv file header. 
+            string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
 
+            for (int i = 0; i < Plate.RowCount; i++)
+            {
+                for (int j = 0; j < Plate.ColumnCount; j++)
+                {
+
+                    msg += Plate.Rows[i].Cells[j].Value.ToString() + ",";
+                    if (!Plate.Rows[i].Cells[j].Value.ToString().Equals(""))
+                    {
+                        list.Add(counter);
+                    }
+                    counter += 1;
+                }
+            }
+            Data.Items.Add(msg); //[AT] Data -- invisible ListBox
+            arrayNames = msg; //[AT] header
+
+            CreateCsv(msg);
+
+            Color[] clr;
+
+            clr = new Color[10];
+            clr[0] = Color.Red;
+            clr[1] = Color.Blue;
+            clr[2] = Color.Chocolate;
+            clr[3] = Color.Green;
+            clr[4] = Color.Black;
+            clr[5] = Color.Aqua;
+            clr[6] = Color.DimGray;
+            clr[7] = Color.DarkViolet;
+            clr[8] = Color.DeepPink;
+            clr[9] = Color.Gray;
+
+            int clrsUsed = 0;
+                
+            //[AT] add series for all named wells 
+            for (int i = 0; i < list.Count; i++)
+            {
+                Results.Series.Add(msg.Split(',')[list[i]]);
+                Results.Series[msg.Split(',')[list[i]]].ChartType =
+                                SeriesChartType.FastLine;                    
+                Results.Series[msg.Split(',')[list[i]]].Color = clr[clrsUsed];
+                clrsUsed += 1;
+                if (clrsUsed > 9)
+                {
+                    clrsUsed = 0;
+                }
+            }
+
+            // put to background to force to close if program exit
+            assay_thread.IsBackground = true;
+
+            assay_thread.Start();       
         }
 
         // [AT] appends result to the plot
