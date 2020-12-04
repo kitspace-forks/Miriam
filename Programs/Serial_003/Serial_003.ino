@@ -70,8 +70,8 @@
 #define NCP18XH103F03RB 3380.0f,298.15f,10000.0f  // B,T0,R0
 
 // temperature calculation correction - linear fit coefficients. Applied only for t in Celsius
-#define LR_CORR_SLOPE 0.8433
-#define LR_CORR_INTERCEPT 4.2213
+#define LR_CORR_SLOPE 0.96//0.8433
+#define LR_CORR_INTERCEPT 2.6//4.2213
 
 // STATES FOR STATE MACHINE
 #define INIT      'I'
@@ -86,6 +86,7 @@
 #define STATUS_LED_ON 'l'
 #define STATUS_LED_OFF 'o'
 #define SET_BOX_THR 'T'
+#define MELT_HEAT  'W'
 
 
 int MUL[6] = {
@@ -148,6 +149,7 @@ String dataString = "                         ";
 boolean stringComplete = false;  // whether the string is complete               
 boolean LED=false;
 boolean HEAT_ON = false;
+boolean MELT_ON = false;
 
 int state = INIT;
 char previous_state = INIT;
@@ -220,6 +222,7 @@ void loop () {
 
   //Calculate PID for heaters
   if (HEAT_ON) Calculate_Heat();
+  if (MELT_ON) Calculate_Melt();
   //Calculate_Heat();
   status_led.Update();
 
@@ -273,6 +276,21 @@ void loop () {
     PID_EXTRA.SetMode(AUTOMATIC);
     state = defaultState;
     break;
+
+  case MELT_HEAT:  
+    HEAT_ON = false;
+    MELT_ON = true;
+    heat_alarm = true;
+
+      
+    Serial.println(F("MELTING BOARDS$"));
+  
+    //turn the PID's on
+    PID_MIDDLE.SetMode(AUTOMATIC);
+    PID_UPPER.SetMode(AUTOMATIC);
+    PID_EXTRA.SetMode(AUTOMATIC);
+    state = defaultState;
+    break;    
 
   case INFO:
 
@@ -404,24 +422,32 @@ void Read_Assay() {
   Output_EXTRA = 0;
   computePIDs();
 
-  digitalWrite(22,HIGH);
-  delay(500);
+//  digitalWrite(22,HIGH);
+////  analogWrite(4,125);
+//  delay(500);
   
   
   //take 5 samples for measurement
-  for (int j=0 ; j<5 ;j++)
+  for (int j=0 ; j<10 ;j++)
   {
+
     for (int i = 0; i < 16; i++)
     {
       setPin(i); // choose an input pin
+      digitalWrite(22,HIGH);
+      delayMicroseconds(100);
       ReadAssay(i);
+      digitalWrite(22,LOW);
+      delayMicroseconds(50);
 
     }    
-    delay(1000);
+//    delay(1000);
+
   }
 
 
-  digitalWrite(22,LOW);
+//  digitalWrite(22,LOW);
+//  analogWrite(4,0);
 
 
   //Calculate the average of the measurements for each sample
@@ -429,7 +455,7 @@ void Read_Assay() {
   {
     for (int l = 0;l < 12;l++)
     {
-      sensorValues[k][l] /= 5;
+      sensorValues[k][l] /= 10;
     }
   }
 
@@ -646,6 +672,15 @@ void Calculate_Heat() {
 
 }    
 
+void Calculate_Melt() {
+
+  ReaderSensorTemp();
+  SetTunings_PID_Melt();
+  computePIDs();    
+  update_heat_status();
+
+}
+
 void computePIDs() {
 
   PID_MIDDLE.Compute();
@@ -680,7 +715,7 @@ void SetTunings_PID() {
   gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
   gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
 
-  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE-0.5)
+  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE)
   {  //we're close to setpoint, use conservative tuning parameters
     PID_MIDDLE.SetTunings(consKp, consKi, consKd);
     Output_MIDDLE = 0;
@@ -688,10 +723,10 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp, aggKi, aggKd);
+    PID_MIDDLE.SetTunings(aggKp/1, aggKi/1, aggKd/1);
   }
 
-  if(Setpoint_UPPER-0.5<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
+  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
   {  //we're close to setpoint, use conservative tuning parameters
     PID_UPPER.SetTunings(consKp, consKi, consKd);
     Output_UPPER = 0;
@@ -699,10 +734,10 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp, aggKi, aggKd);
+    PID_UPPER.SetTunings(aggKp/1, aggKi/1, aggKd/1);
   }
   
-  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA-0.5)
+  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
     {  //we're close to setpoint, use conservative tuning parameters
       PID_EXTRA.SetTunings(consKp, consKi, consKd);
       Output_EXTRA = 0;
@@ -710,7 +745,51 @@ void SetTunings_PID() {
     else
     {
       //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp, aggKi, aggKd);
+      PID_EXTRA.SetTunings(aggKp/8, aggKi/8, aggKd/8);
+    }  
+}
+
+
+
+void SetTunings_PID_Melt() {
+
+  double gap1,gap2,gap3;
+
+  gap1 = abs(Setpoint_MIDDLE - Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
+  gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
+  gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
+
+  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE)
+  {  //we're close to setpoint, use conservative tuning parameters
+    PID_MIDDLE.SetTunings(consKp, consKi, consKd);
+    Output_MIDDLE = 0;
+  }
+  else
+  {
+    //we're far from setpoint, use aggressive tuning parameters
+    PID_MIDDLE.SetTunings(aggKp/80, aggKi/80, aggKd/80);
+  }
+
+  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
+  {  //we're close to setpoint, use conservative tuning parameters
+    PID_UPPER.SetTunings(consKp, consKi, consKd);
+    Output_UPPER = 0;
+  }
+  else
+  {
+    //we're far from setpoint, use aggressive tuning parameters
+    PID_UPPER.SetTunings(aggKp/80, aggKi/80, aggKd/80);
+  }
+  
+  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
+    {  //we're close to setpoint, use conservative tuning parameters
+      PID_EXTRA.SetTunings(consKp, consKi, consKd);
+      Output_EXTRA = 0;
+    }
+    else
+    {
+      //we're far from setpoint, use aggressive tuning parameters
+      PID_EXTRA.SetTunings(aggKp/100, aggKi/100, aggKd/100);
     }  
 }
 
