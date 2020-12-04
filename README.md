@@ -1,11 +1,13 @@
 Miriam
 ========
 
-Miriam is an open-source instrument for isothermal amplification reactions such as LAMP and realtime fluorescence detection. The costs per instrument are below 1000 USD, and our goal is to make it less expensive, more robust, and ready for volume production. It could be used as part of a test for Covid-19 😷. 
+[![build](https://github.com/strawlab/Miriam/workflows/CI/badge.svg?branch=main)](https://github.com/strawlab/Miriam/actions?query=branch%3Amain)
+
+Miriam is an open-source instrument for isothermal amplification reactions such as LAMP and realtime fluorescence detection. The costs per instrument are below 1000 USD, and our goal is to make it less expensive, more robust, and ready for volume production. It could be used as part of a test for Covid-19 😷.
 
 ![](Miriam_RT_LAMP.png)
 
-**🔥 Update 2020 Oct 15 🔥** Updates are coming. We have built and tested a Miriam device and will be updating this repository with details soon. In the meantime, the new [BOM list](https://docs.google.com/spreadsheets/d/1jToRLCrUTaD4QrNjGMmmIuaWwqO89PiL6eRc0J-1mlM/edit?usp=sharing) of the Covid-19 adapted Miriam is updated constantly during our test.
+**🔥 Update 2020 Oct 15 🔥** Updates are coming. We have built and tested a Miriam device and will be updating this repository with details soon. In the meantime, the new [BOM list](PCB/BOM) of the Covid-19 adapted Miriam is updated constantly during our test.
 
 ## User guide ##
 
@@ -87,7 +89,7 @@ The heat uniformity of Miriam would be improved further by optimizing the heatin
 
 ![](heat_simulation.png)
 
-**Figure 6c.** Heat distribution of the lower heater obtained from PCB thermal analysis software [(TRM3, ADAM research)](https://www.adam-research.de/en/).
+**Figure 6c.** Heat distribution of the lower heater obtained from PCB thermal analysis software [(More detail of the analysis)](https://www.adam-research.de/en/2020/10/corona-forschung-mit-trm3/).
 
 The detection of fluorescence is done with 96 LEDs and 96 photodiodes creating LED and photodiode PCBs. The LED peak wavelength is 470 nm and photodiode is a green RGB photodiode. The measured voltage is amplified with an operational amplifier to 0-5 V that is then converted by Arduino’s 8-bit ADC to be a numerical value. (figure 7.)
 
@@ -112,7 +114,7 @@ Assembly
 **Note:** All the cables used for Miriam must be "Opposite Side Contacts".
           For hand soldering, it is recommended to use solder paste and stencils for the sensor board. If it is possible, use reflow oven for the bottom side.
           
-**Updated components:** The new [BOM list](https://docs.google.com/spreadsheets/d/1jToRLCrUTaD4QrNjGMmmIuaWwqO89PiL6eRc0J-1mlM/edit?usp=sharing) of the Covid-19 adapted Miriam will be updated constantly during our test.
+**Updated components:** The new [BOM list](PCB/BOM) of the Covid-19 adapted Miriam will be updated constantly during our test.
 
 Software
 ------------
@@ -130,7 +132,7 @@ The original Miriam is an open source project, supported by Miroculus in collabo
 This version of Miriam has been improved by [Straw Lab](https://strawlab.org) to make it work with Syto-9 + DNA for potentially Covid-19 test.
 Icon and image designed by Miroculus.
 
-The PCB thermal analysis is performed by [ADAM research)](https://www.adam-research.de/en/). 
+The PCB thermal analysis is performed by [ADAM research](https://www.adam-research.de/en/). 
 
 Code of conduct
 --------

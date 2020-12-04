@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  build-windows-miriam-serial:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - uses: microsoft/setup-msbuild@v1.0.2
+    - uses: NuGet/setup-nuget@v1.0.5
+    - name: Restore Packages
+      run: nuget restore Programs/Serial_003/Miriam_Serial/Miriam.sln
+    - name: build
+      run: msbuild Programs/Serial_003/Miriam_Serial/Miriam.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+  build-arduino:
+    # Based on https://legion2.github.io/2020/03/27/from-arduino-builder-to-arduino-cli.html
+    # and https://blog.arduino.cc/2019/11/14/arduino-on-github-actions/
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@master
+      - uses: arduino/setup-arduino-cli@v1.1.1
+      - name: Install platform
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr
+      - name: Compile Sketch
+        run: arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 --libraries ./Programs/PID_v1 ./Programs/Serial_003/Serial_003
