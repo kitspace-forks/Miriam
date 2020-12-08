@@ -106,5 +106,53 @@ namespace Miriam_Serial.Properties {
                 this["settBoxTemperatureThreshold"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        public string meltTemperatureUp {
+            get {
+                return ((string)(this["meltTemperatureUp"]));
+            }
+            set {
+                this["meltTemperatureUp"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        public string meltTemperatureMid {
+            get {
+                return ((string)(this["meltTemperatureMid"]));
+            }
+            set {
+                this["meltTemperatureMid"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        public string meltTemperatureExtra {
+            get {
+                return ((string)(this["meltTemperatureExtra"]));
+            }
+            set {
+                this["meltTemperatureExtra"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public string meltInterval {
+            get {
+                return ((string)(this["meltInterval"]));
+            }
+            set {
+                this["meltInterval"] = value;
+            }
+        }
     }
 }

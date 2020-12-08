@@ -139,7 +139,7 @@ enum {
 };
 
 byte states[] = {
-  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR};
+  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT};
 
 
 // serial data
@@ -281,7 +281,6 @@ void loop () {
     HEAT_ON = false;
     MELT_ON = true;
     heat_alarm = true;
-
       
     Serial.println(F("MELTING BOARDS$"));
   

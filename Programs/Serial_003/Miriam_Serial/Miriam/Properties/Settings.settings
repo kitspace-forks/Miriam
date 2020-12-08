@@ -23,5 +23,17 @@
     <Setting Name="settBoxTemperatureThreshold" Type="System.String" Scope="User">
       <Value Profile="(Default)">45</Value>
     </Setting>
+    <Setting Name="meltTemperatureUp" Type="System.String" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="meltTemperatureMid" Type="System.String" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="meltTemperatureExtra" Type="System.String" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="meltInterval" Type="System.String" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

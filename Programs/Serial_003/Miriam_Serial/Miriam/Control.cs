@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.VisualBasic.FileIO;
+//using Miriam_Serial;
 
 /*
  * Miriam control
@@ -40,7 +41,7 @@ namespace Miriam
 {
     public partial class Control : Form
     {
-        private int duration;
+        private int time_to_stop_assay;
         private string arrayNames;
         private int maximumValue = 0;
         private string port_measurement = "";
@@ -58,10 +59,96 @@ namespace Miriam
         private Dictionary<string, string> currentTemperatureInfo;
 
         private string csv_filename;
+        FormSettings SettingsForm;
+
+        public static bool melting_enabled;
+        public static Dictionary<string, string> settings_melting = new Dictionary<string, string>
+            {
+                { "TUp", "80" },
+                { "TMiddle", "80" },
+                { "TExtra", "80" },
+                { "Interval", "30" }
+            };
+
+        private static string ArduinoReadout(SerialPort serialPort, string command)
+        {
+            serialPort.Write(command + "\r\n");
+            string ReceivedData;
+            bool conti = true;
+            do
+            {
+                ReceivedData = serialPort.ReadLine();
+                if (ReceivedData.Contains('$'))
+                {
+                    conti = false;
+                }
+            } while (conti);
+
+            ReceivedData = ReceivedData.Replace("$", "");
+            ReceivedData = ReceivedData.Replace("\r", "");
+            ReceivedData = ReceivedData.Replace("\n", "");
+
+            return ReceivedData;
+        }
+
+        public class SerialPortForHeat : SerialPort
+        {
+            public SerialPortForHeat(string portname)
+            {
+                PortName = portname;
+                DataBits = 8;
+                Parity = Parity.None;
+                StopBits = StopBits.One;
+                BaudRate = 9600;
+
+                // Set the read/write timeouts
+                ReadTimeout = 500;
+                WriteTimeout = 500;
+            }
+
+            public void start_heat(string t_up, string t_middle, string t_extra, string threshold = "", bool melting=false)
+            {
+                try
+                {
+                    Open();
+                    DiscardOutBuffer();
+                    DiscardInBuffer();
+
+                    String ReceivedData;
+
+                    var s = ArduinoReadout(this, "M " + t_middle);
+                    Console.WriteLine(s);
+
+                    s = ArduinoReadout(this, "U " + t_up);
+                    Console.WriteLine(s);
+
+                    s = ArduinoReadout(this, "E " + t_extra);
+                    Console.WriteLine(s);
+
+                    if (threshold != "")
+                        s = ArduinoReadout(this, "T " + threshold);
+                        Console.WriteLine(s);
+
+                    string heat_command = melting ? "W" : "H";
+                    s = ArduinoReadout(this, heat_command);
+                    Console.WriteLine(s);
+                    // [AT] maybe sleep here a bit?
+                }
+                catch (Exception exc)
+                {
+                    // [AT] todo: show exception
+                    // MessageBox.Show("Serial could not be opened, please check that the device is correct one");
+                    MessageBox.Show(exc.ToString());
+                    this.Close();
+                }
+            }
+        };
+
 
         public Control()
         {
             InitializeComponent();
+            SettingsForm = new FormSettings();
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
             temperatureInfoMap = new Dictionary<string, int>
             {
@@ -145,28 +232,17 @@ namespace Miriam
             }                        
         }
 
+        private bool temperature_reached()
+        {            
+            bool t_up = float.Parse(currentTemperatureInfo["Up"]) - float.Parse(settings_melting["TUp"]) >= 0;
+            bool t_mid = float.Parse(currentTemperatureInfo["Middle"]) - float.Parse(settings_melting["TMiddle"]) >= 0;
+            bool t_extra = float.Parse(currentTemperatureInfo["Extra"]) - float.Parse(settings_melting["TExtra"]) >= 0;
+            return t_up && t_mid && t_extra;
+        }
 //        private void ArduinoCommand(SerialPort serialPort, string command)
 //          { }
-        private string ArduinoReadout(SerialPort serialPort, string command)
-        {
-            serialPort.Write(command + "\r\n");
-            string ReceivedData;
-            bool conti = true;
-            do
-            {
-                ReceivedData = serialPort.ReadLine();
-                if (ReceivedData.Contains('$'))
-                {
-                    conti = false;
-                }
-            } while (conti);
 
-            ReceivedData = ReceivedData.Replace("$", "");
-            ReceivedData = ReceivedData.Replace("\r", "");
-            ReceivedData = ReceivedData.Replace("\n", "");  
-            
-            return ReceivedData;
-        }
+        
 
         private void CreateEmptyPlate()
         {
@@ -400,7 +476,7 @@ namespace Miriam
             DateTime localDate = DateTime.Now;
 
 
-            duration = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
+            time_to_stop_assay = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
                 Convert.ToInt32(CboxDuration.Text) * 60;
 
             betweenMesSec = Convert.ToInt32(CboxInterval.Text);
@@ -628,20 +704,27 @@ namespace Miriam
             bool cont_assay = true;            
             int loop = 0;
             Boolean assay_ready = false;
-
+            bool now_melting = false;
+            bool stop_condition = false;            
             do
             {
                 DateTime current = DateTime.Now;
 				// AT: time when the current measurement started
-				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
+				int time_current_measurement = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
                 string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
 
-				// AT:stop if the specified duration passed (from the textbox)
-				if (_exiting || (duration < endCycle))
+                if (!now_melting) stop_condition = (time_to_stop_assay < time_current_measurement);
+                else stop_condition = temperature_reached();
+
+                // AT:stop if the specified duration passed (from the textbox)
+                if (_exiting || stop_condition)
                 {
                     cont_assay = false;
-                    if (!_exiting)
+                    if (!_exiting) // not exiting on form close
+                    {
                         assay_ready = true;
+                        if (now_melting) now_melting = false; // after melting don't do melting again.
+                    }
                 }
                 
                 // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
@@ -720,14 +803,12 @@ namespace Miriam
                     Console.WriteLine("end sleep 2");
 
                     serialPort.Close();
-
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("Serial could not be opened, please check that the device is correct one");
+                    MessageBox.Show("Serial could not be opened, please check that the device is correct one.\n"+ exc.ToString());
                     serialPort.Close();
                 }
-
 
                 Boolean timeRunning = true;
 
@@ -735,7 +816,7 @@ namespace Miriam
                 do
                 {
                     DateTime wait = DateTime.Now;
-                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                    if (time_current_measurement + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
                     {
                         timeRunning = false;
                     }
@@ -743,6 +824,13 @@ namespace Miriam
                 } while (timeRunning);
                 loop += 1;
 
+                if (assay_ready & melting_enabled)
+                {
+                    assay_ready = false;
+                    cont_assay = true;
+                    apply_settings_melting();
+                    now_melting = true;                    
+                }                
             } while (cont_assay && (!_exiting));
 
 
@@ -754,6 +842,16 @@ namespace Miriam
                 MessageBox.Show("Assay ready");   
             else if(_exiting)
                 MessageBox.Show("Assay Aborted");
+        }
+
+        private void apply_settings_melting()
+        {
+            Console.WriteLine(settings_melting);
+            betweenMesSec = Convert.ToInt32(settings_melting["Interval"]);
+
+            SerialPortForHeat serialPort = new SerialPortForHeat(port_measurement);
+            serialPort.start_heat(settings_melting["TUp"], settings_melting["TMiddle"], settings_melting["TExtra"], melting: true);
+            serialPort.Close();
         }
 
         private void ButtonWrite_Click(object sender, EventArgs e)
@@ -808,6 +906,12 @@ namespace Miriam
             Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
             Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = CboxTempThr.Text;
             Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
+            Miriam_Serial.Properties.Settings.Default.settInterval = CboxInterval.Text;
+
+            settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
+            settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;
+            settings_melting["TExtra"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra;
+            settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
@@ -875,7 +979,19 @@ namespace Miriam
             CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
             CboxTempE.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureExtra;
             CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
+            CboxInterval.Text = Miriam_Serial.Properties.Settings.Default.settInterval;
             CboxTempThr.Text = Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold;
+
+            settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
+            settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;
+            settings_melting["TExtra"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra;
+            settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
+
+        }
+
+        private void buttonChangeSettings_Click(object sender, EventArgs e)
+        {
+            SettingsForm.ShowDialog();
         }
     }
 }

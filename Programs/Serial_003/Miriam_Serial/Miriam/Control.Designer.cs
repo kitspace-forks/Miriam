@@ -64,6 +64,7 @@ namespace Miriam
             this.CboxTempE = new System.Windows.Forms.ComboBox();
             this.labelThr = new System.Windows.Forms.Label();
             this.CboxTempThr = new System.Windows.Forms.ComboBox();
+            this.buttonChangeSettings = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Plate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Results)).BeginInit();
             this.SuspendLayout();
@@ -210,7 +211,7 @@ namespace Miriam
             this.Results.Location = new System.Drawing.Point(5, 375);
             this.Results.Margin = new System.Windows.Forms.Padding(2);
             this.Results.Name = "Results";
-            this.Results.Size = new System.Drawing.Size(539, 332);
+            this.Results.Size = new System.Drawing.Size(531, 332);
             this.Results.TabIndex = 25;
             this.Results.Text = "chart1";
             this.Results.Visible = false;
@@ -356,12 +357,23 @@ namespace Miriam
             this.CboxTempThr.Size = new System.Drawing.Size(82, 21);
             this.CboxTempThr.TabIndex = 40;
             // 
+            // buttonChangeSettings
+            // 
+            this.buttonChangeSettings.Location = new System.Drawing.Point(308, 98);
+            this.buttonChangeSettings.Name = "buttonChangeSettings";
+            this.buttonChangeSettings.Size = new System.Drawing.Size(75, 23);
+            this.buttonChangeSettings.TabIndex = 42;
+            this.buttonChangeSettings.Text = "Settings...";
+            this.buttonChangeSettings.UseVisualStyleBackColor = true;
+            this.buttonChangeSettings.Click += new System.EventHandler(this.buttonChangeSettings_Click);
+            // 
             // Control
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(563, 375);
+            this.ClientSize = new System.Drawing.Size(555, 373);
+            this.Controls.Add(this.buttonChangeSettings);
             this.Controls.Add(this.labelThr);
             this.Controls.Add(this.CboxTempThr);
             this.Controls.Add(this.labelTempE);
@@ -435,6 +447,7 @@ namespace Miriam
         private ComboBox CboxTempE;
         private Label labelThr;
         private ComboBox CboxTempThr;
+        private Button buttonChangeSettings;
     }
 }
 
