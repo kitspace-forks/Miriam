@@ -455,7 +455,7 @@ namespace Miriam
 
         private void CreateCsv(string header)
         {
-            csv_filename = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyddMM_HHmmss") + ".csv";
+            csv_filename = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
             Console.WriteLine();
             Console.WriteLine("Creating csv: {0}", csv_filename);                        
             File.WriteAllText(csv_filename, header.Remove(header.Length-1,1) + Environment.NewLine, Encoding.UTF8);
