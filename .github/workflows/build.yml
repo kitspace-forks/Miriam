@@ -17,6 +17,11 @@ jobs:
       run: nuget restore Programs/Serial_003/Miriam_Serial/Miriam.sln
     - name: build
       run: msbuild Programs/Serial_003/Miriam_Serial/Miriam.sln /p:Configuration=Release /p:Platform="Any CPU"
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: executable
+        path: D:\a\Miriam\Miriam\Programs\Serial_003\Miriam_Serial\MiriamTests\bin\Release\Miriam_Serial.exe
 
   build-arduino:
     # Based on https://legion2.github.io/2020/03/27/from-arduino-builder-to-arduino-cli.html
