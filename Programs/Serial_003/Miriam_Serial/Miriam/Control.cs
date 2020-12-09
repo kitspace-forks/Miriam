@@ -727,7 +727,6 @@ namespace Miriam
                     if (!_exiting) // not exiting on form close
                     {
                         assay_ready = true;
-                        //if (now_melting) now_melting = false; // after melting don't do melting again.
                     }
                 }
                 
@@ -816,26 +815,29 @@ namespace Miriam
 
                 Boolean timeRunning = true;
 
-                // wait until getting the next measurement
-                do
-                {
-                    DateTime wait = DateTime.Now;
-                    if (time_current_measurement + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
-                    {
-                        timeRunning = false;
-                    }
-                    Thread.Sleep(100);
-                } while (timeRunning);
-                loop += 1;
-
-                // if need to start melting after the measurements were taken for specified duration
-                if ((!now_melting) && assay_ready && melting_enabled) 
+                if ((!now_melting) && assay_ready && melting_enabled)
                 {
                     assay_ready = false;
                     cont_assay = true;
                     apply_settings_melting();
-                    now_melting = true;                    
-                }                
+                    now_melting = true;
+                }
+                
+                if (cont_assay)
+                {
+                    // wait until getting the next measurement                
+                    do
+                    {
+                        DateTime wait = DateTime.Now;
+                        if (time_current_measurement + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                        {
+                            timeRunning = false;
+                        }
+                        Thread.Sleep(100);
+                    } while (timeRunning);
+                    loop += 1;
+                }
+                // if need to start melting after the measurements were taken for specified duration
             } while (cont_assay && (!_exiting));
 
 
