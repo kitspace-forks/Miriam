@@ -239,10 +239,6 @@ namespace Miriam
             bool t_extra = float.Parse(currentTemperatureInfo["Extra"]) - float.Parse(settings_melting["TExtra"]) >= 0;
             return t_up && t_mid && t_extra;
         }
-//        private void ArduinoCommand(SerialPort serialPort, string command)
-//          { }
-
-        
 
         private void CreateEmptyPlate()
         {
@@ -723,7 +719,7 @@ namespace Miriam
                     if (!_exiting) // not exiting on form close
                     {
                         assay_ready = true;
-                        if (now_melting) now_melting = false; // after melting don't do melting again.
+                        //if (now_melting) now_melting = false; // after melting don't do melting again.
                     }
                 }
                 
@@ -824,7 +820,8 @@ namespace Miriam
                 } while (timeRunning);
                 loop += 1;
 
-                if (assay_ready & melting_enabled)
+                // if need to start melting after the measurements were taken for specified duration
+                if ((!now_melting) && assay_ready && melting_enabled) 
                 {
                     assay_ready = false;
                     cont_assay = true;
