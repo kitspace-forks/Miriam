@@ -40,6 +40,8 @@
             this.LabelTempM = new System.Windows.Forms.Label();
             this.CboxTempU = new System.Windows.Forms.ComboBox();
             this.CboxTempM = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.CboxTolerance = new System.Windows.Forms.ComboBox();
             this.panelMelting.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -77,6 +79,8 @@
             // 
             // panelMelting
             // 
+            this.panelMelting.Controls.Add(this.label2);
+            this.panelMelting.Controls.Add(this.CboxTolerance);
             this.panelMelting.Controls.Add(this.labelTempE);
             this.panelMelting.Controls.Add(this.CboxTempE);
             this.panelMelting.Controls.Add(this.label1);
@@ -88,7 +92,7 @@
             this.panelMelting.Enabled = false;
             this.panelMelting.Location = new System.Drawing.Point(12, 45);
             this.panelMelting.Name = "panelMelting";
-            this.panelMelting.Size = new System.Drawing.Size(221, 122);
+            this.panelMelting.Size = new System.Drawing.Size(221, 159);
             this.panelMelting.TabIndex = 4;
             // 
             // labelTempE
@@ -167,6 +171,25 @@
             this.CboxTempM.Size = new System.Drawing.Size(82, 21);
             this.CboxTempM.TabIndex = 40;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(20, 120);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(85, 13);
+            this.label2.TabIndex = 49;
+            this.label2.Text = "Tolerance [deg.]";
+            // 
+            // CboxTolerance
+            // 
+            this.CboxTolerance.FormattingEnabled = true;
+            this.CboxTolerance.Location = new System.Drawing.Point(123, 117);
+            this.CboxTolerance.Margin = new System.Windows.Forms.Padding(2);
+            this.CboxTolerance.Name = "CboxTolerance";
+            this.CboxTolerance.Size = new System.Drawing.Size(82, 21);
+            this.CboxTolerance.TabIndex = 48;
+            // 
             // FormSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -200,5 +223,7 @@
         private System.Windows.Forms.Label LabelTempM;
         private System.Windows.Forms.ComboBox CboxTempU;
         private System.Windows.Forms.ComboBox CboxTempM;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox CboxTolerance;
     }
 }

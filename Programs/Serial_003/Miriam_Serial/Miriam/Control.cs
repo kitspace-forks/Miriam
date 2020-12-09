@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -67,7 +68,8 @@ namespace Miriam
                 { "TUp", "80" },
                 { "TMiddle", "80" },
                 { "TExtra", "80" },
-                { "Interval", "30" }
+                { "Interval", "30" },
+                { "Tolerance", "0.1"}
             };
 
         private static string ArduinoReadout(SerialPort serialPort, string command)
@@ -148,7 +150,7 @@ namespace Miriam
         public Control()
         {
             InitializeComponent();
-            SettingsForm = new FormSettings();
+            
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
             temperatureInfoMap = new Dictionary<string, int>
             {
@@ -233,10 +235,16 @@ namespace Miriam
         }
 
         private bool temperature_reached()
-        {            
-            bool t_up = float.Parse(currentTemperatureInfo["Up"]) - float.Parse(settings_melting["TUp"]) >= 0;
-            bool t_mid = float.Parse(currentTemperatureInfo["Middle"]) - float.Parse(settings_melting["TMiddle"]) >= 0;
-            bool t_extra = float.Parse(currentTemperatureInfo["Extra"]) - float.Parse(settings_melting["TExtra"]) >= 0;
+        {
+            float eps = float.Parse(settings_melting["Tolerance"], CultureInfo.InvariantCulture);
+
+            float t_up_val = float.Parse(currentTemperatureInfo["Up"], CultureInfo.InvariantCulture);
+            float t_mid_val = float.Parse(currentTemperatureInfo["Middle"], CultureInfo.InvariantCulture);
+            float t_extra_val = float.Parse(currentTemperatureInfo["Extra"], CultureInfo.InvariantCulture);
+
+            bool t_up = (t_up_val - float.Parse(settings_melting["TUp"]) >= -eps);
+            bool t_mid = float.Parse(currentTemperatureInfo["Middle"]) - float.Parse(settings_melting["TMiddle"], CultureInfo.InvariantCulture) >= -eps;
+            bool t_extra = float.Parse(currentTemperatureInfo["Extra"]) - float.Parse(settings_melting["TExtra"], CultureInfo.InvariantCulture) >= -eps;
             return t_up && t_mid && t_extra;
         }
 
@@ -905,10 +913,11 @@ namespace Miriam
             Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
             Miriam_Serial.Properties.Settings.Default.settInterval = CboxInterval.Text;
 
-            settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
-            settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;
-            settings_melting["TExtra"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra;
-            settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
+            Miriam_Serial.Properties.Settings.Default.meltTemperatureUp = settings_melting["TUp"];
+            Miriam_Serial.Properties.Settings.Default.meltTemperatureMid = settings_melting["TMiddle"];
+            Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra = settings_melting["TExtra"];
+            Miriam_Serial.Properties.Settings.Default.meltInterval = settings_melting["Interval"];
+            Miriam_Serial.Properties.Settings.Default.meltTolerance = settings_melting["Tolerance"];
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
@@ -983,7 +992,8 @@ namespace Miriam
             settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;
             settings_melting["TExtra"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra;
             settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
-
+            settings_melting["Tolerance"] = Miriam_Serial.Properties.Settings.Default.meltTolerance;
+            SettingsForm = new FormSettings();
         }
 
         private void buttonChangeSettings_Click(object sender, EventArgs e)

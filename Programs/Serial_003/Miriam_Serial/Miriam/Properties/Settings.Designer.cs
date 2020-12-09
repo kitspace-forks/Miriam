@@ -154,5 +154,17 @@ namespace Miriam_Serial.Properties {
                 this["meltInterval"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public string meltTolerance {
+            get {
+                return ((string)(this["meltTolerance"]));
+            }
+            set {
+                this["meltTolerance"] = value;
+            }
+        }
     }
 }

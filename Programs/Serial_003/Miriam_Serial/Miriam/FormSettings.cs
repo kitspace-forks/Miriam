@@ -63,6 +63,7 @@ namespace Miriam
             CboxTempM.Text = Control.settings_melting["TMiddle"];
             CboxTempE.Text = Control.settings_melting["TExtra"];
             CboxInterval.Text = Control.settings_melting["Interval"];
+            CboxTolerance.Text = Control.settings_melting["Tolerance"];
         }
     }
 }
