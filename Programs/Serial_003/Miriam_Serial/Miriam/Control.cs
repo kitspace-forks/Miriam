@@ -921,6 +921,8 @@ namespace Miriam
             Miriam_Serial.Properties.Settings.Default.meltInterval = settings_melting["Interval"];
             Miriam_Serial.Properties.Settings.Default.meltTolerance = settings_melting["Tolerance"];
 
+            Miriam_Serial.Properties.Settings.Default.meltingEnabled = melting_enabled;
+
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
 
@@ -995,6 +997,7 @@ namespace Miriam
             settings_melting["TExtra"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra;
             settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
             settings_melting["Tolerance"] = Miriam_Serial.Properties.Settings.Default.meltTolerance;
+            melting_enabled = Miriam_Serial.Properties.Settings.Default.meltingEnabled;
             SettingsForm = new FormSettings();
         }
 

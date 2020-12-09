@@ -166,5 +166,17 @@ namespace Miriam_Serial.Properties {
                 this["meltTolerance"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool meltingEnabled {
+            get {
+                return ((bool)(this["meltingEnabled"]));
+            }
+            set {
+                this["meltingEnabled"] = value;
+            }
+        }
     }
 }
