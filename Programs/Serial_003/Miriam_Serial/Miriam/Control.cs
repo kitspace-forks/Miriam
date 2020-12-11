@@ -242,9 +242,9 @@ namespace Miriam
             float t_mid_val = float.Parse(currentTemperatureInfo["Middle"], CultureInfo.InvariantCulture);
             float t_extra_val = float.Parse(currentTemperatureInfo["Extra"], CultureInfo.InvariantCulture);
 
-            bool t_up = (t_up_val - float.Parse(settings_melting["TUp"]) >= -eps);
-            bool t_mid = float.Parse(currentTemperatureInfo["Middle"]) - float.Parse(settings_melting["TMiddle"], CultureInfo.InvariantCulture) >= -eps;
-            bool t_extra = float.Parse(currentTemperatureInfo["Extra"]) - float.Parse(settings_melting["TExtra"], CultureInfo.InvariantCulture) >= -eps;
+            bool t_up = (t_up_val - float.Parse(settings_melting["TUp"], CultureInfo.InvariantCulture) >= -eps);
+            bool t_mid = (t_mid_val - float.Parse(settings_melting["TMiddle"], CultureInfo.InvariantCulture) >= -eps);
+            bool t_extra = (t_extra_val - float.Parse(settings_melting["TExtra"], CultureInfo.InvariantCulture) >= -eps);
             return t_up && t_mid && t_extra;
         }
 
