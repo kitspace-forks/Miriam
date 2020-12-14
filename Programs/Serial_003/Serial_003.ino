@@ -760,8 +760,8 @@ void SetTunings_PID_Melt() {
 
   if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65.0f)
   {  //we're close to setpoint, use conservative tuning parameters
-    PID_MIDDLE.SetTunings(consKp/40, consKi/40, consKd/40);
-    Output_MIDDLE = 0;
+    PID_MIDDLE.SetTunings(consKp/25, consKi/25, consKd/25);
+    
   }
   else
   {
@@ -771,8 +771,8 @@ void SetTunings_PID_Melt() {
 
   if(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65.0f)
   {  //we're close to setpoint, use conservative tuning parameters
-    PID_UPPER.SetTunings(consKp/40, consKi/40, consKd/40);
-    Output_UPPER = 0;
+    PID_UPPER.SetTunings(consKp/25, consKi/25, consKd/25);
+    
   }
   else
   {
@@ -783,7 +783,7 @@ void SetTunings_PID_Melt() {
   if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65.0f)
     {  //we're close to setpoint, use conservative tuning parameters
       PID_EXTRA.SetTunings(consKp/50, consKi/50, consKd/50);
-      Output_EXTRA = 0;
+      
     }
     else
     {
