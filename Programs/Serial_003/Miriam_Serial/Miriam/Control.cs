@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -14,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.VisualBasic.FileIO;
+//using Miriam_Serial;
 
 /*
  * Miriam control
@@ -40,7 +42,7 @@ namespace Miriam
 {
     public partial class Control : Form
     {
-        private int duration;
+        private int time_to_stop_assay;
         private string arrayNames;
         private int maximumValue = 0;
         private string port_measurement = "";
@@ -57,9 +59,98 @@ namespace Miriam
         private Dictionary<string, int> temperatureInfoMap;
         private Dictionary<string, string> currentTemperatureInfo;
 
+        private string csv_filename;
+        FormSettings SettingsForm;
+
+        public static bool melting_enabled;
+        public static Dictionary<string, string> settings_melting = new Dictionary<string, string>
+            {
+                { "TUp", "80" },
+                { "TMiddle", "80" },
+                { "TExtra", "80" },
+                { "Interval", "30" },
+                { "Tolerance", "0.1"}
+            };
+
+        private static string ArduinoReadout(SerialPort serialPort, string command)
+        {
+            serialPort.Write(command + "\r\n");
+            string ReceivedData;
+            bool conti = true;
+            do
+            {
+                ReceivedData = serialPort.ReadLine();
+                if (ReceivedData.Contains('$'))
+                {
+                    conti = false;
+                }
+            } while (conti);
+
+            ReceivedData = ReceivedData.Replace("$", "");
+            ReceivedData = ReceivedData.Replace("\r", "");
+            ReceivedData = ReceivedData.Replace("\n", "");
+
+            return ReceivedData;
+        }
+
+        public class SerialPortForHeat : SerialPort
+        {
+            public SerialPortForHeat(string portname)
+            {
+                PortName = portname;
+                DataBits = 8;
+                Parity = Parity.None;
+                StopBits = StopBits.One;
+                BaudRate = 9600;
+
+                // Set the read/write timeouts
+                ReadTimeout = 500;
+                WriteTimeout = 500;
+            }
+
+            public void start_heat(string t_up, string t_middle, string t_extra, string threshold = "", bool melting=false)
+            {
+                try
+                {
+                    Open();
+                    DiscardOutBuffer();
+                    DiscardInBuffer();
+
+                    String ReceivedData;
+
+                    var s = ArduinoReadout(this, "M " + t_middle);
+                    Console.WriteLine(s);
+
+                    s = ArduinoReadout(this, "U " + t_up);
+                    Console.WriteLine(s);
+
+                    s = ArduinoReadout(this, "E " + t_extra);
+                    Console.WriteLine(s);
+
+                    if (threshold != "")
+                        s = ArduinoReadout(this, "T " + threshold);
+                        Console.WriteLine(s);
+
+                    string heat_command = melting ? "W" : "H";
+                    s = ArduinoReadout(this, heat_command);
+                    Console.WriteLine(s);
+                    // [AT] maybe sleep here a bit?
+                }
+                catch (Exception exc)
+                {
+                    // [AT] todo: show exception
+                    // MessageBox.Show("Serial could not be opened, please check that the device is correct one");
+                    MessageBox.Show(exc.ToString());
+                    this.Close();
+                }
+            }
+        };
+
+
         public Control()
         {
             InitializeComponent();
+            
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
             temperatureInfoMap = new Dictionary<string, int>
             {
@@ -143,27 +234,18 @@ namespace Miriam
             }                        
         }
 
-//        private void ArduinoCommand(SerialPort serialPort, string command)
-//          { }
-        private string ArduinoReadout(SerialPort serialPort, string command)
+        private bool temperature_reached()
         {
-            serialPort.Write(command + "\r\n");
-            string ReceivedData;
-            bool conti = true;
-            do
-            {
-                ReceivedData = serialPort.ReadLine();
-                if (ReceivedData.Contains('$'))
-                {
-                    conti = false;
-                }
-            } while (conti);
+            float eps = float.Parse(settings_melting["Tolerance"], CultureInfo.InvariantCulture);
 
-            ReceivedData = ReceivedData.Replace("$", "");
-            ReceivedData = ReceivedData.Replace("\r", "");
-            ReceivedData = ReceivedData.Replace("\n", "");  
-            
-            return ReceivedData;
+            float t_up_val = float.Parse(currentTemperatureInfo["Up"], CultureInfo.InvariantCulture);
+            float t_mid_val = float.Parse(currentTemperatureInfo["Middle"], CultureInfo.InvariantCulture);
+            float t_extra_val = float.Parse(currentTemperatureInfo["Extra"], CultureInfo.InvariantCulture);
+
+            bool t_up = (t_up_val - float.Parse(settings_melting["TUp"], CultureInfo.InvariantCulture) >= -eps);
+            bool t_mid = (t_mid_val - float.Parse(settings_melting["TMiddle"], CultureInfo.InvariantCulture) >= -eps);
+            bool t_extra = (t_extra_val - float.Parse(settings_melting["TExtra"], CultureInfo.InvariantCulture) >= -eps);
+            return t_up && t_mid && t_extra;
         }
 
         private void CreateEmptyPlate()
@@ -357,6 +439,13 @@ namespace Miriam
         }
 
 
+        private void AppendToCsv(string value)
+        {
+            //[AT] value has the ',' after the last value, don't write it to the csv
+            File.AppendAllText(csv_filename, value.TrimEnd(',') + Environment.NewLine, Encoding.UTF8);
+            Console.WriteLine("Append to csv: {0}", value);
+        }
+
         private void AppendData(string value)
         {
             if (InvokeRequired)
@@ -365,123 +454,129 @@ namespace Miriam
                 return;
             }
             Data.Items.Add(value);
+            AppendToCsv(value);
+        }
 
+        private void CreateCsv(string header)
+        {
+            csv_filename = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
+            Console.WriteLine();
+            Console.WriteLine("Creating csv: {0}", csv_filename);                        
+            File.WriteAllText(csv_filename, header.Remove(header.Length-1,1) + Environment.NewLine, Encoding.UTF8);
         }
 
         private void ButtonStart_Click(object sender, EventArgs e)
         {
-            if(started == false)
+            if (started) return;            
+
+            Results.Visible = true;
+            Form f = Control.ActiveForm;
+            f.Size = new Size(f.Size.Width, 750);
+            started = true;
+            Results.Visible = true;
+            Results.Anchor |= AnchorStyles.Bottom;
+            port_measurement = COM.Text;
+                
+            DateTime localDate = DateTime.Now;
+
+
+            time_to_stop_assay = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
+                Convert.ToInt32(CboxDuration.Text) * 60;
+
+            betweenMesSec = Convert.ToInt32(CboxInterval.Text);
+
+            Boolean noneFound = true;
+            List<String> dupl = new List<String>();
+            // clear duplicates
+            for (int i = 0; i < Plate.RowCount; i++)
             {
-                Results.Visible = true;
-                Form f = Control.ActiveForm;
-                f.Size = new Size(f.Size.Width, 750);
-                started = true;
-                Results.Visible = true;
-                Results.Anchor |= AnchorStyles.Bottom;
-                port_measurement = COM.Text;
-                
-                DateTime localDate = DateTime.Now;
-
-
-                duration = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
-                    Convert.ToInt32(CboxDuration.Text) * 60;
-
-                betweenMesSec = Convert.ToInt32(CboxInterval.Text);
-
-                Boolean noneFound = true;
-                List<String> dupl = new List<String>();
-                // clear duplicates
-                for (int i = 0; i < Plate.RowCount; i++)
+                for (int j = 0; j < Plate.ColumnCount; j++)
                 {
-                    for (int j = 0; j < Plate.ColumnCount; j++)
+                    if (Plate.Rows[i].Cells[j].Value != null)
                     {
-                        if (Plate.Rows[i].Cells[j].Value != null)
-                        {
-                            if (!Plate.Rows[i].Cells[j].Value.ToString().Equals(""))
-                            {
-                                for (int k = 0; k < dupl.Count; k++)
-                                {
-                                    if (dupl[k].Equals(Plate.Rows[i].Cells[j].Value.ToString()))
-                                    {
-                                        Plate.Rows[i].Cells[j].Value = Plate.Rows[i].Cells[j].Value.ToString() + "_";
-                                    }
-
-                                }
-                                dupl.Add(Plate.Rows[i].Cells[j].Value.ToString());
-                                noneFound = false;
-                            }
-                        } else
-                        {
-                            Plate.Rows[i].Cells[j].Value = "";
-                        }
-                        
-                    }
-                }
-                
-                if (noneFound)
-                {
-                    Plate.Rows[0].Cells[0].Value = "TimeTrack";
-                }
-
-                List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
-                int counter = 5;
-                //string msg = "Time,U,M,"; // [AT] csv file header. 
-                string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
-
-                for (int i = 0; i < Plate.RowCount; i++)
-                {
-                    for (int j = 0; j < Plate.ColumnCount; j++)
-                    {
-
-                        msg += Plate.Rows[i].Cells[j].Value.ToString() + ",";
                         if (!Plate.Rows[i].Cells[j].Value.ToString().Equals(""))
                         {
-                            list.Add(counter);
+                            for (int k = 0; k < dupl.Count; k++)
+                            {
+                                if (dupl[k].Equals(Plate.Rows[i].Cells[j].Value.ToString()))
+                                {
+                                    Plate.Rows[i].Cells[j].Value = Plate.Rows[i].Cells[j].Value.ToString() + "_";
+                                }
+
+                            }
+                            dupl.Add(Plate.Rows[i].Cells[j].Value.ToString());
+                            noneFound = false;
                         }
-                        counter += 1;
-                    }
-                }
-                Data.Items.Add(msg); //[AT] Data -- invisible ListBox
-                arrayNames = msg; //[AT] header
-
-                Color[] clr;
-
-                clr = new Color[10];
-                clr[0] = Color.Red;
-                clr[1] = Color.Blue;
-                clr[2] = Color.Chocolate;
-                clr[3] = Color.Green;
-                clr[4] = Color.Black;
-                clr[5] = Color.Aqua;
-                clr[6] = Color.DimGray;
-                clr[7] = Color.DarkViolet;
-                clr[8] = Color.DeepPink;
-                clr[9] = Color.Gray;
-
-                int clrsUsed = 0;
-                
-                //[AT] add series for all named wells 
-                for (int i = 0; i < list.Count; i++)
-                {
-                    Results.Series.Add(msg.Split(',')[list[i]]);
-                    Results.Series[msg.Split(',')[list[i]]].ChartType =
-                                    SeriesChartType.FastLine;                    
-                    Results.Series[msg.Split(',')[list[i]]].Color = clr[clrsUsed];
-                    clrsUsed += 1;
-                    if (clrsUsed > 9)
+                    } else
                     {
-                        clrsUsed = 0;
+                        Plate.Rows[i].Cells[j].Value = "";
                     }
+                        
                 }
-
-                // put to background to force to close if program exit
-                assay_thread.IsBackground = true;
-
-                assay_thread.Start();
             }
-            
+                
+            if (noneFound)
+            {
+                Plate.Rows[0].Cells[0].Value = "TimeTrack";
+            }
 
+            List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
+            int counter = 5;
+            //string msg = "Time,U,M,"; // [AT] csv file header. 
+            string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
 
+            for (int i = 0; i < Plate.RowCount; i++)
+            {
+                for (int j = 0; j < Plate.ColumnCount; j++)
+                {
+
+                    msg += Plate.Rows[i].Cells[j].Value.ToString() + ",";
+                    if (!Plate.Rows[i].Cells[j].Value.ToString().Equals(""))
+                    {
+                        list.Add(counter);
+                    }
+                    counter += 1;
+                }
+            }
+            Data.Items.Add(msg); //[AT] Data -- invisible ListBox
+            arrayNames = msg; //[AT] header
+
+            CreateCsv(msg);
+
+            Color[] clr;
+
+            clr = new Color[10];
+            clr[0] = Color.Red;
+            clr[1] = Color.Blue;
+            clr[2] = Color.Chocolate;
+            clr[3] = Color.Green;
+            clr[4] = Color.Black;
+            clr[5] = Color.Aqua;
+            clr[6] = Color.DimGray;
+            clr[7] = Color.DarkViolet;
+            clr[8] = Color.DeepPink;
+            clr[9] = Color.Gray;
+
+            int clrsUsed = 0;
+                
+            //[AT] add series for all named wells 
+            for (int i = 0; i < list.Count; i++)
+            {
+                Results.Series.Add(msg.Split(',')[list[i]]);
+                Results.Series[msg.Split(',')[list[i]]].ChartType =
+                                SeriesChartType.FastLine;                    
+                Results.Series[msg.Split(',')[list[i]]].Color = clr[clrsUsed];
+                clrsUsed += 1;
+                if (clrsUsed > 9)
+                {
+                    clrsUsed = 0;
+                }
+            }
+
+            // put to background to force to close if program exit
+            assay_thread.IsBackground = true;
+
+            assay_thread.Start();       
         }
 
         // [AT] appends result to the plot
@@ -613,20 +708,26 @@ namespace Miriam
             bool cont_assay = true;            
             int loop = 0;
             Boolean assay_ready = false;
-
+            bool now_melting = false;
+            bool stop_condition = false;            
             do
             {
                 DateTime current = DateTime.Now;
 				// AT: time when the current measurement started
-				int endCycle = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
+				int time_current_measurement = current.Hour * 60 * 60 + current.Minute * 60 + current.Second;
                 string timestr = current.ToString("s"); //[AT] "s" -- sortable datetime format
 
-				// AT:stop if the specified duration passed (from the textbox)
-				if (_exiting || (duration < endCycle))
+                if (!now_melting) stop_condition = (time_to_stop_assay < time_current_measurement);
+                else stop_condition = temperature_reached();
+
+                // AT:stop if the specified duration passed (from the textbox)
+                if (_exiting || stop_condition)
                 {
                     cont_assay = false;
-                    if (!_exiting)
+                    if (!_exiting) // not exiting on form close
+                    {
                         assay_ready = true;
+                    }
                 }
                 
                 // [AT][?] why recreate this object for every cycle? Would it be enough to create once? + can put it in a child class
@@ -705,29 +806,38 @@ namespace Miriam
                     Console.WriteLine("end sleep 2");
 
                     serialPort.Close();
-
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show("Serial could not be opened, please check that the device is correct one");
+                    MessageBox.Show("Serial could not be opened, please check that the device is correct one.\n"+ exc.ToString());
                     serialPort.Close();
                 }
 
-
                 Boolean timeRunning = true;
 
-                // wait until getting the next measurement
-                do
+                if ((!now_melting) && assay_ready && melting_enabled)
                 {
-                    DateTime wait = DateTime.Now;
-                    if (endCycle + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                    assay_ready = false;
+                    cont_assay = true;
+                    apply_settings_melting();
+                    now_melting = true;
+                }
+                
+                if (cont_assay)
+                {
+                    // wait until getting the next measurement                
+                    do
                     {
-                        timeRunning = false;
-                    }
-                    Thread.Sleep(100);
-                } while (timeRunning);
-                loop += 1;
-
+                        DateTime wait = DateTime.Now;
+                        if (time_current_measurement + betweenMesSec < wait.Hour * 60 * 60 + wait.Minute * 60 + wait.Second)
+                        {
+                            timeRunning = false;
+                        }
+                        Thread.Sleep(100);
+                    } while (timeRunning);
+                    loop += 1;
+                }
+                // if need to start melting after the measurements were taken for specified duration
             } while (cont_assay && (!_exiting));
 
 
@@ -739,6 +849,16 @@ namespace Miriam
                 MessageBox.Show("Assay ready");   
             else if(_exiting)
                 MessageBox.Show("Assay Aborted");
+        }
+
+        private void apply_settings_melting()
+        {
+            Console.WriteLine(settings_melting);
+            betweenMesSec = Convert.ToInt32(settings_melting["Interval"]);
+
+            SerialPortForHeat serialPort = new SerialPortForHeat(port_measurement);
+            serialPort.start_heat(settings_melting["TUp"], settings_melting["TMiddle"], settings_melting["TExtra"], melting: true);
+            serialPort.Close();
         }
 
         private void ButtonWrite_Click(object sender, EventArgs e)
@@ -793,6 +913,15 @@ namespace Miriam
             Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
             Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = CboxTempThr.Text;
             Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
+            Miriam_Serial.Properties.Settings.Default.settInterval = CboxInterval.Text;
+
+            Miriam_Serial.Properties.Settings.Default.meltTemperatureUp = settings_melting["TUp"];
+            Miriam_Serial.Properties.Settings.Default.meltTemperatureMid = settings_melting["TMiddle"];
+            Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra = settings_melting["TExtra"];
+            Miriam_Serial.Properties.Settings.Default.meltInterval = settings_melting["Interval"];
+            Miriam_Serial.Properties.Settings.Default.meltTolerance = settings_melting["Tolerance"];
+
+            Miriam_Serial.Properties.Settings.Default.meltingEnabled = melting_enabled;
 
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
@@ -860,7 +989,21 @@ namespace Miriam
             CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
             CboxTempE.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureExtra;
             CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
+            CboxInterval.Text = Miriam_Serial.Properties.Settings.Default.settInterval;
             CboxTempThr.Text = Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold;
+
+            settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
+            settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;
+            settings_melting["TExtra"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureExtra;
+            settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
+            settings_melting["Tolerance"] = Miriam_Serial.Properties.Settings.Default.meltTolerance;
+            melting_enabled = Miriam_Serial.Properties.Settings.Default.meltingEnabled;
+            SettingsForm = new FormSettings();
+        }
+
+        private void buttonChangeSettings_Click(object sender, EventArgs e)
+        {
+            SettingsForm.ShowDialog();
         }
     }
 }

@@ -30,6 +30,7 @@
 
 #include <PID_v1.h>
 #include <math.h>
+#include "MyStatusLed.h"
 
 
 //Selector ping
@@ -39,20 +40,28 @@
 #define SEL_4 49                 // Selector ping 4
 
 //Temperature Sensors pin
-#define TH_MIDDLEBED_1 A8                 // Temperature Sensor 2
+#define TH_BOX A11                 // Temperature Sensor 2 
 #define TH_MIDDLEBED_2 A9                 // Temperature Sensor 3
-#define TH_UPPERBED A10                   // Temperature Sensor 1
+#define TH_UPPERBED A10                   // Temperature Sensor 1 
+#define TH_EXTRA A8                   // Temperature Sensor ex 
+
 #define OPTIMAL_MIDDLE_TEMP 63
 #define OPTIMAL_UPPER_TEMP 80
+#define OPTIMAL_EXTRA_TEMP 63
 #define IDDLE_MIDDLE_TEMP 30
 #define IDDLE_UPPER_TEMP 20
-#define Threshold_temp 0.5
+//#define Threshold_temp 0.5
 //Heater pins
 #define HEAT_MIDDLE 2             // Heat 1
 #define HEAT_UPPER 3            // Heat 2
+#define HEAT_EXTRA 23            // Heat 3
 
 //LED Sensors pin
-#define PANEL_LED 22			        
+#define PANEL_LED 22
+
+//Speaker pin
+#define SOUND 7  
+#define STATUS_LED_PIN 6
 
 
 // manufacturer data for episco NCP18XH103F03RB 10k thermistor
@@ -60,9 +69,9 @@
 // or use this idea to define your own thermistors
 #define NCP18XH103F03RB 3380.0f,298.15f,10000.0f  // B,T0,R0
 
-// temperature calculation correction - linear fit coefficients
-#define LR_CORR_SLOPE 0.8433
-#define LR_CORR_INTERCEPT 4.2213
+// temperature calculation correction - linear fit coefficients. Applied only for t in Celsius
+#define LR_CORR_SLOPE 0.96//0.8433
+#define LR_CORR_INTERCEPT 2.6//4.2213
 
 // STATES FOR STATE MACHINE
 #define INIT      'I'
@@ -71,7 +80,13 @@
 #define INFO       'i'
 #define SET_TEMP_UPPER 'U'
 #define SET_TEMP_MIDDLE 'M'
+#define SET_TEMP_EXTRA 'E'
 #define READ_ASSAY 'R'
+#define PLAY_SOUND 's'
+#define STATUS_LED_ON 'l'
+#define STATUS_LED_OFF 'o'
+#define SET_BOX_THR 'T'
+#define MELT_HEAT  'W'
 
 
 int MUL[6] = {
@@ -108,12 +123,13 @@ double aggKp=4, aggKi=0.4, aggKd=4; // d2
 double consKp=1, consKi=0.05, consKd=0.25; //1, 0.25
 double Setpoint;
 //Define Variables we'll be connecting to PID's
-double Input_MIDDLE, Output_MIDDLE, Setpoint_MIDDLE,Input_UPPER, Setpoint_UPPER, Output_UPPER,Input_MIDDLE_2;
+double Input_MIDDLE, Output_MIDDLE, Setpoint_MIDDLE,Input_UPPER, Input_BOX, Setpoint_UPPER, Output_UPPER,Input_MIDDLE_2,Input_EXTRA, Output_EXTRA, Setpoint_EXTRA;
+double threshold_BOX=60;
 
 //PID Controller for Heater
 PID PID_MIDDLE(&Input_MIDDLE_2, &Output_MIDDLE, &Setpoint_MIDDLE, consKp, consKi, consKd, DIRECT);
 PID PID_UPPER(&Input_UPPER, &Output_UPPER, &Setpoint_UPPER, consKp, consKi, consKd, DIRECT);
-
+PID PID_EXTRA(&Input_EXTRA, &Output_EXTRA, &Setpoint_EXTRA, consKp, consKi, consKd, DIRECT);
 
 // enumerating 3 major temperature scales
 enum {
@@ -123,7 +139,7 @@ enum {
 };
 
 byte states[] = {
-  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE, READ_ASSAY};
+  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT};
 
 
 // serial data
@@ -133,27 +149,37 @@ String dataString = "                         ";
 boolean stringComplete = false;  // whether the string is complete               
 boolean LED=false;
 boolean HEAT_ON = false;
+boolean MELT_ON = false;
 
 int state = INIT;
 char previous_state = INIT;
 int defaultState = INIT;
 
+bool heat_alarm = false;
+//bool status_led_state_on=false;
+//bool status_led_busy=false;
+
+
+MyStatusLed status_led(STATUS_LED_PIN, 500, 500);
+     
 void setup ()
 {
   DDRL = DDRL | B00001111;  // this sets pins D3 to D7 as outputs
 
   // Temperature Sensors pin
-  pinMode(TH_MIDDLEBED_1, INPUT);
+  pinMode(TH_BOX, INPUT);
   pinMode(TH_MIDDLEBED_2, INPUT);
   pinMode(TH_UPPERBED, INPUT);
+  pinMode(TH_EXTRA, INPUT);
 
   // Heater pins
   pinMode(HEAT_MIDDLE, OUTPUT);
   pinMode(HEAT_UPPER, OUTPUT);
-
+  pinMode(HEAT_EXTRA, OUTPUT);
   //Panel LEDS
   pinMode(PANEL_LED,OUTPUT);
-
+//  pinMode(STATUS_LED,OUTPUT);
+  
 
   // Read temperature sensors
   ReaderSensorTemp();
@@ -161,7 +187,7 @@ void setup ()
   // Set degrees for PID algorithm
   Setpoint_MIDDLE = OPTIMAL_MIDDLE_TEMP;
   Setpoint_UPPER = OPTIMAL_UPPER_TEMP;
-
+  Setpoint_EXTRA = OPTIMAL_EXTRA_TEMP;
   // input string needs space
   inputString.reserve(30);  
   inputString = "";
@@ -174,7 +200,7 @@ void setup ()
 
 
 void loop () {
-    
+  
   // print the string when a newline arrives:
   if (stringComplete) {
     // remove carriage returns and new lines
@@ -196,8 +222,12 @@ void loop () {
 
   //Calculate PID for heaters
   if (HEAT_ON) Calculate_Heat();
+  if (MELT_ON) Calculate_Melt();
   //Calculate_Heat();
+  status_led.Update();
 
+//  if (status_led_on)
+  
   // state machine
   switch (state) {
 
@@ -212,6 +242,7 @@ void loop () {
 
     Output_MIDDLE = 0;
     Output_UPPER = 0;
+    Output_EXTRA = 0;
     computePIDs();
     
     Serial.println(F("Cancel$"));
@@ -220,9 +251,12 @@ void loop () {
     //turn the PID's off
     PID_MIDDLE.SetMode(MANUAL);
     PID_UPPER.SetMode(MANUAL);
+    PID_EXTRA.SetMode(MANUAL);
     
     //Setpoint_MIDDLE = IDDLE_MIDDLE_TEMP;    
     //Setpoint_UPPER = IDDLE_UPPER_TEMP;
+
+    status_led.SwitchMode(LED_OFF);
     
     state = defaultState; 
     
@@ -231,21 +265,56 @@ void loop () {
   case HEAT_BOARDS:  
     
     HEAT_ON = true;
+    heat_alarm = true;
+    status_led.SwitchMode(LED_BLINK);
       
     Serial.println(F("HEATING BOARDS$"));
   
     //turn the PID's on
     PID_MIDDLE.SetMode(AUTOMATIC);
     PID_UPPER.SetMode(AUTOMATIC);
-    
+    PID_EXTRA.SetMode(AUTOMATIC);
     state = defaultState;
     break;
 
+  case MELT_HEAT:  
+    HEAT_ON = false;
+    MELT_ON = true;
+    heat_alarm = true;
+      
+    Serial.println(F("MELTING BOARDS$"));
+  
+    //turn the PID's on
+    PID_MIDDLE.SetMode(AUTOMATIC);
+    PID_UPPER.SetMode(AUTOMATIC);
+    PID_EXTRA.SetMode(AUTOMATIC);
+    state = defaultState;
+    break;    
+
   case INFO:
 
-    Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," + String(analogRead(TH_UPPERBED)) + "," + 
-      String((analogRead(TH_MIDDLEBED_2))) + "," + 
-      String(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + String(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "$");
+    Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," +  
+      String(analogRead(TH_UPPERBED)) + "," + String((analogRead(TH_MIDDLEBED_2))) + ","  + 
+      String(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
+      String(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f))+ "," + 
+      String(Output_EXTRA) + "," + 
+      String((analogRead(TH_EXTRA))) + "," + String((analogRead(TH_BOX))) + "," +
+//      String(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
+      String(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)) + "," + 
+      String(Temperature(TH_BOX,T_CELSIUS,NCP18XH103F03RB,10000.0f))+ "$");
+
+
+    // 0: output_M, 
+    // 1: output_U    
+    // 2: T_U
+    // 3: T_M    
+    // 4: T_U_C
+    // 5: T_M_C
+    // 6: output_E    
+    // 7: T_E
+    // 8: T_Box
+    // 9: T_E_C
+    // 10: T_Box_C
     
     state = defaultState;
 
@@ -271,6 +340,16 @@ void loop () {
     state = defaultState;
 
     break;
+
+  case SET_TEMP_EXTRA:
+    Setpoint_EXTRA = parameters.toInt();
+    Serial.print(F("NEW EXTRA TEMP:"));    
+    Serial.print(Setpoint_EXTRA);
+    Serial.println("$");
+      
+    state = defaultState;
+
+    break;
     
   case READ_ASSAY:
     
@@ -279,7 +358,55 @@ void loop () {
     state = defaultState;
     break;
 
+  case PLAY_SOUND:
+    play_sound();
+    state=defaultState;
+    break;
+    
+  case STATUS_LED_ON:   
+  
+    status_led.SwitchMode(LED_ON);
+    Serial.println(F("Status LED on$"));
+    
+    state=defaultState;    
+    break;
+
+  case STATUS_LED_OFF:   
+  
+    status_led.SwitchMode(LED_OFF);
+    Serial.println(F("Status LED off$"));
+    
+    state=defaultState;    
+    break;
+
+    
+  case SET_BOX_THR:
+  
+    threshold_BOX = parameters.toInt();
+    Serial.print(F("NEW TEMP THRESHOLD:"));    
+    Serial.print(threshold_BOX);
+    Serial.println("$"); 
+        
+    state = defaultState;    
+    break;      
   } 
+}
+
+
+void play_sound() {
+
+  tone(SOUND, 3000, 5000);
+  delay(1000);
+  tone(SOUND, 1000, 5000);
+  delay(1000);
+  tone(SOUND, 2000, 5000);
+  delay(1000);
+  tone(SOUND, 500, 5000); 
+  delay(1000);
+  noTone(SOUND);
+  delay(1000);
+  //tone(piezoPin, 1000, 500);
+  //delay(1000);
 }
 
 void setPin(int outputPin) {
@@ -291,26 +418,35 @@ void Read_Assay() {
   //set the PIDs to zero to boost LED power
   Output_MIDDLE = 0;
   Output_UPPER = 0;
+  Output_EXTRA = 0;
   computePIDs();
 
-  digitalWrite(22,HIGH);
-  delay(500);
+//  digitalWrite(22,HIGH);
+////  analogWrite(4,125);
+//  delay(500);
   
   
   //take 5 samples for measurement
-  for (int j=0 ; j<5 ;j++)
+  for (int j=0 ; j<10 ;j++)
   {
+
     for (int i = 0; i < 16; i++)
     {
       setPin(i); // choose an input pin
+      digitalWrite(22,HIGH);
+      delayMicroseconds(100);
       ReadAssay(i);
+      digitalWrite(22,LOW);
+      delayMicroseconds(50);
 
     }    
-    delay(1000);
+//    delay(1000);
+
   }
 
 
-  digitalWrite(22,LOW);
+//  digitalWrite(22,LOW);
+//  analogWrite(4,0);
 
 
   //Calculate the average of the measurements for each sample
@@ -318,7 +454,7 @@ void Read_Assay() {
   {
     for (int l = 0;l < 12;l++)
     {
-      sensorValues[k][l] /= 5;
+      sensorValues[k][l] /= 10;
     }
   }
 
@@ -491,22 +627,68 @@ void displayData() {
   
 }
 
+void update_heat_status(){  
+  if(heat_alarm) {
+    if(Input_BOX >= threshold_BOX)
+//    if(Input_MIDDLE_2 >= threshold_BOX)
+    {
+//      Serial.print(F("Box temperature exceeded threshold:"));    
+//      Serial.print(Input_BOX);
+//      Serial.println("$");            
+      status_led.SwitchMode(LED_ON);
+      play_sound();
+      heat_alarm=false;           
+    }
+  }
+}
+//  }
+//  if (!status_led_busy)
+//  {
+//    if (!status_led_state_on and (Input_BOX >= threshold_BOX))      
+//    {
+//      digitalWrite(STATUS_LED, HIGH);   
+//      Serial.print(F("Box temperature above the threshold:"));    
+//      Serial.print(Input_BOX);
+//      Serial.println("$");    
+//      status_led_state_on=true;
+//    }
+//    if (status_led_state_on and (Input_BOX < threshold_BOX-0.5))      
+//    {
+//      digitalWrite(STATUS_LED, LOW);
+//      Serial.print(F("Box temperature below the threshold:"));    
+//      Serial.print(Input_BOX);
+//      Serial.println("$");
+//      status_led_state_on=false;
+//    }
+//  }
+  
 void Calculate_Heat() {
 
   ReaderSensorTemp();
   SetTunings_PID();
   computePIDs();    
-
+  update_heat_status();
 
 }    
+
+void Calculate_Melt() {
+
+  ReaderSensorTemp();
+  SetTunings_PID_Melt();
+  computePIDs();    
+  update_heat_status();
+
+}
 
 void computePIDs() {
 
   PID_MIDDLE.Compute();
   PID_UPPER.Compute();
+  PID_EXTRA.Compute();
 
   analogWrite(HEAT_MIDDLE,Output_MIDDLE);
   analogWrite(HEAT_UPPER,Output_UPPER);
+  analogWrite(HEAT_EXTRA,Output_EXTRA);
   /*
   
    analogWrite(HEAT_MIDDLE,0);
@@ -518,18 +700,19 @@ void computePIDs() {
 void ReaderSensorTemp() {
 
   Input_UPPER = Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f);
-  //Input_MIDDLE = Temperature(TH_MIDDLEBED_1,T_CELSIUS,NCP18XH103F03RB,10000.0f);
+  Input_BOX = Temperature(TH_BOX,T_CELSIUS,NCP18XH103F03RB,10000.0f);
   Input_MIDDLE_2 = Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f);
+  Input_EXTRA = Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f);
 
 }
 
 void SetTunings_PID() {
 
-  double gap1,gap2;
+  double gap1,gap2,gap3;
 
   gap1 = abs(Setpoint_MIDDLE - Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
   gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
-
+  gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
 
   if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE)
   {  //we're close to setpoint, use conservative tuning parameters
@@ -539,7 +722,7 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp, aggKi, aggKd);
+    PID_MIDDLE.SetTunings(aggKp/1, aggKi/1, aggKd/1);
   }
 
   if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
@@ -550,9 +733,66 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp, aggKi, aggKd);
+    PID_UPPER.SetTunings(aggKp/1, aggKi/1, aggKd/1);
   }
+  
+  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
+    {  //we're close to setpoint, use conservative tuning parameters
+      PID_EXTRA.SetTunings(consKp, consKi, consKd);
+      Output_EXTRA = 0;
+    }
+    else
+    {
+      //we're far from setpoint, use aggressive tuning parameters
+      PID_EXTRA.SetTunings(aggKp/8, aggKi/8, aggKd/8);
+    }  
 }
+
+
+
+void SetTunings_PID_Melt() {
+
+  double gap1,gap2,gap3;
+
+  gap1 = abs(Setpoint_MIDDLE - Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
+  gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
+  gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
+
+  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE)
+  {  //we're close to setpoint, use conservative tuning parameters
+    PID_MIDDLE.SetTunings(consKp, consKi, consKd);
+    Output_MIDDLE = 0;
+  }
+  else
+  {
+    //we're far from setpoint, use aggressive tuning parameters
+    PID_MIDDLE.SetTunings(aggKp/80, aggKi/80, aggKd/80);
+  }
+
+  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
+  {  //we're close to setpoint, use conservative tuning parameters
+    PID_UPPER.SetTunings(consKp, consKi, consKd);
+    Output_UPPER = 0;
+  }
+  else
+  {
+    //we're far from setpoint, use aggressive tuning parameters
+    PID_UPPER.SetTunings(aggKp/80, aggKi/80, aggKd/80);
+  }
+  
+  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
+    {  //we're close to setpoint, use conservative tuning parameters
+      PID_EXTRA.SetTunings(consKp, consKi, consKd);
+      Output_EXTRA = 0;
+    }
+    else
+    {
+      //we're far from setpoint, use aggressive tuning parameters
+      PID_EXTRA.SetTunings(aggKp/100, aggKi/100, aggKd/100);
+    }  
+}
+
+
 
 // check if it is a valid state for the state machine
 boolean isState(int s) {
