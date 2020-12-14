@@ -239,6 +239,7 @@ void loop () {
   case CANCEL:
 
     HEAT_ON = false;
+    MELT_ON = false;
 
     Output_MIDDLE = 0;
     Output_UPPER = 0;
@@ -278,7 +279,6 @@ void loop () {
     break;
 
   case MELT_HEAT:  
-    HEAT_ON = false;
     MELT_ON = true;
     heat_alarm = true;
       
@@ -722,7 +722,7 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp/1, aggKi/1, aggKd/1);
+    PID_MIDDLE.SetTunings(aggKp, aggKi, aggKd);
   }
 
   if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
@@ -733,7 +733,7 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp/1, aggKi/1, aggKd/1);
+    PID_UPPER.SetTunings(aggKp, aggKi, aggKd);
   }
   
   if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
@@ -744,7 +744,7 @@ void SetTunings_PID() {
     else
     {
       //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp/8, aggKi/8, aggKd/8);
+      PID_EXTRA.SetTunings(aggKp/10, aggKi/10, aggKd/10);
     }  
 }
 
@@ -758,37 +758,37 @@ void SetTunings_PID_Melt() {
   gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
   gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
 
-  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE)
+  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65)
   {  //we're close to setpoint, use conservative tuning parameters
-    PID_MIDDLE.SetTunings(consKp, consKi, consKd);
+    PID_MIDDLE.SetTunings(consKp/40, consKi/40, consKd/40);
     Output_MIDDLE = 0;
   }
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp/80, aggKi/80, aggKd/80);
+    PID_MIDDLE.SetTunings(aggKp, aggKi, aggKd);
   }
 
-  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
+  if(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65)
   {  //we're close to setpoint, use conservative tuning parameters
-    PID_UPPER.SetTunings(consKp, consKi, consKd);
+    PID_UPPER.SetTunings(consKp/40, consKi/40, consKd/40);
     Output_UPPER = 0;
   }
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp/80, aggKi/80, aggKd/80);
+    PID_UPPER.SetTunings(aggKp, aggKi, aggKd);
   }
   
-  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
+  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65)
     {  //we're close to setpoint, use conservative tuning parameters
-      PID_EXTRA.SetTunings(consKp, consKi, consKd);
+      PID_EXTRA.SetTunings(consKp/50, consKi/50, consKd/50);
       Output_EXTRA = 0;
     }
     else
     {
       //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp/100, aggKi/100, aggKd/100);
+      PID_EXTRA.SetTunings(aggKp/10, aggKi/10, aggKd/10);
     }  
 }
 
