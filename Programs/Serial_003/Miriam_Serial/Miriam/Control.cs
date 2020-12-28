@@ -71,7 +71,16 @@ namespace Miriam
                 { "Interval", "30" },
                 { "Tolerance", "0.1"}
             };
-
+        public struct SettingsMeasurement
+        {
+            public double TUp;
+            public double TMiddle;
+            public double TExtra;
+            public double TThreshold;
+            public int MeasureIntervalSec;
+            public double DurationMin;
+        }
+        public static SettingsMeasurement settings_measurement;
         private static string ArduinoReadout(SerialPort serialPort, string command)
         {
             serialPort.Write(command + "\r\n");
@@ -150,7 +159,7 @@ namespace Miriam
         public Control()
         {
             InitializeComponent();
-            
+            settings_measurement = new SettingsMeasurement();
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
             temperatureInfoMap = new Dictionary<string, int>
             {
@@ -179,37 +188,6 @@ namespace Miriam
                 COM.SelectedIndex = 0;
             }
 
-
-            for (int i = 55; i < 70; i++)
-            {
-                CboxTempM.Items.Add(i);
-            }
-            for (int i = 80; i < 90; i++)
-            {
-                CboxTempU.Items.Add(i);
-            }
-            for (int i = 55; i < 90; i++)
-            {
-                CboxTempE.Items.Add(i);
-            }
-            for (int i = 40; i < 80; i++)
-            {
-                CboxTempThr.Items.Add(i);
-            }
-
-            for (int i = 0; i < 150; i++)
-            {
-                CboxDuration.Items.Add(i);
-            }
-            for (int i = 10; i < 600; i++)
-            {
-                CboxInterval.Items.Add(i); // AT: minimum time a measurement takes is 11 seconds
-            }
-            CboxTempU.Text = "90";
-            CboxTempM.Text = "65";
-            CboxTempE.Text = "65";
-            CboxDuration.Text = "120";
-            CboxInterval.Text = "10";
 
             //CreatePlate();
             CreateEmptyPlate();            
@@ -342,16 +320,16 @@ namespace Miriam
                 //RecievedData = serialPort.ReadLine();
                 //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
                 // [AT] SW 'M param' (middle wanted temperature, i.e. M 63) - FW 'temperatureMiddleSet'
-                var s = ArduinoReadout(serialPort, "M " + CboxTempM.Text);
+                var s = ArduinoReadout(serialPort, "M " + settings_measurement.TMiddle.ToString());
                 Console.WriteLine(s);
 
-                s = ArduinoReadout(serialPort, "U " + CboxTempU.Text);
+                s = ArduinoReadout(serialPort, "U " + settings_measurement.TUp.ToString());
                 Console.WriteLine(s);
 
-                s = ArduinoReadout(serialPort, "E " + CboxTempE.Text);
+                s = ArduinoReadout(serialPort, "E " + settings_measurement.TExtra.ToString());
                 Console.WriteLine(s);
 
-                s = ArduinoReadout(serialPort, "T " + CboxTempThr.Text);
+                s = ArduinoReadout(serialPort, "T " + settings_measurement.TThreshold.ToString());
                 Console.WriteLine(s);
 
                 s = ArduinoReadout(serialPort, "H");
@@ -481,9 +459,9 @@ namespace Miriam
 
 
             time_to_stop_assay = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
-                Convert.ToInt32(CboxDuration.Text) * 60;
+                Convert.ToInt32(settings_measurement.DurationMin * 60);
 
-            betweenMesSec = Convert.ToInt32(CboxInterval.Text);
+            betweenMesSec = settings_measurement.MeasureIntervalSec;
 
             Boolean noneFound = true;
             List<String> dupl = new List<String>();
@@ -908,12 +886,18 @@ namespace Miriam
             savePlateCells(cells_fname);
             Miriam_Serial.Properties.Settings.Default.settFolderRes = folderBrowserSaveRes.SelectedPath;
 
-            Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
-            Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
-            Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
-            Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = CboxTempThr.Text;
-            Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
-            Miriam_Serial.Properties.Settings.Default.settInterval = CboxInterval.Text;
+            //Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
+            //Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
+            //Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = CboxTempE.Text;
+            //Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = CboxTempThr.Text;
+            //Miriam_Serial.Properties.Settings.Default.settDuration = CboxDuration.Text;
+            //Miriam_Serial.Properties.Settings.Default.settInterval = CboxInterval.Text;
+            Miriam_Serial.Properties.Settings.Default.settTemperatureMid = settings_measurement.TMiddle.ToString();
+            Miriam_Serial.Properties.Settings.Default.settTemperatureUp = settings_measurement.TUp.ToString();
+            Miriam_Serial.Properties.Settings.Default.settTemperatureExtra = settings_measurement.TExtra.ToString();
+            Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold = settings_measurement.TThreshold.ToString();
+            Miriam_Serial.Properties.Settings.Default.settDuration = settings_measurement.DurationMin.ToString();
+            Miriam_Serial.Properties.Settings.Default.settInterval = settings_measurement.MeasureIntervalSec.ToString();
 
             Miriam_Serial.Properties.Settings.Default.meltTemperatureUp = settings_melting["TUp"];
             Miriam_Serial.Properties.Settings.Default.meltTemperatureMid = settings_melting["TMiddle"];
@@ -985,12 +969,13 @@ namespace Miriam
                 folderBrowserSaveRes.SelectedPath = Miriam_Serial.Properties.Settings.Default.settFolderRes;
             }
             Console.WriteLine("folder: {0}", folderName);
-            CboxTempU.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureUp;
-            CboxTempM.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureMid;
-            CboxTempE.Text = Miriam_Serial.Properties.Settings.Default.settTemperatureExtra;
-            CboxDuration.Text = Miriam_Serial.Properties.Settings.Default.settDuration;
-            CboxInterval.Text = Miriam_Serial.Properties.Settings.Default.settInterval;
-            CboxTempThr.Text = Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold;
+            settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid);
+            settings_measurement.TUp = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureUp);
+            settings_measurement.TExtra = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureExtra);
+            settings_measurement.DurationMin = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settDuration);
+            settings_measurement.MeasureIntervalSec = Convert.ToInt32(Miriam_Serial.Properties.Settings.Default.settInterval);
+            settings_measurement.TThreshold = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold);            
+            
 
             settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
             settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;

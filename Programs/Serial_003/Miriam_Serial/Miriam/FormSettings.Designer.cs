@@ -43,18 +43,18 @@
             this.CboxTempU = new System.Windows.Forms.ComboBox();
             this.CboxTempM = new System.Windows.Forms.ComboBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cBoxMesDuration = new System.Windows.Forms.ComboBox();
+            this.cBoxMesInterval = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.cBoxMesETemp = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.comboBox3 = new System.Windows.Forms.ComboBox();
+            this.cBoxMesThrTemp = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.comboBox4 = new System.Windows.Forms.ComboBox();
-            this.comboBox5 = new System.Windows.Forms.ComboBox();
-            this.comboBox7 = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
+            this.cBoxMesUTemp = new System.Windows.Forms.ComboBox();
+            this.cBoxMesMTemp = new System.Windows.Forms.ComboBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -214,30 +214,58 @@
             // 
             this.panel1.Controls.Add(this.label8);
             this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.comboBox7);
-            this.panel1.Controls.Add(this.comboBox1);
+            this.panel1.Controls.Add(this.cBoxMesDuration);
+            this.panel1.Controls.Add(this.cBoxMesInterval);
             this.panel1.Controls.Add(this.label4);
-            this.panel1.Controls.Add(this.comboBox2);
+            this.panel1.Controls.Add(this.cBoxMesETemp);
             this.panel1.Controls.Add(this.label5);
-            this.panel1.Controls.Add(this.comboBox3);
+            this.panel1.Controls.Add(this.cBoxMesThrTemp);
             this.panel1.Controls.Add(this.label6);
             this.panel1.Controls.Add(this.label7);
-            this.panel1.Controls.Add(this.comboBox4);
-            this.panel1.Controls.Add(this.comboBox5);
-            this.panel1.Enabled = false;
+            this.panel1.Controls.Add(this.cBoxMesUTemp);
+            this.panel1.Controls.Add(this.cBoxMesMTemp);
             this.panel1.Location = new System.Drawing.Point(11, 30);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(221, 185);
             this.panel1.TabIndex = 6;
             // 
-            // comboBox1
+            // label8
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(123, 122);
-            this.comboBox1.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(82, 21);
-            this.comboBox1.TabIndex = 48;
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(47, 154);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(72, 13);
+            this.label8.TabIndex = 52;
+            this.label8.Text = "Duration [min]";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(22, 96);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(97, 13);
+            this.label3.TabIndex = 51;
+            this.label3.Text = "Box temp threshold";
+            // 
+            // cBoxMesDuration
+            // 
+            this.cBoxMesDuration.FormattingEnabled = true;
+            this.cBoxMesDuration.Location = new System.Drawing.Point(123, 151);
+            this.cBoxMesDuration.Margin = new System.Windows.Forms.Padding(2);
+            this.cBoxMesDuration.Name = "cBoxMesDuration";
+            this.cBoxMesDuration.Size = new System.Drawing.Size(82, 21);
+            this.cBoxMesDuration.TabIndex = 50;
+            // 
+            // cBoxMesInterval
+            // 
+            this.cBoxMesInterval.FormattingEnabled = true;
+            this.cBoxMesInterval.Location = new System.Drawing.Point(123, 122);
+            this.cBoxMesInterval.Margin = new System.Windows.Forms.Padding(2);
+            this.cBoxMesInterval.Name = "cBoxMesInterval";
+            this.cBoxMesInterval.Size = new System.Drawing.Size(82, 21);
+            this.cBoxMesInterval.TabIndex = 48;
             // 
             // label4
             // 
@@ -249,14 +277,14 @@
             this.label4.TabIndex = 47;
             this.label4.Text = "Extra temp";
             // 
-            // comboBox2
+            // cBoxMesETemp
             // 
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(123, 64);
-            this.comboBox2.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(82, 21);
-            this.comboBox2.TabIndex = 46;
+            this.cBoxMesETemp.FormattingEnabled = true;
+            this.cBoxMesETemp.Location = new System.Drawing.Point(123, 64);
+            this.cBoxMesETemp.Margin = new System.Windows.Forms.Padding(2);
+            this.cBoxMesETemp.Name = "cBoxMesETemp";
+            this.cBoxMesETemp.Size = new System.Drawing.Size(82, 21);
+            this.cBoxMesETemp.TabIndex = 46;
             // 
             // label5
             // 
@@ -268,14 +296,15 @@
             this.label5.TabIndex = 45;
             this.label5.Text = "Measure interval [s]";
             // 
-            // comboBox3
+            // cBoxMesThrTemp
             // 
-            this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(123, 93);
-            this.comboBox3.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(82, 21);
-            this.comboBox3.TabIndex = 44;
+            this.cBoxMesThrTemp.FormatString = "N2";
+            this.cBoxMesThrTemp.FormattingEnabled = true;
+            this.cBoxMesThrTemp.Location = new System.Drawing.Point(123, 93);
+            this.cBoxMesThrTemp.Margin = new System.Windows.Forms.Padding(2);
+            this.cBoxMesThrTemp.Name = "cBoxMesThrTemp";
+            this.cBoxMesThrTemp.Size = new System.Drawing.Size(82, 21);
+            this.cBoxMesThrTemp.TabIndex = 44;
             // 
             // label6
             // 
@@ -297,52 +326,24 @@
             this.label7.TabIndex = 42;
             this.label7.Text = "Middle temp";
             // 
-            // comboBox4
+            // cBoxMesUTemp
             // 
-            this.comboBox4.FormattingEnabled = true;
-            this.comboBox4.Location = new System.Drawing.Point(123, 35);
-            this.comboBox4.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox4.Name = "comboBox4";
-            this.comboBox4.Size = new System.Drawing.Size(82, 21);
-            this.comboBox4.TabIndex = 41;
+            this.cBoxMesUTemp.FormattingEnabled = true;
+            this.cBoxMesUTemp.Location = new System.Drawing.Point(123, 35);
+            this.cBoxMesUTemp.Margin = new System.Windows.Forms.Padding(2);
+            this.cBoxMesUTemp.Name = "cBoxMesUTemp";
+            this.cBoxMesUTemp.Size = new System.Drawing.Size(82, 21);
+            this.cBoxMesUTemp.TabIndex = 41;
             // 
-            // comboBox5
+            // cBoxMesMTemp
             // 
-            this.comboBox5.FormattingEnabled = true;
-            this.comboBox5.Location = new System.Drawing.Point(123, 6);
-            this.comboBox5.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(82, 21);
-            this.comboBox5.TabIndex = 40;
-            // 
-            // comboBox7
-            // 
-            this.comboBox7.FormattingEnabled = true;
-            this.comboBox7.Location = new System.Drawing.Point(123, 151);
-            this.comboBox7.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox7.Name = "comboBox7";
-            this.comboBox7.Size = new System.Drawing.Size(82, 21);
-            this.comboBox7.TabIndex = 50;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(22, 96);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(97, 13);
-            this.label3.TabIndex = 51;
-            this.label3.Text = "Box temp threshold";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(47, 154);
-            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(72, 13);
-            this.label8.TabIndex = 52;
-            this.label8.Text = "Duration [min]";
+            this.cBoxMesMTemp.FormatString = "N2";
+            this.cBoxMesMTemp.FormattingEnabled = true;
+            this.cBoxMesMTemp.Location = new System.Drawing.Point(123, 6);
+            this.cBoxMesMTemp.Margin = new System.Windows.Forms.Padding(2);
+            this.cBoxMesMTemp.Name = "cBoxMesMTemp";
+            this.cBoxMesMTemp.Size = new System.Drawing.Size(82, 21);
+            this.cBoxMesMTemp.TabIndex = 40;
             // 
             // textBox1
             // 
@@ -442,17 +443,17 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox CboxTolerance;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox cBoxMesInterval;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.ComboBox cBoxMesETemp;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.ComboBox comboBox3;
+        private System.Windows.Forms.ComboBox cBoxMesThrTemp;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox comboBox4;
-        private System.Windows.Forms.ComboBox comboBox5;
+        private System.Windows.Forms.ComboBox cBoxMesUTemp;
+        private System.Windows.Forms.ComboBox cBoxMesMTemp;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox comboBox7;
+        private System.Windows.Forms.ComboBox cBoxMesDuration;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label9;
