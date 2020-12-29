@@ -55,7 +55,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.cBoxMesUTemp = new System.Windows.Forms.ComboBox();
             this.cBoxMesMTemp = new System.Windows.Forms.ComboBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBoxFnamePrefix = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.buttonSaveAs = new System.Windows.Forms.Button();
@@ -346,13 +346,13 @@
             this.cBoxMesMTemp.Size = new System.Drawing.Size(82, 21);
             this.cBoxMesMTemp.TabIndex = 40;
             // 
-            // textBox1
+            // textBoxFnamePrefix
             // 
-            this.textBox1.Location = new System.Drawing.Point(266, 91);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(86, 20);
-            this.textBox1.TabIndex = 7;
-            this.textBox1.Text = "miriam";
+            this.textBoxFnamePrefix.Location = new System.Drawing.Point(266, 91);
+            this.textBoxFnamePrefix.Name = "textBoxFnamePrefix";
+            this.textBoxFnamePrefix.Size = new System.Drawing.Size(86, 20);
+            this.textBoxFnamePrefix.TabIndex = 7;
+            this.textBoxFnamePrefix.Text = "miriam";
             // 
             // label9
             // 
@@ -414,7 +414,7 @@
             this.Controls.Add(this.buttonSaveAs);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.textBoxFnamePrefix);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panelMelting);
             this.Controls.Add(this.checkBoxEnableMelting);
@@ -461,7 +461,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cBoxMesDuration;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBoxFnamePrefix;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button buttonSaveAs;

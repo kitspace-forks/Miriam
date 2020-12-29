@@ -63,6 +63,7 @@ namespace Miriam
         FormSettings SettingsForm;
 
         public static bool melting_enabled;
+        public static string filename_prefix;
         public static Dictionary<string, string> settings_melting = new Dictionary<string, string>
             {
                 { "TUp", "80" },
@@ -437,7 +438,7 @@ namespace Miriam
 
         private void CreateCsv(string header)
         {
-            csv_filename = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
+            csv_filename = folderName + @"\" + filename_prefix + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
             Console.WriteLine();
             Console.WriteLine("Creating csv: {0}", csv_filename);                        
             File.WriteAllText(csv_filename, header.Remove(header.Length-1,1) + Environment.NewLine, Encoding.UTF8);
@@ -853,9 +854,9 @@ namespace Miriam
                 }
 
                 //after your loop
-                //[AT] todo: change path option
+               
                 //string fname = "Miriam_serial_data.csv";
-                string fname = folderName + @"\miriam_" + DateTime.Now.ToString("yyyyddMM_HHmmss") + ".csv";
+                string fname = folderName + @"\"+filename_prefix+"_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
                 Console.WriteLine();                
                 Console.WriteLine("Saving csv: {0}", fname);
                 // string fname = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/Miriam_serial_data.csv";
@@ -907,6 +908,8 @@ namespace Miriam
 
             Miriam_Serial.Properties.Settings.Default.meltingEnabled = melting_enabled;
 
+            Miriam_Serial.Properties.Settings.Default.filenamePrefix = filename_prefix;
+
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             Miriam_Serial.Properties.Settings.Default.Save();
 
@@ -952,7 +955,7 @@ namespace Miriam
             if (Miriam_Serial.Properties.Settings.Default.settFolderRes == "")
             {
                 folderName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                //folderBrowserSaveRes.RootFolder.ToString();                                
+                //folderBrowserSaveRes.RootFolder.ToString();                                -
             }
             else
             {
@@ -974,6 +977,9 @@ namespace Miriam
             settings_melting["Interval"] = Miriam_Serial.Properties.Settings.Default.meltInterval;
             settings_melting["Tolerance"] = Miriam_Serial.Properties.Settings.Default.meltTolerance;
             melting_enabled = Miriam_Serial.Properties.Settings.Default.meltingEnabled;
+
+            filename_prefix = Miriam_Serial.Properties.Settings.Default.filenamePrefix;
+
             SettingsForm = new FormSettings();
         }
 
