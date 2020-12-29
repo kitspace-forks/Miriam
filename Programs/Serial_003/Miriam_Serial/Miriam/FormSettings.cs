@@ -87,6 +87,9 @@ namespace Miriam
             Control.settings_melting["TExtra"] = CboxTempE.Text;
             Control.settings_melting["Interval"] = CboxInterval.Text;
 
+            // results storage folder
+            Control.folderName = folderBrowserSaveRes.SelectedPath;
+
             this.DialogResult = DialogResult.OK;
         }
 
@@ -117,6 +120,20 @@ namespace Miriam
             cBoxMesThrTemp.Text = Control.settings_measurement.TThreshold.ToString();
             cBoxMesInterval.Text = Control.settings_measurement.MeasureIntervalSec.ToString();
             cBoxMesDuration.Text = Control.settings_measurement.DurationMin.ToString();
+
+            // results storage folder
+            folderBrowserSaveRes.SelectedPath = Control.folderName;            
+            textBoxFolder.Text = folderBrowserSaveRes.SelectedPath;
+        }
+
+        private void buttonSaveAs_Click(object sender, EventArgs e)
+        {
+            // Show the FolderBrowserDialog.
+            DialogResult result = folderBrowserSaveRes.ShowDialog();
+            if (result == DialogResult.OK)
+            {                
+                textBoxFolder.Text = folderBrowserSaveRes.SelectedPath;
+            }
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Miriam
         private readonly int nGridCols = 12;
         private readonly string cells_fname = @".cells.tsv";
         private int betweenMesSec;
-        private string folderName;
+        public static string folderName;
         private volatile bool _exiting = false;
         private Thread assay_thread;
 
@@ -884,7 +884,7 @@ namespace Miriam
             _exiting = true;
 
             savePlateCells(cells_fname);
-            Miriam_Serial.Properties.Settings.Default.settFolderRes = folderBrowserSaveRes.SelectedPath;
+            Miriam_Serial.Properties.Settings.Default.settFolderRes = folderName;
 
             //Miriam_Serial.Properties.Settings.Default.settTemperatureMid = CboxTempM.Text;
             //Miriam_Serial.Properties.Settings.Default.settTemperatureUp = CboxTempU.Text;
@@ -946,27 +946,18 @@ namespace Miriam
             File.WriteAllLines(filename, output, System.Text.Encoding.UTF8);
         }
 
-        private void buttonSaveAs_Click(object sender, EventArgs e)
-        {
-            // Show the FolderBrowserDialog.
-            DialogResult result = folderBrowserSaveRes.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                folderName = folderBrowserSaveRes.SelectedPath;                
-            }
-        }
-
         private void Control_Load(object sender, EventArgs e)
         {
             Console.WriteLine(Miriam_Serial.Properties.Settings.Default.settFolderRes);
             if (Miriam_Serial.Properties.Settings.Default.settFolderRes == "")
             {
-                folderName = folderBrowserSaveRes.RootFolder.ToString();                                
+                folderName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                //folderBrowserSaveRes.RootFolder.ToString();                                
             }
             else
             {
                 folderName = Miriam_Serial.Properties.Settings.Default.settFolderRes;
-                folderBrowserSaveRes.SelectedPath = Miriam_Serial.Properties.Settings.Default.settFolderRes;
+                //folderBrowserSaveRes.SelectedPath = Miriam_Serial.Properties.Settings.Default.settFolderRes;
             }
             Console.WriteLine("folder: {0}", folderName);
             settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid);

@@ -31,8 +31,8 @@ namespace Miriam
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Control));
             this.ButtonStart = new System.Windows.Forms.Button();
             this.Plate = new System.Windows.Forms.DataGridView();
@@ -47,9 +47,7 @@ namespace Miriam
             this.COM = new System.Windows.Forms.ComboBox();
             this.buttonFillAll = new System.Windows.Forms.Button();
             this.buttonClearAll = new System.Windows.Forms.Button();
-            this.buttonSaveAs = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.folderBrowserSaveRes = new System.Windows.Forms.FolderBrowserDialog();
             this.LabelTempBoxC = new System.Windows.Forms.Label();
             this.LabelTempEC = new System.Windows.Forms.Label();
             this.buttonChangeSettings = new System.Windows.Forms.Button();
@@ -135,10 +133,10 @@ namespace Miriam
             // 
             this.Results.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "ChartArea1";
-            this.Results.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.Results.Legends.Add(legend1);
+            chartArea2.Name = "ChartArea1";
+            this.Results.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.Results.Legends.Add(legend2);
             this.Results.Location = new System.Drawing.Point(5, 375);
             this.Results.Margin = new System.Windows.Forms.Padding(2);
             this.Results.Name = "Results";
@@ -197,20 +195,6 @@ namespace Miriam
             this.buttonClearAll.UseVisualStyleBackColor = true;
             this.buttonClearAll.Click += new System.EventHandler(this.buttonClearAll_Click);
             // 
-            // buttonSaveAs
-            // 
-            this.buttonSaveAs.Location = new System.Drawing.Point(521, 7);
-            this.buttonSaveAs.Name = "buttonSaveAs";
-            this.buttonSaveAs.Size = new System.Drawing.Size(28, 29);
-            this.buttonSaveAs.TabIndex = 35;
-            this.buttonSaveAs.Text = "...";
-            this.buttonSaveAs.UseVisualStyleBackColor = true;
-            this.buttonSaveAs.Click += new System.EventHandler(this.buttonSaveAs_Click);
-            // 
-            // folderBrowserSaveRes
-            // 
-            this.folderBrowserSaveRes.Description = "Select the directory to save the measurements data";
-            // 
             // LabelTempBoxC
             // 
             this.LabelTempBoxC.AutoSize = true;
@@ -250,7 +234,6 @@ namespace Miriam
             this.Controls.Add(this.buttonChangeSettings);
             this.Controls.Add(this.LabelTempBoxC);
             this.Controls.Add(this.LabelTempEC);
-            this.Controls.Add(this.buttonSaveAs);
             this.Controls.Add(this.buttonClearAll);
             this.Controls.Add(this.buttonFillAll);
             this.Controls.Add(this.COM);
@@ -292,9 +275,7 @@ namespace Miriam
         private ComboBox COM;
         private Button buttonFillAll;
         private Button buttonClearAll;
-        private Button buttonSaveAs;
         private SaveFileDialog saveFileDialog1;
-        private FolderBrowserDialog folderBrowserSaveRes;
         private Label LabelTempBoxC;
         private Label LabelTempEC;
         private Button buttonChangeSettings;

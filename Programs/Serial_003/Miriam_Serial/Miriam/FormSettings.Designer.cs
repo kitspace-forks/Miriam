@@ -58,9 +58,10 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
-            this.label_results_folder = new System.Windows.Forms.Label();
             this.buttonSaveAs = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
+            this.folderBrowserSaveRes = new System.Windows.Forms.FolderBrowserDialog();
+            this.textBoxFolder = new System.Windows.Forms.TextBox();
             this.panelMelting.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -371,23 +372,15 @@
             this.label10.TabIndex = 9;
             this.label10.Text = "Results storage folder:";
             // 
-            // label_results_folder
-            // 
-            this.label_results_folder.AutoSize = true;
-            this.label_results_folder.Location = new System.Drawing.Point(266, 45);
-            this.label_results_folder.Name = "label_results_folder";
-            this.label_results_folder.Size = new System.Drawing.Size(75, 13);
-            this.label_results_folder.TabIndex = 10;
-            this.label_results_folder.Text = "(results_folder)";
-            // 
             // buttonSaveAs
             // 
-            this.buttonSaveAs.Location = new System.Drawing.Point(380, 12);
+            this.buttonSaveAs.Location = new System.Drawing.Point(490, 39);
             this.buttonSaveAs.Name = "buttonSaveAs";
-            this.buttonSaveAs.Size = new System.Drawing.Size(28, 29);
+            this.buttonSaveAs.Size = new System.Drawing.Size(28, 20);
             this.buttonSaveAs.TabIndex = 36;
             this.buttonSaveAs.Text = "...";
             this.buttonSaveAs.UseVisualStyleBackColor = true;
+            this.buttonSaveAs.Click += new System.EventHandler(this.buttonSaveAs_Click);
             // 
             // label11
             // 
@@ -398,14 +391,27 @@
             this.label11.TabIndex = 37;
             this.label11.Text = "Measurement settings";
             // 
+            // folderBrowserSaveRes
+            // 
+            this.folderBrowserSaveRes.Description = "Select the directory to save the measurements data";
+            // 
+            // textBoxFolder
+            // 
+            this.textBoxFolder.Location = new System.Drawing.Point(269, 39);
+            this.textBoxFolder.Name = "textBoxFolder";
+            this.textBoxFolder.ReadOnly = true;
+            this.textBoxFolder.Size = new System.Drawing.Size(222, 20);
+            this.textBoxFolder.TabIndex = 38;
+            this.textBoxFolder.Text = "(results folder)";
+            // 
             // FormSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(423, 415);
+            this.ClientSize = new System.Drawing.Size(539, 415);
+            this.Controls.Add(this.textBoxFolder);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.buttonSaveAs);
-            this.Controls.Add(this.label_results_folder);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.textBox1);
@@ -458,8 +464,9 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label_results_folder;
         private System.Windows.Forms.Button buttonSaveAs;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserSaveRes;
+        private System.Windows.Forms.TextBox textBoxFolder;
     }
 }
