@@ -758,38 +758,14 @@ void SetTunings_PID_Melt() {
   gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
   gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
 
-  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65.0f)
-  {  //we're close to setpoint, use conservative tuning parameters
-    PID_MIDDLE.SetTunings(consKp/25, consKi/25, consKd/25);
-    
-  }
-  else
-  {
-    //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp, aggKi, aggKd);
-  }
+ 
+  PID_MIDDLE.SetTunings(consKp/40, consKi/40, consKd/40);
 
-  if(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65.0f)
-  {  //we're close to setpoint, use conservative tuning parameters
-    PID_UPPER.SetTunings(consKp/25, consKi/25, consKd/25);
-    
-  }
-  else
-  {
-    //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp, aggKi, aggKd);
-  }
-  
-  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>65.0f)
-    {  //we're close to setpoint, use conservative tuning parameters
-      PID_EXTRA.SetTunings(consKp/50, consKi/50, consKd/50);
+  PID_UPPER.SetTunings(consKp/40, consKi/40, consKd/40);
+
+  PID_EXTRA.SetTunings(consKp/80, consKi/80, consKd/80);
       
-    }
-    else
-    {
-      //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp/10, aggKi/10, aggKd/10);
-    }  
+    
 }
 
 
