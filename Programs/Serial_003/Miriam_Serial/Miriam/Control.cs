@@ -103,12 +103,12 @@ namespace Miriam
                 StopBits = StopBits.One;
                 BaudRate = 9600;
 
-                // Set the read/write timeouts
-                ReadTimeout = 500;
+                // Set the read/write timeouts                
+                ReadTimeout = 5000;
                 WriteTimeout = 500;
             }
 
-            public void start_heat(string t_up, string t_middle, string t_extra, string threshold = "", bool melting=false)
+            public bool start_heat(string t_up, string t_middle, string t_extra, string threshold = "", bool melting=false)
             {
                 try
                 {
@@ -116,9 +116,18 @@ namespace Miriam
                     DiscardOutBuffer();
                     DiscardInBuffer();
 
-                    String ReceivedData;
+                    string heat_command = melting ? "W" : "H";
 
-                    var s = ArduinoReadout(this, "M " + t_middle);
+                    //String ReceivedData;
+                    String s;
+
+                    if (melting)
+                        {
+                            s = ArduinoReadout(this, heat_command);
+                            Console.WriteLine(s);
+                        }
+
+                    s = ArduinoReadout(this, "M " + t_middle);
                     Console.WriteLine(s);
 
                     s = ArduinoReadout(this, "U " + t_up);
@@ -131,9 +140,11 @@ namespace Miriam
                         s = ArduinoReadout(this, "T " + threshold);
                         Console.WriteLine(s);
 
-                    string heat_command = melting ? "W" : "H";
-                    s = ArduinoReadout(this, heat_command);
-                    Console.WriteLine(s);
+                    if (!melting)  
+                        {
+                            s = ArduinoReadout(this, heat_command);
+                            Console.WriteLine(s);
+                        }                    
                     // [AT] maybe sleep here a bit?
                 }
                 catch (Exception exc)
@@ -142,7 +153,9 @@ namespace Miriam
                     // MessageBox.Show("Serial could not be opened, please check that the device is correct one");
                     MessageBox.Show(exc.ToString());
                     this.Close();
+                    return false;
                 }
+                return true;
             }
         };
 
@@ -817,12 +830,14 @@ namespace Miriam
 
                 if ((!now_melting) && assay_ready && melting_enabled)
                 {
-                    assay_ready = false;
                     cont_assay = true;
-                    apply_settings_melting();
-                    now_melting = true;
-                }
-                
+                    if (apply_settings_melting())
+                    {
+                        now_melting = true;
+                        assay_ready = false;                        
+                    }
+                 }
+
                 if (cont_assay)
                 {
                     // wait until getting the next measurement                
@@ -851,14 +866,14 @@ namespace Miriam
                 MessageBox.Show("Assay Aborted");
         }
 
-        private void apply_settings_melting()
-        {
+        private bool apply_settings_melting()        {
             Console.WriteLine(settings_melting);
             betweenMesSec = Convert.ToInt32(settings_melting["Interval"]);
 
             SerialPortForHeat serialPort = new SerialPortForHeat(port_measurement);
-            serialPort.start_heat(settings_melting["TUp"], settings_melting["TMiddle"], settings_melting["TExtra"], melting: true);
+            bool started = serialPort.start_heat(settings_melting["TUp"], settings_melting["TMiddle"], settings_melting["TExtra"], melting: true);
             serialPort.Close();
+            return started;
         }
 
         private void ButtonWrite_Click(object sender, EventArgs e)

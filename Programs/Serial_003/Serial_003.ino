@@ -280,7 +280,8 @@ void loop () {
 
   case MELT_HEAT:  
     MELT_ON = true;
-    heat_alarm = true;
+//    heat_alarm = true;
+    heat_alarm = false;
       
     Serial.println(F("MELTING BOARDS$"));
   
