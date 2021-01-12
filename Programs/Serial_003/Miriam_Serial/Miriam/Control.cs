@@ -123,6 +123,8 @@ namespace Miriam
 
                     if (melting)
                         {
+                            s = ArduinoReadout(this, "w"); // melt init sets the output values
+                            Console.WriteLine(s);
                             s = ArduinoReadout(this, heat_command);
                             Console.WriteLine(s);
                         }
@@ -137,8 +139,10 @@ namespace Miriam
                     Console.WriteLine(s);
 
                     if (threshold != "")
+                    {
                         s = ArduinoReadout(this, "T " + threshold);
                         Console.WriteLine(s);
+                    }
 
                     if (!melting)  
                         {
