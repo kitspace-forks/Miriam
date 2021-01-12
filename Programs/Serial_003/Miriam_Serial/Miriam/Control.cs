@@ -56,6 +56,8 @@ namespace Miriam
         private volatile bool _exiting = false;
         private Thread assay_thread;
 
+        private int ninfo;
+
         private Dictionary<string, int> temperatureInfoMap;
         private Dictionary<string, string> currentTemperatureInfo;
 
@@ -174,14 +176,22 @@ namespace Miriam
                 { "Up", 4 },
                 { "Middle", 5 },
                 { "Extra", 9 },
-                { "Box", 10 }
+                { "Box", 10 },
+                { "OutUp", 1 },
+                { "OutMiddle", 0 },
+                { "OutExtra", 6 },
+
             };
             currentTemperatureInfo = new Dictionary<string, string>
             {
                 { "Up", "" },
                 { "Middle", "" },
                 { "Extra", "" },
-                { "Box", "" }
+                { "Box", "" },
+                { "OutUp", "" },
+                { "OutMiddle", "" },
+                { "OutExtra", "" },
+
             };
 
             string[] ports = SerialPort.GetPortNames();
@@ -538,9 +548,13 @@ namespace Miriam
             }
 
             List<int> list = new List<int>(); //[AT] list of wells with names <int - number in array of values>
+
             int counter = 5;
             //string msg = "Time,U,M,"; // [AT] csv file header. 
             string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
+            msg += "OutU, OutM, OutE,"; // add output values
+            counter += 3;
+            ninfo = counter;
 
             for (int i = 0; i < Plate.RowCount; i++)
             {
@@ -554,7 +568,9 @@ namespace Miriam
                     }
                     counter += 1;
                 }
-            }
+            }            
+            Console.WriteLine(msg);
+
             Data.Items.Add(msg); //[AT] Data -- invisible ListBox
             arrayNames = msg; //[AT] header
 
@@ -604,8 +620,8 @@ namespace Miriam
                 this.Invoke(new Action<string>(AppendResult), new object[] { value });
                 return;
             }
-
-            for(int i = 5;i<arrayNames.Split(',').Length;i++)
+            
+            for(int i = ninfo; i<arrayNames.Split(',').Length; i++)
             {
                 if(!arrayNames.Split(',')[i].Equals(""))
                 {
@@ -802,22 +818,19 @@ namespace Miriam
                     // [AT] upd: The columns of the grid are mixed, it is received as A11,A12,...A1,A2, B11,B12,...,B1,B2, ...
                     ReceivedData = RearrangeColumnOrder(ReceivedData);
 
-                    AppendData(timestr + "," +
-                        currentTemperatureInfo["Up"] + "," +
+                    string tinfocsv = currentTemperatureInfo["Up"] + "," +
                         currentTemperatureInfo["Middle"] + "," +
                         currentTemperatureInfo["Extra"] + "," +
                         currentTemperatureInfo["Box"] + "," +
-                        ReceivedData);
+                        currentTemperatureInfo["OutUp"] + "," +
+                        currentTemperatureInfo["OutMiddle"] + "," +
+                        currentTemperatureInfo["OutExtra"] + ",";
+                    AppendData(timestr + "," + tinfocsv + ReceivedData);
                         
                     // todo: fix appendData and AppendResult
                     //string resToAppend = loop.ToString() + ",U,M,";  // [AT] not used, so i commented this line
 
-                    AppendResult(loop.ToString() + "," + 
-                        currentTemperatureInfo["Up"] + "," +
-                        currentTemperatureInfo["Middle"] + "," +
-                        currentTemperatureInfo["Extra"] + "," +
-                        currentTemperatureInfo["Box"] + "," +
-                        ReceivedData);
+                    AppendResult(loop.ToString() + "," + tinfocsv + ReceivedData);
 
                     Thread.Sleep(2000); // 2s
                     Console.WriteLine("end sleep 2");
