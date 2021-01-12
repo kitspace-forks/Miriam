@@ -87,6 +87,7 @@
 #define STATUS_LED_OFF 'o'
 #define SET_BOX_THR 'T'
 #define MELT_HEAT  'W'
+#define MELT_INIT  'w'
 
 
 int MUL[6] = {
@@ -139,7 +140,7 @@ enum {
 };
 
 byte states[] = {
-  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT};
+  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT, MELT_INIT};
 
 
 // serial data
@@ -236,6 +237,26 @@ void loop () {
     state = 'I';
     break;
 
+  case MELT_INIT:
+
+    HEAT_ON = false;
+    MELT_ON = false;
+
+    Output_MIDDLE = 100;
+    Output_UPPER = 100;
+    Output_EXTRA = 100;
+    computePIDs();
+    
+    Serial.println(F("INIT MELT$"));
+    
+    //turn the PID's off
+//     PID_MIDDLE.SetMode(MANUAL);
+//     PID_UPPER.SetMode(MANUAL);
+//     PID_EXTRA.SetMode(MANUAL);
+       
+    state = defaultState; 
+    break;      
+      
   case CANCEL:
 
     HEAT_ON = false;
