@@ -20,7 +20,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: executable
+        name: miriam-application-windows
         path: D:\a\Miriam\Miriam\Programs\Serial_003\Miriam_Serial\MiriamTests\bin\Release\Miriam_Serial.exe
 
   build-arduino:
