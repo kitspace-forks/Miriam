@@ -35,4 +35,12 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install arduino:avr
       - name: Compile Sketch
-        run: arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 --libraries ./Programs/PID_v1 ./Programs/Serial_003/Serial_003
+        run: arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 --libraries ./Programs/PID_v1 --output-dir miriam-firmware ./Programs/Serial_003/Serial_003
+      # TODO: also include the source code because it seems easier flash Arduino
+      # firmware from source. Unfortunately flashing a .hex file seems rather
+      # painful https://forum.arduino.cc/index.php?topic=417659.0 .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: miriam-firmware
+          path: miriam-firmware\Serial_003.ino.hex
