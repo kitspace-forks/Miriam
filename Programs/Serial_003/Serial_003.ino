@@ -32,6 +32,7 @@
 #include <math.h>
 #include "MyStatusLed.h"
 
+#define FIRMWARE_VERSION "0.1.0" // Started with 0.1.0
 
 //Selector ping
 #define SEL_1 46                 // Selector ping 1
@@ -88,7 +89,7 @@
 #define SET_BOX_THR 'T'
 #define MELT_HEAT  'W'
 #define MELT_INIT  'w'
-
+#define VERSION 'V'
 
 int MUL[6] = {
   A0,A1,A2,A3,A4,A5};				// Multiplexer  1
@@ -140,7 +141,7 @@ enum {
 };
 
 byte states[] = {
-  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT, MELT_INIT};
+  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT, MELT_INIT, VERSION};
 
 
 // serial data
@@ -313,6 +314,13 @@ void loop () {
     state = defaultState;
     break;    
 
+  case VERSION:
+    Serial.print(F("firmware_version: "));
+    Serial.print(FIRMWARE_VERSION);
+    Serial.println("$");
+    state = defaultState;
+    break;    
+    
   case INFO:
 
     Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," +  
