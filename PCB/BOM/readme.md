@@ -1,3 +1,4 @@
 # Components
 
-Components required for the PCB assembly are listed in the BOMs. Main components contain a link to the component. 
+Components required for the PCB assembly are listed in the BOM files in this
+directory. Each .xlsx file contains link to the individual components.

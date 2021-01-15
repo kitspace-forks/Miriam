@@ -7,7 +7,7 @@ on:
     branches: [ '**' ]
 
 jobs:
-  build-windows-miriam-serial:
+  build-application-windows:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v2
@@ -20,10 +20,10 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: executable
+        name: miriam-application-windows
         path: D:\a\Miriam\Miriam\Programs\Serial_003\Miriam_Serial\MiriamTests\bin\Release\Miriam_Serial.exe
 
-  build-arduino:
+  build-firmware:
     # Based on https://legion2.github.io/2020/03/27/from-arduino-builder-to-arduino-cli.html
     # and https://blog.arduino.cc/2019/11/14/arduino-on-github-actions/
     runs-on: windows-2019
@@ -35,4 +35,12 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install arduino:avr
       - name: Compile Sketch
-        run: arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 --libraries ./Programs/PID_v1 ./Programs/Serial_003/Serial_003
+        run: arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 --libraries ./Programs/PID_v1 --output-dir miriam-firmware ./Programs/Serial_003/Serial_003
+      # TODO: also include the source code because it seems easier flash Arduino
+      # firmware from source. Unfortunately flashing a .hex file seems rather
+      # painful https://forum.arduino.cc/index.php?topic=417659.0 .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: miriam-firmware
+          path: miriam-firmware\Serial_003.ino.hex
