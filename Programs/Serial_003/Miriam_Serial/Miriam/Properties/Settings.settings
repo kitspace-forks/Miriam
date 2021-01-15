@@ -41,5 +41,8 @@
     <Setting Name="meltingEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="filenamePrefix" Type="System.String" Scope="User">
+      <Value Profile="(Default)">miriam</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
