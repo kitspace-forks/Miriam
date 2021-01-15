@@ -3,6 +3,7 @@ using Miriam;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,15 +29,30 @@ namespace Miriam.Tests
             string[] srows = { "A", "B", "C", "D", "E", "F", "G", "H" };
             string[] scolumns_correct = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" };
             string[] scolumns_rearranged = { "11", "12", "9", "10", "7", "8", "5", "6", "3", "4", "1", "2" };
-            string s_correct="";
-            string s_output="";
+            string s_correct = "";
+            string s_output = "";
             for (int i = 0; i < srows.Length; i++)
                 for (int j = 0; j < scolumns_correct.Length; j++)
                 {
                     s_output += srows[i] + scolumns_rearranged[j] + ",";
-                    s_correct += srows[i] + scolumns_correct[j] + ",";                    
+                    s_correct += srows[i] + scolumns_correct[j] + ",";
                 }
             Assert.AreEqual(s_correct, tControl.RearrangeColumnOrder(s_output));
+        }
+
+        [TestMethod()]
+        public void check_versionTest()
+        {
+            var tControl = new Control();
+            //Assembly assembly = Assembly.GetExecutingAssembly();
+            //System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            //string version = fvi.FileVersion;
+            //Console.WriteLine(version);
+           // Console.WriteLine(version.Split('.')[0]);
+            Assert.IsTrue(tControl.check_version("2.0.0"));
+            Assert.IsTrue(tControl.check_version("2.0.1"));
+            Assert.IsFalse(tControl.check_version("1.1.1"));
+            Assert.IsFalse(tControl.check_version("2.1.1"));
         }
     }
 }

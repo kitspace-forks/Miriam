@@ -31,8 +31,8 @@ namespace Miriam
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Control));
             this.ButtonStart = new System.Windows.Forms.Button();
             this.Plate = new System.Windows.Forms.DataGridView();
@@ -133,10 +133,10 @@ namespace Miriam
             // 
             this.Results.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea2.Name = "ChartArea1";
-            this.Results.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.Results.Legends.Add(legend2);
+            chartArea1.Name = "ChartArea1";
+            this.Results.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.Results.Legends.Add(legend1);
             this.Results.Location = new System.Drawing.Point(5, 375);
             this.Results.Margin = new System.Windows.Forms.Padding(2);
             this.Results.Name = "Results";

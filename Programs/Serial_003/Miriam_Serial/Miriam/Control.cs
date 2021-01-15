@@ -9,6 +9,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -116,7 +117,7 @@ namespace Miriam
                 BaudRate = 9600;
 
                 // Set the read/write timeouts                
-                ReadTimeout = 5000;
+                ReadTimeout = 500;
                 WriteTimeout = 500;
             }
 
@@ -175,10 +176,10 @@ namespace Miriam
             }
         };
 
-
         public Control()
         {
             InitializeComponent();
+
             settings_measurement = new SettingsMeasurement();
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
             temperatureInfoMap = new Dictionary<string, int>
@@ -211,11 +212,27 @@ namespace Miriam
                 COM.Items.Add(ports[i]);
             }
 
-            if (ports.Length != 0)
+            foreach (string port in ports)
+            {
+                try
+                {
+                    if(check_firmware_version(port))
+                    {
+                        COM.SelectedItem = port;
+                        break;
+                    }
+                }
+                catch (Exception exc)
+                {
+                    Console.Write(exc.ToString());
+                    Console.WriteLine();
+                }
+            }
+
+            if (ports.Length != 0 && COM.SelectedIndex == -1)
             {
                 COM.SelectedIndex = 0;
             }
-
 
             //CreatePlate();
             CreateEmptyPlate();            
@@ -223,6 +240,45 @@ namespace Miriam
             // todo: don't load if cannot load
             FillPlate(cells_fname);
             //Results.Visible = true;
+        }
+
+        private bool check_firmware_version(string port)
+        {
+            SerialPort serial = new SerialPortForHeat(port);
+            
+            serial.Open();
+            try
+            {
+                Console.WriteLine(port);
+
+                serial.DiscardInBuffer();
+                serial.DiscardOutBuffer();
+
+                string ver = ArduinoReadout(serial, "V");
+                bool result = check_version(ver);
+                serial.Close();
+                return result;
+            }
+            catch (Exception exc)
+            {
+                serial.Close();
+                throw exc;
+            }
+            
+        }
+
+        public bool check_version(string firmware_version)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+            
+            Console.WriteLine("software version:" + version);
+            Console.WriteLine("firmware version:" + firmware_version);
+            var v0 = Convert.ToInt32(firmware_version.Split('.')[0]);
+            var v1 = Convert.ToInt32(firmware_version.Split('.')[1]);
+            
+            return (v0 == fvi.FileMajorPart) && (v1 == fvi.FileMinorPart);
         }
 
         private void ParseTemperatureInfo(string received_data)
@@ -475,16 +531,30 @@ namespace Miriam
         {
             if (started) return;            
 
+            port_measurement = COM.Text;
+
+            try
+            {
+                if (!check_firmware_version(port_measurement))
+                {
+                    MessageBox.Show("Version of firmware does not match version of Software! Please update.");
+                    return;
+                }
+            }
+            catch (TimeoutException exc)
+            {
+                string complain = "Serial could not be opened, please check that the device is correct one";
+                MessageBox.Show(complain + "\n\n" + exc.ToString());
+                return;
+            }
+
             Results.Visible = true;
             Form f = Control.ActiveForm;
             f.Size = new Size(f.Size.Width, 750);
             started = true;
             Results.Visible = true;
             Results.Anchor |= AnchorStyles.Bottom;
-            port_measurement = COM.Text;
-                
             DateTime localDate = DateTime.Now;
-
 
             time_to_stop_assay = localDate.Hour * 60 * 60 + localDate.Minute * 60 + localDate.Second +
                 Convert.ToInt32(settings_measurement.DurationMin * 60);

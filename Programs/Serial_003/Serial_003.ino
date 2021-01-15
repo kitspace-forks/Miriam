@@ -32,7 +32,7 @@
 #include <math.h>
 #include "MyStatusLed.h"
 
-#define FIRMWARE_VERSION "0.1.0" // Started with 0.1.0
+#define FIRMWARE_VERSION "2.0.0" // first release 2.0.0
 
 //Selector ping
 #define SEL_1 46                 // Selector ping 1
@@ -315,7 +315,7 @@ void loop () {
     break;    
 
   case VERSION:
-    Serial.print(F("firmware_version: "));
+//    Serial.print(F("firmware_version: "));
     Serial.print(FIRMWARE_VERSION);
     Serial.println("$");
     state = defaultState;
