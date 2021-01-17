@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,12 +74,12 @@ namespace Miriam
         private void buttonOk_Click(object sender, EventArgs e)
         {
             // apply assay settings
-            Control.settings_measurement.TMiddle = Convert.ToDouble(cBoxMesMTemp.Text);
-            Control.settings_measurement.TUp = Convert.ToDouble(cBoxMesUTemp.Text);
-            Control.settings_measurement.TExtra = Convert.ToDouble(cBoxMesETemp.Text);                       
-            Control.settings_measurement.TThreshold = Convert.ToDouble(cBoxMesThrTemp.Text);
+            Control.settings_measurement.TMiddle = Convert.ToDouble(cBoxMesMTemp.Text, CultureInfo.InvariantCulture);
+            Control.settings_measurement.TUp = Convert.ToDouble(cBoxMesUTemp.Text, CultureInfo.InvariantCulture);
+            Control.settings_measurement.TExtra = Convert.ToDouble(cBoxMesETemp.Text, CultureInfo.InvariantCulture);
+            Control.settings_measurement.TThreshold = Convert.ToDouble(cBoxMesThrTemp.Text, CultureInfo.InvariantCulture);
             Control.settings_measurement.MeasureIntervalSec = Convert.ToInt32(cBoxMesInterval.Text);
-            Control.settings_measurement.DurationMin = Convert.ToDouble(cBoxMesDuration.Text);
+            Control.settings_measurement.DurationMin = Convert.ToDouble(cBoxMesDuration.Text, CultureInfo.InvariantCulture);
 
             // apply melting settings
             Control.melting_enabled = checkBoxEnableMelting.Checked;
@@ -136,6 +137,13 @@ namespace Miriam
             {                
                 textBoxFolder.Text = folderBrowserSaveRes.SelectedPath;
             }
+        }
+
+        private void cBoxMesInterval_KeyPress(object sender, KeyPressEventArgs e)
+        {
+
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+
         }
     }
 }

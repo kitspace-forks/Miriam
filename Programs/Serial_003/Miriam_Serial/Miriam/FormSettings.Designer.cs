@@ -267,6 +267,7 @@
             this.cBoxMesInterval.Name = "cBoxMesInterval";
             this.cBoxMesInterval.Size = new System.Drawing.Size(82, 21);
             this.cBoxMesInterval.TabIndex = 48;
+            this.cBoxMesInterval.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cBoxMesInterval_KeyPress);
             // 
             // label4
             // 

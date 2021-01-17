@@ -81,6 +81,7 @@ namespace Miriam
             };
         public struct SettingsMeasurement
         {
+            // in the firmware all the temperatures are converted to int! 
             public double TUp;
             public double TMiddle;
             public double TExtra;
@@ -183,6 +184,8 @@ namespace Miriam
         public Control()
         {
             InitializeComponent();
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             datafile_separator = '\t';
             //datafile_separator = ',';
 
@@ -804,6 +807,7 @@ namespace Miriam
 
         private void doAssay()
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             // Boolean cont = true;
             bool cont_assay = true;            
             int loop = 0;
@@ -1083,12 +1087,12 @@ namespace Miriam
                 //folderBrowserSaveRes.SelectedPath = Miriam_Serial.Properties.Settings.Default.settFolderRes;
             }
             Console.WriteLine("folder: {0}", folderName);
-            settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid);
-            settings_measurement.TUp = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureUp);
-            settings_measurement.TExtra = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureExtra);
-            settings_measurement.DurationMin = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settDuration);
+            settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid, CultureInfo.InvariantCulture);
+            settings_measurement.TUp = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureUp, CultureInfo.InvariantCulture);
+            settings_measurement.TExtra = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureExtra, CultureInfo.InvariantCulture);
+            settings_measurement.DurationMin = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settDuration, CultureInfo.InvariantCulture);
             settings_measurement.MeasureIntervalSec = Convert.ToInt32(Miriam_Serial.Properties.Settings.Default.settInterval);
-            settings_measurement.TThreshold = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold);            
+            settings_measurement.TThreshold = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold, CultureInfo.InvariantCulture);            
             
 
             settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
