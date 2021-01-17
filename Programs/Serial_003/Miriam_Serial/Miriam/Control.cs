@@ -43,6 +43,7 @@ namespace Miriam
 {
     public partial class Control : Form
     {
+        private System.Diagnostics.FileVersionInfo file_version_info;
         private int time_to_stop_assay;
         private string arrayNames;
         private int maximumValue = 0;
@@ -67,6 +68,9 @@ namespace Miriam
 
         public static bool melting_enabled;
         public static string filename_prefix;
+        public static char datafile_separator;
+        public string firmware_version;
+        public string software_version;
         public static Dictionary<string, string> settings_melting = new Dictionary<string, string>
             {
                 { "TUp", "80" },
@@ -179,6 +183,12 @@ namespace Miriam
         public Control()
         {
             InitializeComponent();
+            datafile_separator = '\t';
+            //datafile_separator = ',';
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            file_version_info = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            software_version = file_version_info.FileVersion;
 
             settings_measurement = new SettingsMeasurement();
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
@@ -267,18 +277,18 @@ namespace Miriam
             
         }
 
-        public bool check_version(string firmware_version)
+        public bool check_version(string val)
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
-            string version = fvi.FileVersion;
-            
-            Console.WriteLine("software version:" + version);
+            //Assembly assembly = Assembly.GetExecutingAssembly();
+            //System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            //string version = fvi.FileVersion;
+            firmware_version = val;
+            Console.WriteLine("software version:" + software_version);
             Console.WriteLine("firmware version:" + firmware_version);
             var v0 = Convert.ToInt32(firmware_version.Split('.')[0]);
             var v1 = Convert.ToInt32(firmware_version.Split('.')[1]);
             
-            return (v0 == fvi.FileMajorPart) && (v1 == fvi.FileMinorPart);
+            return (v0 == file_version_info.FileMajorPart) && (v1 == file_version_info.FileMinorPart);
         }
 
         private void ParseTemperatureInfo(string received_data)
@@ -503,8 +513,11 @@ namespace Miriam
 
         private void AppendToCsv(string value)
         {
+            string append_string = value.TrimEnd(',') + Environment.NewLine;
+            append_string = append_string.Replace(',', datafile_separator);
+            
             //[AT] value has the ',' after the last value, don't write it to the csv
-            File.AppendAllText(csv_filename, value.TrimEnd(',') + Environment.NewLine, Encoding.UTF8);
+            File.AppendAllText(csv_filename, append_string, Encoding.UTF8);
             Console.WriteLine("Append to csv: {0}", value);
         }
 
@@ -521,10 +534,15 @@ namespace Miriam
 
         private void CreateCsv(string header)
         {
-            csv_filename = folderName + @"\" + filename_prefix + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
+            // header - comma-separated
+            string file_ext = datafile_separator == '\t' ? ".tsv" : ".csv";
+            header = header.Replace(',', datafile_separator);
+            csv_filename = folderName + @"\" + filename_prefix + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + file_ext;
             Console.WriteLine();
-            Console.WriteLine("Creating csv: {0}", csv_filename);                        
-            File.WriteAllText(csv_filename, header.Remove(header.Length-1,1) + Environment.NewLine, Encoding.UTF8);
+            Console.WriteLine("Creating csv: {0}", csv_filename);
+            string metadata = "# {" + $"software-version: {software_version}, firmware-version: {firmware_version}" + "}";
+            File.WriteAllText(csv_filename, metadata + Environment.NewLine, Encoding.UTF8);
+            File.AppendAllText(csv_filename, header.Remove(header.Length - 1, 1) + Environment.NewLine, Encoding.UTF8);
         }
 
         private void ButtonStart_Click(object sender, EventArgs e)
@@ -535,7 +553,7 @@ namespace Miriam
 
             try
             {
-                if (!check_firmware_version(port_measurement))
+                if (!check_firmware_version(port_measurement)) // changes firmware_version //todo: refactor: fwv=get_firmware_version(port); if !check_v() ... 
                 {
                     MessageBox.Show("Version of firmware does not match version of Software! Please update.");
                     return;
@@ -617,7 +635,7 @@ namespace Miriam
                     }
                     counter += 1;
                 }
-            }            
+            }
             Console.WriteLine(msg);
 
             Data.Items.Add(msg); //[AT] Data -- invisible ListBox
