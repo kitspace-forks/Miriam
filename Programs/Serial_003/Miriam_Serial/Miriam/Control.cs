@@ -186,8 +186,10 @@ namespace Miriam
             InitializeComponent();
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-            datafile_separator = '\t';
-            //datafile_separator = ',';
+            //datafile_separator = '\t'; // windows doesn't handle tsv files very well :(
+            datafile_separator = ','; //csv
+            //datafile_separator = ';';
+
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             file_version_info = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -195,6 +197,8 @@ namespace Miriam
 
             settings_measurement = new SettingsMeasurement();
             assay_thread = new System.Threading.Thread(new System.Threading.ThreadStart(doAssay));
+            
+            // indices in the arduino "i" readout
             temperatureInfoMap = new Dictionary<string, int>
             {
                 { "Up", 4 },
@@ -204,8 +208,8 @@ namespace Miriam
                 { "OutUp", 1 },
                 { "OutMiddle", 0 },
                 { "OutExtra", 6 },
-
             };
+
             currentTemperatureInfo = new Dictionary<string, string>
             {
                 { "Up", "" },
@@ -543,7 +547,7 @@ namespace Miriam
             csv_filename = folderName + @"\" + filename_prefix + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + file_ext;
             Console.WriteLine();
             Console.WriteLine("Creating csv: {0}", csv_filename);
-            string metadata = "# {" + $"software-version: {software_version}, firmware-version: {firmware_version}" + "}";
+            string metadata = $"# software-version: {software_version}\n# firmware-version: {firmware_version}";
             File.WriteAllText(csv_filename, metadata + Environment.NewLine, Encoding.UTF8);
             File.AppendAllText(csv_filename, header.Remove(header.Length - 1, 1) + Environment.NewLine, Encoding.UTF8);
         }
