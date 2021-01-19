@@ -241,7 +241,7 @@ namespace Miriam
                 }
                 catch (Exception exc)
                 {
-                    Console.Write(exc.ToString());
+                    Console.Write("Version check failed: " + exc.ToString());
                     Console.WriteLine();
                 }
             }
@@ -262,10 +262,9 @@ namespace Miriam
         private bool check_firmware_version(string port)
         {
             SerialPort serial = new SerialPortForHeat(port);
-            
-            serial.Open();
             try
             {
+                serial.Open();
                 Console.WriteLine(port);
 
                 serial.DiscardInBuffer();
@@ -562,11 +561,17 @@ namespace Miriam
             {
                 if (!check_firmware_version(port_measurement)) // changes firmware_version //todo: refactor: fwv=get_firmware_version(port); if !check_v() ... 
                 {
-                    MessageBox.Show("Version of firmware does not match version of Software! Please update.");
+                    MessageBox.Show($"Version of firmware ({firmware_version}) does not match version of software ({software_version})! Please update.");
                     return;
                 }
             }
             catch (TimeoutException exc)
+            {
+                string complain = "Timeout reading from Serial Port";
+                MessageBox.Show(complain + "\n\n" + exc.ToString());
+                return;
+            }
+            catch (UnauthorizedAccessException exc)
             {
                 string complain = "Serial could not be opened, please check that the device is correct one";
                 MessageBox.Show(complain + "\n\n" + exc.ToString());
