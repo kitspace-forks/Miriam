@@ -352,7 +352,7 @@ void loop () {
 
   case SET_TEMP_UPPER:
 
-    Setpoint_UPPER = parameters.toInt();
+    Setpoint_UPPER = parameters.toFloat();
     Serial.print(F("NEW UPPER TEMP:"));    
     Serial.print(Setpoint_UPPER);
     Serial.println("$");
@@ -362,7 +362,7 @@ void loop () {
 
   case SET_TEMP_MIDDLE:
 
-    Setpoint_MIDDLE = parameters.toInt();  
+    Setpoint_MIDDLE = parameters.toFloat();  
     Serial.print(F("NEW MIDDLE TEMP:"));       
     Serial.print(Setpoint_MIDDLE);
     Serial.println("$");
@@ -372,7 +372,7 @@ void loop () {
     break;
 
   case SET_TEMP_EXTRA:
-    Setpoint_EXTRA = parameters.toInt();
+    Setpoint_EXTRA = parameters.toFloat();
     Serial.print(F("NEW EXTRA TEMP:"));    
     Serial.print(Setpoint_EXTRA);
     Serial.println("$");
@@ -412,7 +412,7 @@ void loop () {
     
   case SET_BOX_THR:
   
-    threshold_BOX = parameters.toInt();
+    threshold_BOX = parameters.toFloat();
     Serial.print(F("NEW TEMP THRESHOLD:"));    
     Serial.print(threshold_BOX);
     Serial.println("$"); 
