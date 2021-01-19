@@ -87,6 +87,7 @@ namespace Miriam
             Control.settings_melting["TMiddle"] = CboxTempM.Text;
             Control.settings_melting["TExtra"] = CboxTempE.Text;
             Control.settings_melting["Interval"] = CboxInterval.Text;
+            Control.settings_melting["Tolerance"] = CboxTolerance.Text;
 
             // results storage 
             Control.folderName = folderBrowserSaveRes.SelectedPath;
