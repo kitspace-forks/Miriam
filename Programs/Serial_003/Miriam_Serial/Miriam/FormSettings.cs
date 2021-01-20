@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -73,13 +74,16 @@ namespace Miriam
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
+            //for correct string <-> double convertion using '.' as a decimal separator
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             // apply assay settings
-            Control.settings_measurement.TMiddle = Convert.ToDouble(cBoxMesMTemp.Text, CultureInfo.InvariantCulture);
-            Control.settings_measurement.TUp = Convert.ToDouble(cBoxMesUTemp.Text, CultureInfo.InvariantCulture);
-            Control.settings_measurement.TExtra = Convert.ToDouble(cBoxMesETemp.Text, CultureInfo.InvariantCulture);
-            Control.settings_measurement.TThreshold = Convert.ToDouble(cBoxMesThrTemp.Text, CultureInfo.InvariantCulture);
+            Control.settings_measurement.TMiddle = Convert.ToDouble(cBoxMesMTemp.Text);
+            Control.settings_measurement.TUp = Convert.ToDouble(cBoxMesUTemp.Text);
+            Control.settings_measurement.TExtra = Convert.ToDouble(cBoxMesETemp.Text);
+            Control.settings_measurement.TThreshold = Convert.ToDouble(cBoxMesThrTemp.Text);
             Control.settings_measurement.MeasureIntervalSec = Convert.ToInt32(cBoxMesInterval.Text);
-            Control.settings_measurement.DurationMin = Convert.ToDouble(cBoxMesDuration.Text, CultureInfo.InvariantCulture);
+            Control.settings_measurement.DurationMin = Convert.ToDouble(cBoxMesDuration.Text);
 
             // apply melting settings
             Control.melting_enabled = checkBoxEnableMelting.Checked;
@@ -108,6 +112,9 @@ namespace Miriam
 
         private void FormSettings_Load(object sender, EventArgs e)
         {
+            //for correct string <-> double convertion using '.' as a decimal separator
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             // melting settings
             checkBoxEnableMelting.Checked = Control.melting_enabled;
             CboxTempU.Text = Control.settings_melting["TUp"];

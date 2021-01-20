@@ -184,6 +184,8 @@ namespace Miriam
         public Control()
         {
             InitializeComponent();
+
+            //for correct string <-> double convertion using '.' as a decimal separator
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             //datafile_separator = '\t'; // windows doesn't handle tsv files very well :(
@@ -314,15 +316,17 @@ namespace Miriam
 
         private bool temperature_reached()
         {
-            float eps = float.Parse(settings_melting["Tolerance"], CultureInfo.InvariantCulture);
+            //for correct string <-> double convertion using '.' as a decimal separator
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            float eps = float.Parse(settings_melting["Tolerance"]);
 
-            float t_up_val = float.Parse(currentTemperatureInfo["Up"], CultureInfo.InvariantCulture);
-            float t_mid_val = float.Parse(currentTemperatureInfo["Middle"], CultureInfo.InvariantCulture);
-            float t_extra_val = float.Parse(currentTemperatureInfo["Extra"], CultureInfo.InvariantCulture);
+            float t_up_val = float.Parse(currentTemperatureInfo["Up"]);
+            float t_mid_val = float.Parse(currentTemperatureInfo["Middle"]);
+            float t_extra_val = float.Parse(currentTemperatureInfo["Extra"]);
 
-            bool t_up = (t_up_val - float.Parse(settings_melting["TUp"], CultureInfo.InvariantCulture) >= -eps);
-            bool t_mid = (t_mid_val - float.Parse(settings_melting["TMiddle"], CultureInfo.InvariantCulture) >= -eps);
-            bool t_extra = (t_extra_val - float.Parse(settings_melting["TExtra"], CultureInfo.InvariantCulture) >= -eps);
+            bool t_up = (t_up_val - float.Parse(settings_melting["TUp"]) >= -eps);
+            bool t_mid = (t_mid_val - float.Parse(settings_melting["TMiddle"]) >= -eps);
+            bool t_extra = (t_extra_val - float.Parse(settings_melting["TExtra"]) >= -eps);
             return t_up && t_mid && t_extra;
         }
 
@@ -417,8 +421,9 @@ namespace Miriam
 
                 String ReceivedData;
 
-                //RecievedData = serialPort.ReadLine();
-                //serialPort.DataReceived += new SerialDataReceivedEventHandler(responseHandler);
+                //for correct string <-> double convertion using '.' as a decimal separator
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
                 // [AT] SW 'M param' (middle wanted temperature, i.e. M 63) - FW 'temperatureMiddleSet'
                 var s = ArduinoReadout(serialPort, "M " + settings_measurement.TMiddle.ToString());
                 Console.WriteLine(s);
@@ -1096,13 +1101,17 @@ namespace Miriam
                 //folderBrowserSaveRes.SelectedPath = Miriam_Serial.Properties.Settings.Default.settFolderRes;
             }
             Console.WriteLine("folder: {0}", folderName);
-            settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid, CultureInfo.InvariantCulture);
-            settings_measurement.TUp = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureUp, CultureInfo.InvariantCulture);
-            settings_measurement.TExtra = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureExtra, CultureInfo.InvariantCulture);
-            settings_measurement.DurationMin = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settDuration, CultureInfo.InvariantCulture);
+
+            //for correct string <-> double convertion using '.' as a decimal separator
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+//            settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid, CultureInfo.InvariantCulture);
+            settings_measurement.TMiddle = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureMid);
+            settings_measurement.TUp = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureUp);
+            settings_measurement.TExtra = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settTemperatureExtra);
+            settings_measurement.DurationMin = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settDuration);
             settings_measurement.MeasureIntervalSec = Convert.ToInt32(Miriam_Serial.Properties.Settings.Default.settInterval);
-            settings_measurement.TThreshold = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold, CultureInfo.InvariantCulture);            
-            
+            settings_measurement.TThreshold = Convert.ToDouble(Miriam_Serial.Properties.Settings.Default.settBoxTemperatureThreshold);
 
             settings_melting["TUp"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureUp;
             settings_melting["TMiddle"] = Miriam_Serial.Properties.Settings.Default.meltTemperatureMid;
