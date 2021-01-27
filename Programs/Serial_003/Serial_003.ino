@@ -55,7 +55,7 @@
 //Heater pins
 #define HEAT_MIDDLE 2             // Heat 1
 #define HEAT_UPPER 3            // Heat 2
-#define HEAT_EXTRA 23            // Heat 3
+#define HEAT_EXTRA 5            // Heat 3
 
 //LED Sensors pin
 #define PANEL_LED 22
@@ -446,10 +446,10 @@ void setPin(int outputPin) {
 void Read_Assay() {
 
   //set the PIDs to zero to boost LED power
-  Output_MIDDLE = 0;
-  Output_UPPER = 0;
-  Output_EXTRA = 0;
-  computePIDs();
+  // Output_MIDDLE = 0;
+  // Output_UPPER = 0;
+  // Output_EXTRA = 0;
+  // computePIDs();
 
 //  digitalWrite(22,HIGH);
 ////  analogWrite(4,125);
@@ -752,10 +752,10 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp, aggKi, aggKd);
+    PID_MIDDLE.SetTunings(aggKp/3, aggKi/3, aggKd/3);
   }
 
-  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
+  if(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_UPPER)
   {  //we're close to setpoint, use conservative tuning parameters
     PID_UPPER.SetTunings(consKp, consKi, consKd);
     Output_UPPER = 0;
@@ -774,7 +774,7 @@ void SetTunings_PID() {
     else
     {
       //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp/10, aggKi/10, aggKd/10);
+      PID_EXTRA.SetTunings(aggKp/5, aggKi/5, aggKd/5);
     }  
 }
 
@@ -789,11 +789,11 @@ void SetTunings_PID_Melt() {
   gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
 
  
-  PID_MIDDLE.SetTunings(consKp/40, consKi/40, consKd/40);
+  PID_MIDDLE.SetTunings(consKp/50, consKi/50, consKd/50);
 
-  PID_UPPER.SetTunings(consKp/40, consKi/40, consKd/40);
+  PID_UPPER.SetTunings(consKp/20, consKi/20, consKd/20);
 
-  PID_EXTRA.SetTunings(consKp/80, consKi/80, consKd/80);
+  PID_EXTRA.SetTunings(consKp/50, consKi/50, consKd/50);
       
     
 }
