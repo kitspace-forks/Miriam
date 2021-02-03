@@ -300,7 +300,9 @@ namespace Miriam
             catch (Exception exc)
             {
                 serial.Close();
-                throw exc;
+                throw; 
+                //todo: check if the line below works
+                //throw new Exception("Version check failed.", exc);
             }
             
         }
@@ -611,8 +613,10 @@ namespace Miriam
 
             int counter = 5;
             //string msg = "Time,U,M,"; // [AT] csv file header. 
-            string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
-            msg += "OutU, OutM, OutE,"; // add output values
+            //string msg = "Time,U,M,Extra,Box,"; // [AT] csv file header. 
+            string msg = "Time,TemperatureUpper,TemperatureLower,TemperatureWire,TemperatureBox,";
+            //msg += "OutU, OutM, OutE,"; // add output values
+            msg += "HeatCommandUpper,HeatCommandLower,HeatCommandWire,";
             counter += 3;
             ninfo = counter;
 
