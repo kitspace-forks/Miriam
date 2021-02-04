@@ -300,7 +300,7 @@ namespace Miriam
             catch (Exception exc)
             {
                 serial.Close();              
-                exc.Data.Add("UserMessage", "Version check failed. Does the firmware have a version number?");
+                exc.Data.Add("UserMessage", "Version check failed. Check that the correct serial port is selected. Does the firmware have a version number?");
                 throw;                
             }
             
