@@ -299,10 +299,9 @@ namespace Miriam
             }
             catch (Exception exc)
             {
-                serial.Close();
-                throw; 
-                //todo: check if the line below works
-                //throw new Exception("Version check failed.", exc);
+                serial.Close();              
+                exc.Data.Add("UserMessage", "Version check failed. Does the firmware have a version number?");
+                throw;                
             }
             
         }
@@ -551,12 +550,20 @@ namespace Miriam
             catch (TimeoutException exc)
             {
                 string complain = "Timeout reading from Serial Port";
+                if (exc.Data.Contains("UserMessage"))
+                {
+                    complain = exc.Data["UserMessage"].ToString();
+                }
                 MessageBox.Show(complain + "\n\n" + exc.ToString());
                 return;
             }
             catch (UnauthorizedAccessException exc)
             {
                 string complain = "Serial could not be opened, please check that the device is correct one";
+                if (exc.Data.Contains("UserMessage"))
+                {
+                    complain = exc.Data["UserMessage"].ToString();
+                }
                 MessageBox.Show(complain + "\n\n" + exc.ToString());
                 return;
             }
