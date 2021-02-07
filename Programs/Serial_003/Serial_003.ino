@@ -32,6 +32,7 @@
 #include <math.h>
 #include "MyStatusLed.h"
 
+#define FIRMWARE_VERSION "2.0.0" // first release 2.0.0
 
 //Selector ping
 #define SEL_1 46                 // Selector ping 1
@@ -54,7 +55,7 @@
 //Heater pins
 #define HEAT_MIDDLE 2             // Heat 1
 #define HEAT_UPPER 3            // Heat 2
-#define HEAT_EXTRA 23            // Heat 3
+#define HEAT_EXTRA 5            // Heat 3
 
 //LED Sensors pin
 #define PANEL_LED 22
@@ -87,7 +88,8 @@
 #define STATUS_LED_OFF 'o'
 #define SET_BOX_THR 'T'
 #define MELT_HEAT  'W'
-
+#define MELT_INIT  'w'
+#define VERSION 'V'
 
 int MUL[6] = {
   A0,A1,A2,A3,A4,A5};				// Multiplexer  1
@@ -139,7 +141,7 @@ enum {
 };
 
 byte states[] = {
-  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR};
+  INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE,SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT, MELT_INIT, VERSION};
 
 
 // serial data
@@ -236,9 +238,30 @@ void loop () {
     state = 'I';
     break;
 
+  case MELT_INIT:
+
+    HEAT_ON = false;
+    MELT_ON = false;
+
+    Output_MIDDLE = 100;
+    Output_UPPER = 100;
+    Output_EXTRA = 100;
+    computePIDs();
+    
+    Serial.println(F("INIT MELT$"));
+    
+    //turn the PID's off
+//     PID_MIDDLE.SetMode(MANUAL);
+//     PID_UPPER.SetMode(MANUAL);
+//     PID_EXTRA.SetMode(MANUAL);
+       
+    state = defaultState; 
+    break;      
+      
   case CANCEL:
 
     HEAT_ON = false;
+    MELT_ON = false;
 
     Output_MIDDLE = 0;
     Output_UPPER = 0;
@@ -278,10 +301,9 @@ void loop () {
     break;
 
   case MELT_HEAT:  
-    HEAT_ON = false;
     MELT_ON = true;
-    heat_alarm = true;
-
+//    heat_alarm = true;
+    heat_alarm = false;
       
     Serial.println(F("MELTING BOARDS$"));
   
@@ -292,6 +314,13 @@ void loop () {
     state = defaultState;
     break;    
 
+  case VERSION:
+//    Serial.print(F("firmware_version: "));
+    Serial.print(FIRMWARE_VERSION);
+    Serial.println("$");
+    state = defaultState;
+    break;    
+    
   case INFO:
 
     Serial.println(String(Output_MIDDLE) + "," + String(Output_UPPER) + "," +  
@@ -323,7 +352,7 @@ void loop () {
 
   case SET_TEMP_UPPER:
 
-    Setpoint_UPPER = parameters.toInt();
+    Setpoint_UPPER = parameters.toFloat();
     Serial.print(F("NEW UPPER TEMP:"));    
     Serial.print(Setpoint_UPPER);
     Serial.println("$");
@@ -333,7 +362,7 @@ void loop () {
 
   case SET_TEMP_MIDDLE:
 
-    Setpoint_MIDDLE = parameters.toInt();  
+    Setpoint_MIDDLE = parameters.toFloat();  
     Serial.print(F("NEW MIDDLE TEMP:"));       
     Serial.print(Setpoint_MIDDLE);
     Serial.println("$");
@@ -343,7 +372,7 @@ void loop () {
     break;
 
   case SET_TEMP_EXTRA:
-    Setpoint_EXTRA = parameters.toInt();
+    Setpoint_EXTRA = parameters.toFloat();
     Serial.print(F("NEW EXTRA TEMP:"));    
     Serial.print(Setpoint_EXTRA);
     Serial.println("$");
@@ -383,7 +412,7 @@ void loop () {
     
   case SET_BOX_THR:
   
-    threshold_BOX = parameters.toInt();
+    threshold_BOX = parameters.toFloat();
     Serial.print(F("NEW TEMP THRESHOLD:"));    
     Serial.print(threshold_BOX);
     Serial.println("$"); 
@@ -417,10 +446,10 @@ void setPin(int outputPin) {
 void Read_Assay() {
 
   //set the PIDs to zero to boost LED power
-  Output_MIDDLE = 0;
-  Output_UPPER = 0;
-  Output_EXTRA = 0;
-  computePIDs();
+  // Output_MIDDLE = 0;
+  // Output_UPPER = 0;
+  // Output_EXTRA = 0;
+  // computePIDs();
 
 //  digitalWrite(22,HIGH);
 ////  analogWrite(4,125);
@@ -723,10 +752,10 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp/1, aggKi/1, aggKd/1);
+    PID_MIDDLE.SetTunings(aggKp/3, aggKi/3, aggKd/3);
   }
 
-  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
+  if(Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_UPPER)
   {  //we're close to setpoint, use conservative tuning parameters
     PID_UPPER.SetTunings(consKp, consKi, consKd);
     Output_UPPER = 0;
@@ -734,7 +763,7 @@ void SetTunings_PID() {
   else
   {
     //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp/1, aggKi/1, aggKd/1);
+    PID_UPPER.SetTunings(aggKp, aggKi, aggKd);
   }
   
   if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
@@ -745,7 +774,7 @@ void SetTunings_PID() {
     else
     {
       //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp/8, aggKi/8, aggKd/8);
+      PID_EXTRA.SetTunings(aggKp/5, aggKi/5, aggKd/5);
     }  
 }
 
@@ -759,38 +788,14 @@ void SetTunings_PID_Melt() {
   gap2 = abs(Setpoint_UPPER - Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
   gap3 = abs(Setpoint_EXTRA - Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)); //distance away from setpoint
 
-  if(Temperature(TH_MIDDLEBED_2,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_MIDDLE)
-  {  //we're close to setpoint, use conservative tuning parameters
-    PID_MIDDLE.SetTunings(consKp, consKi, consKd);
-    Output_MIDDLE = 0;
-  }
-  else
-  {
-    //we're far from setpoint, use aggressive tuning parameters
-    PID_MIDDLE.SetTunings(aggKp/80, aggKi/80, aggKd/80);
-  }
+ 
+  PID_MIDDLE.SetTunings(consKp/50, consKi/50, consKd/50);
 
-  if(Setpoint_UPPER<Temperature(TH_UPPERBED,T_CELSIUS,NCP18XH103F03RB,10000.0f))
-  {  //we're close to setpoint, use conservative tuning parameters
-    PID_UPPER.SetTunings(consKp, consKi, consKd);
-    Output_UPPER = 0;
-  }
-  else
-  {
-    //we're far from setpoint, use aggressive tuning parameters
-    PID_UPPER.SetTunings(aggKp/80, aggKi/80, aggKd/80);
-  }
-  
-  if(Temperature(TH_EXTRA,T_CELSIUS,NCP18XH103F03RB,10000.0f)>Setpoint_EXTRA)
-    {  //we're close to setpoint, use conservative tuning parameters
-      PID_EXTRA.SetTunings(consKp, consKi, consKd);
-      Output_EXTRA = 0;
-    }
-    else
-    {
-      //we're far from setpoint, use aggressive tuning parameters
-      PID_EXTRA.SetTunings(aggKp/100, aggKi/100, aggKd/100);
-    }  
+  PID_UPPER.SetTunings(consKp/20, consKi/20, consKd/20);
+
+  PID_EXTRA.SetTunings(consKp/50, consKi/50, consKd/50);
+      
+    
 }
 
 

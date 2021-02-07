@@ -23,5 +23,26 @@
     <Setting Name="settBoxTemperatureThreshold" Type="System.String" Scope="User">
       <Value Profile="(Default)">45</Value>
     </Setting>
+    <Setting Name="meltTemperatureUp" Type="System.String" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="meltTemperatureMid" Type="System.String" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="meltTemperatureExtra" Type="System.String" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="meltInterval" Type="System.String" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="meltTolerance" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="meltingEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="filenamePrefix" Type="System.String" Scope="User">
+      <Value Profile="(Default)">miriam</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

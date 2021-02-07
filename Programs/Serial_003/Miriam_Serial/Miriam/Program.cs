@@ -21,7 +21,8 @@ namespace Miriam
             
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Control());
+            Control MainForm = new Control();
+            Application.Run(MainForm);
         }
         
 
