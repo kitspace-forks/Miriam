@@ -2,26 +2,49 @@ name: CI
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ["**"]
   pull_request:
-    branches: [ '**' ]
+    branches: ["**"]
 
 jobs:
   build-application-windows:
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v2
-    - uses: microsoft/setup-msbuild@v1.0.2
-    - uses: NuGet/setup-nuget@v1.0.5
-    - name: Restore Packages
-      run: nuget restore Programs/Serial_003/Miriam_Serial/Miriam.sln
-    - name: build
-      run: msbuild Programs/Serial_003/Miriam_Serial/Miriam.sln /p:Configuration=Release /p:Platform="Any CPU"
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: miriam-application-windows
-        path: D:\a\Miriam\Miriam\Programs\Serial_003\Miriam_Serial\MiriamTests\bin\Release\Miriam_Serial.exe
+      - uses: actions/checkout@v2
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 0
+        run: mkdir artifact
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 1
+        run: mkdir artifact\miriam-arduino-firmware-source
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 2
+        run: mkdir artifact\miriam-arduino-firmware-source\Serial_003
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 3
+        run: copy .\Programs\Serial_003\Serial_003.ino .\artifact\miriam-arduino-firmware-source\Serial_003\
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 3.1
+        run: copy .\Programs\Serial_003\MyStatusLed.h .\artifact\miriam-arduino-firmware-source\Serial_003\
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 3.2
+        run: copy .\Programs\Serial_003\MyStatusLed.cpp .\artifact\miriam-arduino-firmware-source\Serial_003\
+      - name: Prepare copy of Arduino source to distribute with Windows EXE 4
+        run: copy .\Programs\README-arduino-firmware.md .\artifact\miriam-arduino-firmware-source\README.md
+      - name: Make Arduino library
+        uses: papeloto/action-zip@v1
+        with:
+          files: Programs\PID_v1
+          dest: artifact\miriam-arduino-firmware-source\PID_v1.zip
+      - uses: microsoft/setup-msbuild@v1.0.2
+      - uses: NuGet/setup-nuget@v1.0.5
+      - name: Restore Packages
+        run: nuget restore Programs/Serial_003/Miriam_Serial/Miriam.sln
+      - name: build
+        run: msbuild Programs/Serial_003/Miriam_Serial/Miriam.sln /p:Configuration=Release /p:Platform="Any CPU"
+      - name: copy Miriam executable
+        run: copy D:\a\Miriam\Miriam\Programs\Serial_003\Miriam_Serial\MiriamTests\bin\Release\Miriam_Serial.exe artifact\Miriam_Serial.exe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: miriam
+          path: |
+            artifact/miriam-arduino-firmware-source
+            artifact/Miriam_Serial.exe
 
   build-firmware:
     # Based on https://legion2.github.io/2020/03/27/from-arduino-builder-to-arduino-cli.html

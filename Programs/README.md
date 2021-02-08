@@ -16,10 +16,3 @@ You should have received a copy of the GNU General Public License along with thi
 Firmware is written with [Arduino IDE](https://www.arduino.cc/en/main/software) and the software with Visual Studio 2015 open community using C#.
 
 * Serial_003 is meant for communication between computer and Miriam via USB cable and string messages
-
-The following programs were removed (see original https://github.com/miroculus/Miriam/tree/master/Programs):
-
-* Wifi_003 is for interaction between controller and Miriam over the same wifi network
-* Wifi_004 webservice controls Miriam
-
-
