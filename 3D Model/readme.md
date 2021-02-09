@@ -3,6 +3,8 @@
 Miriam box is composed of 3D printed parts. It is designed to fit the bed of Prusa i3 mk3 printer.
 Printer setting is: PETG with 20% cubic infill, 200% speed.
 
+**Attension!!!** If you need to use melting curve, please use ABS for printing the box.
+
 ![](Miriam_exploded_view.jpg)
 Exploded view with part list of Miriam. [High resolution version for printing](Miriam_exploded_view.pdf)
 
