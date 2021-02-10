@@ -8,8 +8,9 @@ This requires the [Arduino software](https://www.arduino.cc/en/Guide/Windows).
 
 ## Installing
 
-1. The `PID_v1` library should be installed in the Arduino IDE [according to these
-instructions](https://www.arduino.cc/en/guide/libraries).
+1. The `PID_v1` library should be installed in the Arduino IDE [according to
+   these instructions](https://www.arduino.cc/en/guide/libraries). Follow the
+   "Importing a .zip Library" section and select `PID_v1.zip`.
 
 2. In the Arduino IDE, go to "Tools > Board" then select `Arduino Mega or Mega
    2560`.
