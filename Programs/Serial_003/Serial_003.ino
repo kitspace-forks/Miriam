@@ -454,6 +454,30 @@ void Read_Assay()
   ////  analogWrite(4,125);
   //  delay(500);
 
+  // Clear old values sitting in this variable by setting to 0.
+  for (int k = 0; k < 8; k++)
+  {
+    for (int l = 0; l < 12; l++)
+    {
+      sensorValues[k][l] = 0;
+    }
+  }
+
+  // Empty possibly stored charge.
+  // Take 15 samples.
+  for (int j = 0; j < 15; j++)
+  {
+    for (int i = 0; i < 16; i++)
+    {
+      setPin(i); // choose an input pin all multiplexers
+      for (int k = 0; k < 5; k++)
+      {
+        ReadAssayEmpty(i);
+      }
+    }
+    delay(10);
+  }
+
   const int N_SAMPLES = 10;
 
   // take N_SAMPLES samples for measurement
@@ -486,32 +510,6 @@ void Read_Assay()
   }
 
   displayData();
-
-  //Empty the array
-  for (int k = 0; k < 8; k++)
-  {
-    for (int l = 0; l < 12; l++)
-    {
-      sensorValues[k][l] = 0;
-    }
-  }
-
-  //Empty possibly stored charge
-  //take 15 samples for measurement
-  for (int j = 0; j < 15; j++)
-  {
-    for (int i = 0; i < 16; i++)
-    {
-      setPin(i); // choose an input pin all multiplexers
-
-      for (int k = 0; k < 5; k++)
-      {
-
-        ReadAssayEmpty(i);
-      }
-    }
-    delay(10);
-  }
 }
 
 void ReadAssayEmpty(int i)
