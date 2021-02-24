@@ -90,7 +90,7 @@
 #define VERSION 'V'
 
 int MUL[6] = {
-    A0, A1, A2, A3, A4, A5}; // Multiplexer  1
+    A0, A1, A2, A3, A4, A5}; // These are the 6 analog inputs. One per multiplexer.
 
 byte controlLPins[] = {
     B00000000,
@@ -110,7 +110,7 @@ byte controlLPins[] = {
     B00001110,
     B00001111};
 
-// holds incoming values from Multiplexer
+// Holds incoming values from Multiplexer. This is our 96 well plate.
 int sensorValues[8][12] = {};
 
 //Define the aggressive and conservative Tuning Parameters
@@ -434,6 +434,10 @@ void play_sound()
 
 void setPin(int outputPin)
 {
+  // This selects the multiplexer state on all multiplexers. Since we use the
+  // multiplexer only for reading the sensors, this picks the input to the
+  // multiplexer from channel 0 through channel 15 (inclusive) to be output on
+  // the output pin of the multiplexer.
   PORTL = controlLPins[outputPin];
 }
 
@@ -450,18 +454,21 @@ void Read_Assay()
   ////  analogWrite(4,125);
   //  delay(500);
 
-  //take 5 samples for measurement
-  for (int j = 0; j < 10; j++)
+  const int N_SAMPLES = 10;
+
+  // take N_SAMPLES samples for measurement
+  for (int j = 0; j < N_SAMPLES; j++)
   {
 
+    // Iterate through the channels on the multiplexer.
     for (int i = 0; i < 16; i++)
     {
-      setPin(i); // choose an input pin
-      digitalWrite(22, HIGH);
-      delayMicroseconds(100);
-      ReadAssay(i);
-      digitalWrite(22, LOW);
-      delayMicroseconds(50);
+      setPin(i);              // Choose an input pin all multiplexers.
+      digitalWrite(22, HIGH); // Turn on LEDs.
+      delayMicroseconds(100); // Wait.
+      ReadAssay(i);           // Read all analog inputs, add into `sensorValues`.
+      digitalWrite(22, LOW);  // Turn off LEDs.
+      delayMicroseconds(50);  // Wait.
     }
     //    delay(1000);
   }
@@ -474,7 +481,7 @@ void Read_Assay()
   {
     for (int l = 0; l < 12; l++)
     {
-      sensorValues[k][l] /= 10;
+      sensorValues[k][l] /= N_SAMPLES;
     }
   }
 
@@ -490,12 +497,12 @@ void Read_Assay()
   }
 
   //Empty possibly stored charge
-  //take 5 samples for measurement
+  //take 15 samples for measurement
   for (int j = 0; j < 15; j++)
   {
     for (int i = 0; i < 16; i++)
     {
-      setPin(i); // choose an input pin
+      setPin(i); // choose an input pin all multiplexers
 
       for (int k = 0; k < 5; k++)
       {
@@ -506,6 +513,7 @@ void Read_Assay()
     delay(10);
   }
 }
+
 void ReadAssayEmpty(int i)
 {
 
@@ -567,6 +575,7 @@ void ReadAssayEmpty(int i)
   }
 }
 
+// i is the input pin on all multiplexers.
 void ReadAssay(int i)
 {
 
