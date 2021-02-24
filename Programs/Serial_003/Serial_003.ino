@@ -478,36 +478,44 @@ void Read_Assay()
     delay(10);
   }
 
-  const int N_SAMPLES = 10;
-
-  // take N_SAMPLES samples for measurement
-  for (int j = 0; j < N_SAMPLES; j++)
+  // Iterate through the channels on the multiplexer.
+  for (int i = 0; i < 16; i++)
   {
+    setPin(i);              // Choose an input pin all multiplexers.
+    digitalWrite(22, HIGH); // Turn on LEDs.
 
-    // Iterate through the channels on the multiplexer.
-    for (int i = 0; i < 16; i++)
-    {
-      setPin(i);              // Choose an input pin all multiplexers.
-      digitalWrite(22, HIGH); // Turn on LEDs.
-      delayMicroseconds(100); // Wait.
-      ReadAssay(i);           // Read all analog inputs, add into `sensorValues`.
-      digitalWrite(22, LOW);  // Turn off LEDs.
-      delayMicroseconds(50);  // Wait.
-    }
-    //    delay(1000);
+    ReadAssay(i); // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(10); // Wait.
+    ReadAssay(i);          // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(10); // Wait.
+    ReadAssay(i);          // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(10); // Wait.
+    ReadAssay(i);          // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(10); // Wait.
+    ReadAssay(i);          // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(10); // Wait.
+    ReadAssay(i);          // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(100); // Wait.
+    ReadAssay(i);           // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(500); // Wait.
+    ReadAssay(i);           // Read all analog inputs, add into `sensorValues`.
+
+    delayMicroseconds(10); // Wait.
+    ReadAssay(i);          // Read all analog inputs, add into `sensorValues`.
+
+    digitalWrite(22, LOW); // Turn off LEDs.
+    delayMicroseconds(50); // Wait.
   }
 
   //  digitalWrite(22,LOW);
   //  analogWrite(4,0);
-
-  //Calculate the average of the measurements for each sample
-  for (int k = 0; k < 8; k++)
-  {
-    for (int l = 0; l < 12; l++)
-    {
-      sensorValues[k][l] /= N_SAMPLES;
-    }
-  }
 
   displayData();
 }
