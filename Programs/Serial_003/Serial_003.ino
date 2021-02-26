@@ -465,7 +465,7 @@ void Read_Assay()
     {
       setPin(i);              // Choose an input pin all multiplexers.
       digitalWrite(22, HIGH); // Turn on LEDs.
-      delayMicroseconds(100); // Wait.
+      delayMicroseconds(500); // Wait.
       ReadAssay(i);           // Read all analog inputs, add into `sensorValues`.
       digitalWrite(22, LOW);  // Turn off LEDs.
       delayMicroseconds(50);  // Wait.
