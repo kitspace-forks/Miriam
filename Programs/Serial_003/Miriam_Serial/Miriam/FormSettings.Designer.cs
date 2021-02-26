@@ -62,6 +62,8 @@
             this.label11 = new System.Windows.Forms.Label();
             this.folderBrowserSaveRes = new System.Windows.Forms.FolderBrowserDialog();
             this.textBoxFolder = new System.Windows.Forms.TextBox();
+            this.buttonSaveSettings = new System.Windows.Forms.Button();
+            this.buttonLoadSettings = new System.Windows.Forms.Button();
             this.panelMelting.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -405,11 +407,33 @@
             this.textBoxFolder.TabIndex = 38;
             this.textBoxFolder.Text = "(results folder)";
             // 
+            // buttonSaveSettings
+            // 
+            this.buttonSaveSettings.Location = new System.Drawing.Point(254, 334);
+            this.buttonSaveSettings.Name = "buttonSaveSettings";
+            this.buttonSaveSettings.Size = new System.Drawing.Size(124, 23);
+            this.buttonSaveSettings.TabIndex = 39;
+            this.buttonSaveSettings.Text = "Save settings";
+            this.buttonSaveSettings.UseVisualStyleBackColor = true;
+            this.buttonSaveSettings.Click += new System.EventHandler(this.buttonSaveSettings_Click);
+            // 
+            // buttonLoadSettings
+            // 
+            this.buttonLoadSettings.Location = new System.Drawing.Point(254, 305);
+            this.buttonLoadSettings.Name = "buttonLoadSettings";
+            this.buttonLoadSettings.Size = new System.Drawing.Size(124, 23);
+            this.buttonLoadSettings.TabIndex = 40;
+            this.buttonLoadSettings.Text = "Load settings";
+            this.buttonLoadSettings.UseVisualStyleBackColor = true;
+            this.buttonLoadSettings.Click += new System.EventHandler(this.buttonLoadSettings_Click);
+            // 
             // FormSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 415);
+            this.Controls.Add(this.buttonLoadSettings);
+            this.Controls.Add(this.buttonSaveSettings);
             this.Controls.Add(this.textBoxFolder);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.buttonSaveAs);
@@ -469,5 +493,7 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserSaveRes;
         private System.Windows.Forms.TextBox textBoxFolder;
+        private System.Windows.Forms.Button buttonSaveSettings;
+        private System.Windows.Forms.Button buttonLoadSettings;
     }
 }

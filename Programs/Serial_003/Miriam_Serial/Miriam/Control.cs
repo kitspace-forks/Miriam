@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.VisualBasic.FileIO;
+using YamlDotNet.Serialization;
 //using Miriam_Serial;
 
 /*
@@ -90,6 +91,16 @@ namespace Miriam
             public double DurationMin;
         }
         public static SettingsMeasurement settings_measurement;
+
+        public class AssaySettings
+        {
+            public Dictionary<string, string> melting;
+            public SettingsMeasurement measurement;
+            public bool melting_enabled;
+        }
+        public static AssaySettings settings = new AssaySettings();
+
+
         private static string ArduinoReadout(SerialPort serialPort, string command)
         {
             serialPort.Write(command + "\r\n");
@@ -529,8 +540,21 @@ namespace Miriam
             Console.WriteLine("Creating csv: {0}", csv_filename);
             string metadata = $"# software-version: {software_version}\n# firmware-version: {firmware_version}";
             File.WriteAllText(filename, metadata + Environment.NewLine, Encoding.UTF8);
-            File.AppendAllText(filename, header.Remove(header.Length - 1, 1) + Environment.NewLine, Encoding.UTF8);
+            string yaml_comment_settings = get_settings_string();
+            File.AppendAllText(filename, yaml_comment_settings + Environment.NewLine, Encoding.UTF8);
+            File.AppendAllText(filename, header.Remove(header.Length - 1, 1) + Environment.NewLine, Encoding.UTF8); //header without the last character (separator)
             return filename;
+        }
+
+        private string get_settings_string(bool as_comment=true)
+        {
+            var stringBuilder = new StringBuilder();
+            var serializer = new Serializer();
+
+            var yaml_all = serializer.Serialize(settings);            
+            stringBuilder.AppendLine("\n" + yaml_all);
+            if (as_comment) stringBuilder.Replace("\n", "\n# ");
+            return stringBuilder.ToString();
         }
 
         private void ButtonStart_Click(object sender, EventArgs e)
@@ -1070,6 +1094,10 @@ namespace Miriam
             melting_enabled = Miriam_Serial.Properties.Settings.Default.meltingEnabled;
 
             filename_prefix = Miriam_Serial.Properties.Settings.Default.filenamePrefix;
+
+            settings.measurement = settings_measurement;
+            settings.melting = settings_melting;
+            settings.melting_enabled = melting_enabled;
 
             SettingsForm = new FormSettings();
         }

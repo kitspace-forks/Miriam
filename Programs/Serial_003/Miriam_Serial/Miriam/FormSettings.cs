@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamlDotNet.Serialization;
+//using YamlDotNet.Serialization;
 
 
 namespace Miriam
@@ -74,6 +76,14 @@ namespace Miriam
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
+            apply_settings();
+
+            this.DialogResult = DialogResult.OK;
+        }
+
+        private void apply_settings()
+        {
+
             //for correct string <-> double convertion using '.' as a decimal separator
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -97,7 +107,11 @@ namespace Miriam
             Control.folderName = folderBrowserSaveRes.SelectedPath;
             Control.filename_prefix = textBoxFnamePrefix.Text;
 
-            this.DialogResult = DialogResult.OK;
+            // update the settings (redundant copy!)
+            Control.settings.measurement = Control.settings_measurement;
+            Control.settings.melting = Control.settings_melting;
+            Control.settings.melting_enabled = Control.melting_enabled;
+
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
@@ -152,6 +166,30 @@ namespace Miriam
 
             e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
 
+        }
+
+        private void buttonSaveSettings_Click(object sender, EventArgs e)
+        {
+            apply_settings();
+
+            var stringBuilder = new StringBuilder();
+            var serializer = new Serializer();
+
+            var yaml_all = serializer.Serialize(Control.settings);
+            Console.WriteLine(yaml_all);
+
+            stringBuilder.AppendLine("\n" + yaml_all);
+            stringBuilder.Replace("\n", "\n # ");
+            Console.WriteLine(stringBuilder.ToString());
+            //  Control.settings_measurement
+            // Control.settings_melting
+            // Control.melting_enabled
+
+        }
+
+        private void buttonLoadSettings_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }
