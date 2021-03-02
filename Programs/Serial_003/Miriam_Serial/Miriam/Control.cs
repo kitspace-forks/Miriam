@@ -16,7 +16,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.VisualBasic.FileIO;
+using YamlDotNet.RepresentationModel;
+//using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+
 //using Miriam_Serial;
 
 /*
@@ -292,6 +296,22 @@ namespace Miriam
             //Results.Visible = true;
         }
 
+        /*
+        internal static void load_yam_settings(string fileName)
+        {
+            var deserializer = new DeserializerBuilder().Build();
+
+            using (var reader = new StreamReader(fileName))
+            {
+                // Load the stream
+                var yaml = new YamlStream();
+                yaml.Load(reader);
+                Console.WriteLine(yaml.ToString());
+                //Control.settings = deserializer.Deserialize<AssaySettings>(yaml.ToString());                
+            }         
+        }
+        */
+
         private bool check_firmware_version(string port)
         {
             SerialPort serial = new SerialPortForHeat(port);
@@ -551,8 +571,8 @@ namespace Miriam
             var stringBuilder = new StringBuilder();
             var serializer = new Serializer();
 
-            var yaml_all = serializer.Serialize(settings);            
-            stringBuilder.AppendLine("\n" + yaml_all);
+            var yaml_all_settings = serializer.Serialize(settings);            
+            stringBuilder.AppendLine("\n" + yaml_all_settings);
             if (as_comment) stringBuilder.Replace("\n", "\n# ");
             return stringBuilder.ToString();
         }

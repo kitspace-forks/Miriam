@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 //using YamlDotNet.Serialization;
 
@@ -16,7 +18,7 @@ using YamlDotNet.Serialization;
 namespace Miriam
 {
     public partial class FormSettings : Form
-    {
+    {        
         public FormSettings()
         {
             InitializeComponent();
@@ -178,18 +180,103 @@ namespace Miriam
             var yaml_all = serializer.Serialize(Control.settings);
             Console.WriteLine(yaml_all);
 
-            stringBuilder.AppendLine("\n" + yaml_all);
-            stringBuilder.Replace("\n", "\n # ");
-            Console.WriteLine(stringBuilder.ToString());
-            //  Control.settings_measurement
-            // Control.settings_melting
-            // Control.melting_enabled
-
+            SaveFileDialog saveSettingsYaml = new SaveFileDialog();
+            saveSettingsYaml.InitialDirectory = folderBrowserSaveRes.SelectedPath;
+            saveSettingsYaml.FileName = "miriam_settings.yaml";
+            saveSettingsYaml.Filter = "Yaml files|*.yaml;*.yml|All files|*.*";
+            saveSettingsYaml.Title = "Save measurement settings...";
+            saveSettingsYaml.ShowDialog();
+            if (saveSettingsYaml.FileName != "")
+            {
+                File.WriteAllText(saveSettingsYaml.FileName, yaml_all + Environment.NewLine);
+            }
         }
 
         private void buttonLoadSettings_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            OpenFileDialog loadSettingsYaml = new OpenFileDialog();
+            loadSettingsYaml.InitialDirectory = folderBrowserSaveRes.SelectedPath;
+            loadSettingsYaml.FileName = "miriam_settings.yaml";
+            loadSettingsYaml.Filter = "Yaml files|*.yaml;*.yml|All files|*.*";
+            loadSettingsYaml.Title = "Load measurement settings...";
+            loadSettingsYaml.ShowDialog();
+
+            if (loadSettingsYaml.FileName != "")
+            {
+                Console.WriteLine("loading file: {0}", loadSettingsYaml.FileName);
+                //                Control.load_yam_settings(loadSettingsYaml.FileName);
+
+                var deserializer = new DeserializerBuilder().Build();
+
+                using (var reader = new StreamReader(loadSettingsYaml.FileName))
+                {
+                    // Load the stream
+                    var yaml = new YamlStream();
+                    yaml.Load(reader);
+                    var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
+
+                    var measurement_params = (YamlMappingNode)mapping.Children[new YamlScalarNode("measurement")];
+                    var melting_params = (YamlMappingNode)mapping.Children[new YamlScalarNode("melting")];
+
+                    foreach (var entry in mapping.Children)
+                    {
+                        var key = ((YamlScalarNode)entry.Key).Value;
+                        Console.WriteLine(key);
+                        if (key.ToString() == "melting_enabled")
+                            checkBoxEnableMelting.Checked = bool.Parse(entry.Value.ToString());
+                    }
+
+                    foreach (var entry in measurement_params.Children)
+                    {
+                        var key = ((YamlScalarNode)entry.Key).Value;
+                        Console.WriteLine(key);
+                        switch (key)
+                        {
+                            case "TUp":
+                                cBoxMesUTemp.Text = entry.Value.ToString();
+                                break;
+                            case "TMiddle":
+                                cBoxMesMTemp.Text = entry.Value.ToString();
+                                break;
+                            case "TExtra":
+                                cBoxMesETemp.Text = entry.Value.ToString();
+                                break;
+                            case "TThreshold":
+                                cBoxMesThrTemp.Text = entry.Value.ToString();
+                                break;
+                            case "MeasureIntervalSec":
+                                cBoxMesInterval.Text = entry.Value.ToString();
+                                break;
+                            case "DurationMin":
+                                cBoxMesDuration.Text = entry.Value.ToString();
+                                break;
+                        }
+                    }
+                    foreach (var entry in melting_params.Children)
+                    {
+                        var key = ((YamlScalarNode)entry.Key).Value;
+                        Console.WriteLine(key);
+                        switch (key)
+                        {
+                            case "TUp":
+                                CboxTempU.Text = entry.Value.ToString();
+                                break;
+                            case "TMiddle":
+                                CboxTempM.Text = entry.Value.ToString();
+                                break;
+                            case "TExtra":
+                                CboxTempE.Text = entry.Value.ToString();
+                                break;
+                            case "Interval":
+                                CboxInterval.Text = entry.Value.ToString();
+                                break;
+                            case "Tolerance":
+                                CboxTolerance.Text = entry.Value.ToString();
+                                break;
+                        }
+                    }
+                }
+            }   
         }
     }
 }

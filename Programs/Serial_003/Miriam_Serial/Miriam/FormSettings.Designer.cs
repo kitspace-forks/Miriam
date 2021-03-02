@@ -413,7 +413,7 @@
             this.buttonSaveSettings.Name = "buttonSaveSettings";
             this.buttonSaveSettings.Size = new System.Drawing.Size(124, 23);
             this.buttonSaveSettings.TabIndex = 39;
-            this.buttonSaveSettings.Text = "Save settings";
+            this.buttonSaveSettings.Text = "Apply and export";
             this.buttonSaveSettings.UseVisualStyleBackColor = true;
             this.buttonSaveSettings.Click += new System.EventHandler(this.buttonSaveSettings_Click);
             // 
@@ -423,7 +423,7 @@
             this.buttonLoadSettings.Name = "buttonLoadSettings";
             this.buttonLoadSettings.Size = new System.Drawing.Size(124, 23);
             this.buttonLoadSettings.TabIndex = 40;
-            this.buttonLoadSettings.Text = "Load settings";
+            this.buttonLoadSettings.Text = "Import settings";
             this.buttonLoadSettings.UseVisualStyleBackColor = true;
             this.buttonLoadSettings.Click += new System.EventHandler(this.buttonLoadSettings_Click);
             // 
