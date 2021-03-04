@@ -29,6 +29,7 @@
 
 #include <PID_v1.h>
 #include <math.h>
+#include <EEPROM.h>
 #include "MyStatusLed.h"
 
 #define FIRMWARE_VERSION "2.0.0" // first release 2.0.0
@@ -105,6 +106,10 @@ byte controlLPins[] = {
 // Holds incoming values from Multiplexer. This is our 96 well plate.
 int sensorValues[8][12] = {};
 
+// Hold calibration values
+float cfu_scale[8][12] = {};
+float cfu_offset[8][12] = {};
+
 //Define the aggressive and conservative Tuning Parameters
 double aggKp = 4, aggKi = 0.4, aggKd = 4;        // d2
 double consKp = 1, consKi = 0.05, consKd = 0.25; //1, 0.25
@@ -150,6 +155,11 @@ MyStatusLed status_led(STATUS_LED_PIN, 500, 500);
 
 void setup()
 {
+
+  // Load the calibration values for the sensors.
+  load_eeprom_array(1, cfu_scale);
+  load_eeprom_array(1 + 96 * 4, cfu_offset);
+
   DDRL = DDRL | B00001111; // this sets pins D3 to D7 as outputs
 
   // Temperature Sensors pin
@@ -180,6 +190,40 @@ void setup()
 
   Serial.begin(9600); // Begin the serial monitor at 9600bps
   Serial.println(F("Hope your day is nice and shiny!"));
+}
+
+void load_eeprom_array(int start_address, float (&array)[8][12])
+{
+  int addr = start_address;
+  for (char row = 0; row < 8; row++)
+  {
+    for (char col = 0; col < 12; col++)
+    {
+      char b[4];
+      b[0] = EEPROM.read(addr++);
+      b[1] = EEPROM.read(addr++);
+      b[2] = EEPROM.read(addr++);
+      b[3] = EEPROM.read(addr++);
+      array[row][col] = *(float *)(&b[0]);
+    }
+  }
+}
+
+void store_eeprom_array(int start_address, const float (&array)[8][12])
+{
+  int addr = start_address;
+  for (char row = 0; row < 8; row++)
+  {
+    for (char col = 0; col < 12; col++)
+    {
+      char b[4];
+      *(float *)(&b[0]) = array[row][col];
+      EEPROM.write(addr++, b[0]);
+      EEPROM.write(addr++, b[1]);
+      EEPROM.write(addr++, b[2]);
+      EEPROM.write(addr++, b[3]);
+    }
+  }
 }
 
 void loop()
