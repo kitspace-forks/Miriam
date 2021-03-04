@@ -33,12 +33,6 @@
 
 #define FIRMWARE_VERSION "2.0.0" // first release 2.0.0
 
-//Selector ping
-#define SEL_1 46 // Selector ping 1
-#define SEL_2 47 // Selector ping 2
-#define SEL_3 48 // Selector ping 3
-#define SEL_4 49 // Selector ping 4
-
 //Temperature Sensors pin
 #define TH_BOX A11        // Temperature Sensor 2
 #define TH_MIDDLEBED_2 A9 // Temperature Sensor 3
@@ -48,8 +42,6 @@
 #define OPTIMAL_MIDDLE_TEMP 63
 #define OPTIMAL_UPPER_TEMP 80
 #define OPTIMAL_EXTRA_TEMP 63
-#define IDDLE_MIDDLE_TEMP 30
-#define IDDLE_UPPER_TEMP 20
 //#define Threshold_temp 0.5
 //Heater pins
 #define HEAT_MIDDLE 2 // Heat 1
@@ -270,9 +262,6 @@ void loop()
     PID_MIDDLE.SetMode(MANUAL);
     PID_UPPER.SetMode(MANUAL);
     PID_EXTRA.SetMode(MANUAL);
-
-    //Setpoint_MIDDLE = IDDLE_MIDDLE_TEMP;
-    //Setpoint_UPPER = IDDLE_UPPER_TEMP;
 
     status_led.SwitchMode(LED_OFF);
 
