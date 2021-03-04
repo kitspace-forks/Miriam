@@ -81,6 +81,9 @@
 #define MELT_HEAT 'W'
 #define MELT_INIT 'w'
 #define VERSION 'V'
+#define SET_CALIBRATION_SCALE 'x'
+#define SET_CALIBRATION_OFFSET 'X'
+#define STORE_CALIBRATION 'S'
 
 int MUL[6] = {
     A0, A1, A2, A3, A4, A5}; // These are the 6 analog inputs. One per multiplexer.
@@ -132,7 +135,25 @@ enum
 };
 
 byte states[] = {
-    INIT, CANCEL, HEAT_BOARDS, INFO, SET_TEMP_UPPER, SET_TEMP_MIDDLE, SET_TEMP_EXTRA, READ_ASSAY, PLAY_SOUND, STATUS_LED_ON, STATUS_LED_OFF, SET_BOX_THR, MELT_HEAT, MELT_INIT, VERSION};
+    INIT,
+    CANCEL,
+    HEAT_BOARDS,
+    INFO,
+    SET_TEMP_UPPER,
+    SET_TEMP_MIDDLE,
+    SET_TEMP_EXTRA,
+    READ_ASSAY,
+    PLAY_SOUND,
+    STATUS_LED_ON,
+    STATUS_LED_OFF,
+    SET_BOX_THR,
+    MELT_HEAT,
+    MELT_INIT,
+    VERSION,
+    SET_CALIBRATION_SCALE,
+    SET_CALIBRATION_OFFSET,
+    STORE_CALIBRATION,
+};
 
 // serial data
 String inputString = "                         "; // a string to hold incoming data
@@ -224,6 +245,28 @@ void store_eeprom_array(int start_address, const float (&array)[8][12])
       EEPROM.write(addr++, b[3]);
     }
   }
+}
+
+bool get_value(int *row, int *col, float *value, String &parameters)
+{
+  String row_str;
+  String col_str;
+  String val_str;
+
+  if (parameters[2] == ' ')
+  {
+    row_str = parameters.substring(0, 2);
+    *row = row_str.toInt();
+    if (parameters[5] == ' ')
+    {
+      col_str = parameters.substring(3, 5);
+      *col = col_str.toInt();
+      val_str = parameters.substring(6);
+      *value = val_str.toFloat();
+      return true;
+    }
+  }
+  return false;
 }
 
 void loop()
@@ -347,6 +390,34 @@ void loop()
     Serial.print(FIRMWARE_VERSION);
     Serial.println("$");
     state = defaultState;
+    break;
+
+  case SET_CALIBRATION_SCALE:
+  {
+    int row, col;
+    float value;
+    if (get_value(&row, &col, &value, parameters))
+    {
+      cfu_scale[row][col] = value;
+    }
+  }
+  break;
+
+  case SET_CALIBRATION_OFFSET:
+  {
+    int row, col;
+    float value;
+    if (get_value(&row, &col, &value, parameters))
+    {
+      cfu_offset[row][col] = value;
+    }
+  }
+  break;
+
+  case STORE_CALIBRATION:
+    store_eeprom_array(1, cfu_scale);
+    store_eeprom_array(1 + 96 * 4, cfu_offset);
+    EEPROM.write(0, 1);
     break;
 
   case INFO:
@@ -684,7 +755,9 @@ void displayData()
 
     for (int i = 0; i < 12; i++)
     {
-      str = str + sensorValues[j][i] + ",";
+      // compute the calibrated fluorescence
+      float cfu_value = sensorValues[j][i] * cfu_scale[j][i] + cfu_offset[j][i];
+      str = str + cfu_value + ",";
     }
   }
   Serial.print(str + "$");
