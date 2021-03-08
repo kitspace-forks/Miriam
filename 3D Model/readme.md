@@ -30,7 +30,7 @@ Cover is meant to hide the Arduino mega and shield in the back of the case.
 
 Cut the filter and glue it in the middle of these two filters. The bottom one is toward the sensor board.
 
-## [lock.stl](lock.stl) and [lock_bar.stl](lock_bar.stl)
+## [lock.stl](lock.stl) and [lock_bar_new.stl](lock_bar_new.stl)
 
 The lock is meant to tighten the lid during testing.
 
