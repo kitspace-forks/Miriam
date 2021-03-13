@@ -261,7 +261,6 @@ void loop()
     Output_MIDDLE = 0;
     Output_UPPER = 0;
     Output_EXTRA = 0;
-    computePIDs();
 
     Serial.println(F("Cancel$"));
     //delay(4000);
