@@ -81,7 +81,7 @@
 #define MELT_HEAT 'W'
 #define MELT_INIT 'w'
 #define VERSION 'V'
-#define SET_CALIBRATION_SCALE 'x'
+#define SET_CALIBRATION_SLOPE 'x'
 #define SET_CALIBRATION_OFFSET 'X'
 #define STORE_CALIBRATION 'S'
 
@@ -110,7 +110,7 @@ byte controlLPins[] = {
 int sensorValues[8][12] = {};
 
 // Hold calibration values
-float cfu_scale[8][12] = {};
+float cfu_slope[8][12] = {};
 float cfu_offset[8][12] = {};
 
 //Define the aggressive and conservative Tuning Parameters
@@ -150,7 +150,7 @@ byte states[] = {
     MELT_HEAT,
     MELT_INIT,
     VERSION,
-    SET_CALIBRATION_SCALE,
+    SET_CALIBRATION_SLOPE,
     SET_CALIBRATION_OFFSET,
     STORE_CALIBRATION,
 };
@@ -178,7 +178,7 @@ void setup()
 {
 
   // Load the calibration values for the sensors.
-  load_eeprom_array(1, cfu_scale);
+  load_eeprom_array(1, cfu_slope);
   load_eeprom_array(1 + 96 * 4, cfu_offset);
 
   DDRL = DDRL | B00001111; // this sets pins D3 to D7 as outputs
@@ -391,13 +391,13 @@ void loop()
     state = defaultState;
     break;
 
-  case SET_CALIBRATION_SCALE:
+  case SET_CALIBRATION_SLOPE:
   {
     int row, col;
     float value;
     if (get_value(&row, &col, &value, parameters))
     {
-      cfu_scale[row][col] = value;
+      cfu_slope[row][col] = value;
     }
   }
     Serial.println(F("$"));
@@ -416,7 +416,7 @@ void loop()
     break;
 
   case STORE_CALIBRATION:
-    store_eeprom_array(1, cfu_scale);
+    store_eeprom_array(1, cfu_slope);
     store_eeprom_array(1 + 96 * 4, cfu_offset);
     EEPROM.write(0, 1);
     Serial.println(F("$"));
@@ -761,7 +761,7 @@ void displayData()
     for (int i = 0; i < 12; i++)
     {
       // compute the calibrated fluorescence
-      float cfu_value = sensorValues[j][i] * cfu_scale[j][i] + cfu_offset[j][i];
+      float cfu_value = sensorValues[j][i] * cfu_slope[j][i] + cfu_offset[j][i];
       str = str + cfu_value + ",";
     }
   }
