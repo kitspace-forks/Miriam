@@ -401,7 +401,8 @@ void loop()
       cfu_scale[row][col] = value;
     }
   }
-  break;
+    Serial.println(F("$"));
+    break;
 
   case SET_CALIBRATION_OFFSET:
   {
@@ -412,12 +413,14 @@ void loop()
       cfu_offset[row][col] = value;
     }
   }
-  break;
+    Serial.println(F("$"));
+    break;
 
   case STORE_CALIBRATION:
     store_eeprom_array(1, cfu_scale);
     store_eeprom_array(1 + 96 * 4, cfu_offset);
     EEPROM.write(0, 1);
+    Serial.println(F("$"));
     break;
 
   case INFO:
