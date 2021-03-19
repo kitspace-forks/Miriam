@@ -379,11 +379,14 @@ void loop()
     Serial.print(F("READ ASSAY"));
     Read_Assay();
     state = defaultState;
+
+    // Read_Assay calls display_data() which eventually prints "$\n"
     break;
 
   case PLAY_SOUND:
     play_sound();
     state = defaultState;
+    Serial.println(F("$"));
     break;
 
   case STATUS_LED_ON:
