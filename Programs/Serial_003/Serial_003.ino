@@ -82,7 +82,9 @@
 #define MELT_INIT 'w'
 #define VERSION 'V'
 #define SET_CALIBRATION_SLOPE 'x'
-#define SET_CALIBRATION_OFFSET 'X'
+#define GET_CALIBRATION_SLOPE 'X'
+#define SET_CALIBRATION_OFFSET 'y'
+#define GET_CALIBRATION_OFFSET 'Y'
 #define STORE_CALIBRATION 'S'
 
 int MUL[6] = {
@@ -403,6 +405,20 @@ void loop()
     Serial.println(F("$"));
     break;
 
+  case GET_CALIBRATION_SLOPE:
+  {
+    int row, col;
+    float value = -9999999;
+
+    if (get_value(&row, &col, &value, parameters))
+    {
+      value = cfu_slope[row][col];
+    }
+    Serial.print(String(value) + "$");
+    Serial.println(F(""));
+  }
+  break;
+
   case SET_CALIBRATION_OFFSET:
   {
     int row, col;
@@ -414,6 +430,20 @@ void loop()
   }
     Serial.println(F("$"));
     break;
+
+  case GET_CALIBRATION_OFFSET:
+  {
+    int row, col;
+    float value = -9999999;
+
+    if (get_value(&row, &col, &value, parameters))
+    {
+      value = cfu_offset[row][col];
+    }
+    Serial.print(String(value) + "$");
+    Serial.println(F(""));
+  }
+  break;
 
   case STORE_CALIBRATION:
     store_eeprom_array(1, cfu_slope);
