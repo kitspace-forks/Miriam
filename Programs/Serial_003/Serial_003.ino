@@ -66,6 +66,7 @@
 #define LR_CORR_INTERCEPT 2.6 //4.2213
 
 // STATES FOR STATE MACHINE
+// This must be kept in sync with the states[] variable below.
 #define INIT 'I'
 #define CANCEL 'C'
 #define HEAT_BOARDS 'H'
@@ -136,6 +137,7 @@ enum
   T_FAHRENHEIT
 };
 
+// This must be kept in sync with the state defines above.
 byte states[] = {
     INIT,
     CANCEL,
@@ -153,7 +155,9 @@ byte states[] = {
     MELT_INIT,
     VERSION,
     SET_CALIBRATION_SLOPE,
+    GET_CALIBRATION_SLOPE,
     SET_CALIBRATION_OFFSET,
+    GET_CALIBRATION_OFFSET,
     STORE_CALIBRATION,
 };
 
@@ -180,8 +184,13 @@ void setup()
 {
 
   // Load the calibration values for the sensors.
-  load_eeprom_array(1, cfu_slope);
-  load_eeprom_array(1 + 96 * 4, cfu_offset);
+  {
+    int addr;
+    // TODO ensure value `1` at address 0. Even better: calculate checksum and
+    // compare it with saved checksum.
+    addr = load_eeprom_array(1, cfu_slope);
+    load_eeprom_array(addr, cfu_offset);
+  }
 
   DDRL = DDRL | B00001111; // this sets pins D3 to D7 as outputs
 
@@ -215,7 +224,7 @@ void setup()
   Serial.println(F("Hope your day is nice and shiny!"));
 }
 
-void load_eeprom_array(int start_address, float (&array)[8][12])
+int load_eeprom_array(int start_address, float (&array)[8][12])
 {
   int addr = start_address;
   for (char row = 0; row < 8; row++)
@@ -230,9 +239,10 @@ void load_eeprom_array(int start_address, float (&array)[8][12])
       array[row][col] = *(float *)(&b[0]);
     }
   }
+  return addr;
 }
 
-void store_eeprom_array(int start_address, const float (&array)[8][12])
+int store_eeprom_array(int start_address, const float (&array)[8][12])
 {
   int addr = start_address;
   for (char row = 0; row < 8; row++)
@@ -247,6 +257,7 @@ void store_eeprom_array(int start_address, const float (&array)[8][12])
       EEPROM.write(addr++, b[3]);
     }
   }
+  return addr;
 }
 
 bool get_value(int *row, int *col, float *value, String &parameters)
@@ -403,6 +414,7 @@ void loop()
     }
   }
     Serial.println(F("$"));
+    state = defaultState;
     break;
 
   case GET_CALIBRATION_SLOPE:
@@ -414,10 +426,12 @@ void loop()
     {
       value = cfu_slope[row][col];
     }
-    Serial.print(String(value) + "$");
-    Serial.println(F(""));
+    // print with 10 digits of precision
+    Serial.print(String(value, 10) + "$");
   }
-  break;
+    Serial.println(F(""));
+    state = defaultState;
+    break;
 
   case SET_CALIBRATION_OFFSET:
   {
@@ -429,6 +443,7 @@ void loop()
     }
   }
     Serial.println(F("$"));
+    state = defaultState;
     break;
 
   case GET_CALIBRATION_OFFSET:
@@ -440,16 +455,23 @@ void loop()
     {
       value = cfu_offset[row][col];
     }
-    Serial.print(String(value) + "$");
-    Serial.println(F(""));
+    // print with 10 digits of precision
+    Serial.print(String(value, 10) + "$");
   }
-  break;
+    Serial.println(F(""));
+    state = defaultState;
+    break;
 
   case STORE_CALIBRATION:
-    store_eeprom_array(1, cfu_slope);
-    store_eeprom_array(1 + 96 * 4, cfu_offset);
+  {
+    int addr;
+    addr = store_eeprom_array(1, cfu_slope);
+    store_eeprom_array(addr, cfu_offset);
+    // Write a `1` at address 0.
     EEPROM.write(0, 1);
+  }
     Serial.println(F("$"));
+    state = defaultState;
     break;
 
   case INFO:
@@ -1002,6 +1024,7 @@ void serialEvent()
       // so the main loop can do something about it:
       if (inChar == '\n')
       {
+        Serial.println(F("stringComplete = true"));
         stringComplete = true;
       }
     }
