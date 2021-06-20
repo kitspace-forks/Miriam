@@ -1,0 +1,36 @@
+multi:
+  miriam-LED:
+    readme: README.md
+    gerbers: PCB/LED/Gerber/
+    color: black
+    eda:
+      type: eagle
+      pcb: PCB/LED/Eagle/LED_005.brd
+  miriam-lower-heating-board:
+    readme: README.md
+    gerbers: PCB/Lower heating board/Gerber/
+    color: black
+    eda:
+      type: eagle
+      pcb: PCB/Lower heating board/Eagle/LH_010.brd
+  miriam-sensor:
+    readme: README.md
+    gerbers: PCB/Sensor/Gerber/
+    color: black
+    eda:
+      type: eagle
+      pcb: PCB/Sensor/Eagle/sensor_004.brd
+  miriam-shield:
+    readme: README.md
+    gerbers: PCB/Shield/Gerber/
+    color: black
+    eda:
+      type: eagle
+      pcb: PCB/Shield/Eagle/shield_008.brd
+  miriam-upper-heating-board:
+    readme: README.md
+    gerbers: PCB/Upper heating board/Gerber/
+    color: black
+    eda:
+      type: eagle
+      pcb: PCB/Upper heating board/Eagle/UH_007.brd
